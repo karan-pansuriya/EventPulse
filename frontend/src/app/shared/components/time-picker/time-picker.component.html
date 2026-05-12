@@ -1,0 +1,70 @@
+<mat-form-field
+  appearance="outline"
+  class="w-100"
+  subscriptSizing="fixed"
+  [class.mat-form-field-invalid]="showError"
+  [class.mat-focused]="isOpen"
+>
+  <mat-label class="fw-medium">{{ label }}</mat-label>
+
+  <input
+    matInput
+    readonly
+    [value]="value || ''"
+    [disabled]="disabled"
+    (click)="toggle()"
+    (blur)="onTouched()"
+    style="cursor: pointer"
+  />
+
+  <span matSuffix class="time-field-icon me-2" (click)="toggle()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="9" stroke="#111827" stroke-width="1.8" />
+      <path
+        d="M12 7v5l3 3"
+        stroke="#111827"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </span>
+</mat-form-field>
+
+@if (isOpen) {
+<div class="tp-dropdown" (click)="$event.stopPropagation()">
+  <div class="tp-col-headers">
+    <div class="tp-col-header">Hour</div>
+    <div class="tp-col-header">Min</div>
+    <div class="tp-col-header">AM/PM</div>
+  </div>
+
+  <div class="tp-columns">
+    <div class="tp-col">
+      @for (h of hours; track h) {
+      <div class="tp-item" [class.selected]="h === tempHour" (click)="selectHour(h)">
+        {{ h | number : '2.0-0' }}
+      </div>
+      }
+    </div>
+
+    <div class="tp-col">
+      @for (m of minutes; track m) {
+      <div class="tp-item" [class.selected]="m === tempMin" (click)="selectMin(m)">
+        {{ m | number : '2.0-0' }}
+      </div>
+      }
+    </div>
+
+    <div class="tp-col tp-col-ampm">
+      <div class="tp-item" [class.selected]="tempAmPm === 'AM'" (click)="selectAmPm('AM')">AM</div>
+      <div class="tp-item" [class.selected]="tempAmPm === 'PM'" (click)="selectAmPm('PM')">PM</div>
+    </div>
+  </div>
+
+  <div class="tp-footer">
+    <button class="tp-btn-cancel" type="button" (click)="cancel()">Cancel</button>
+    <button class="tp-btn-apply" type="button" (click)="apply()">Apply</button>
+  </div>
+</div>
+}

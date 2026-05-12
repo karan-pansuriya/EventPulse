@@ -1,0 +1,285 @@
+<div class="w-100">
+  @switch (type) {
+    @case ('text') {
+      <mat-form-field
+        appearance="outline"
+        class="w-100"
+        subscriptSizing="fixed"
+        [class.mat-form-field-invalid]="showError"
+      >
+        <mat-label class="fw-medium">{{ displayLabel }}</mat-label>
+
+        <input
+          matInput
+          type="text"
+          [value]="value"
+          [disabled]="disabled"
+          (input)="handleInput($event)"
+          (keypress)="onTextKeyPress($event)"
+          (blur)="onTextBlur()"
+        />
+      </mat-form-field>
+    }
+
+    @case ('date') {
+      <mat-form-field
+        appearance="outline"
+        class="w-100"
+        [class.mat-form-field-invalid]="showError"
+        subscriptSizing="fixed"
+      >
+        <mat-label class="fw-medium">{{ displayLabel }}</mat-label>
+
+        <input
+          matInput
+          [matDatepicker]="picker"
+          [value]="displayDateValue"
+          (dateChange)="handleDateChange($event)"
+          [disabled]="disabled"
+          (click)="picker.open()"
+          readonly
+        />
+
+        <mat-datepicker-toggle matSuffix [for]="picker">
+          <img matDatepickerToggleIcon src="/assets/images/CalendarDots.svg" alt="calendar" />
+        </mat-datepicker-toggle>
+
+        <mat-datepicker #picker (closed)="onPickerClosed()">
+          <mat-datepicker-actions>
+            <app-secondary-button [rounded]="true" (click)="clearDateOnly()">
+              Clear
+            </app-secondary-button>
+
+            <app-primary-button
+              class="ms-3"
+              [rounded]="true"
+              matDatepickerApply
+              (click)="onApplyClicked()"
+              >Apply</app-primary-button
+            >
+          </mat-datepicker-actions>
+        </mat-datepicker>
+      </mat-form-field>
+    }
+    @case ('mobile') {
+      <mat-form-field
+        [class.mat-form-field-invalid]="showError"
+        appearance="outline"
+        class="w-100"
+        subscriptSizing="fixed"
+      >
+        <mat-label class="fw-medium">{{ displayLabel }}</mat-label>
+
+        <input
+          matInput
+          type="tel"
+          maxlength="10"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          [value]="value"
+          [disabled]="disabled"
+          (keypress)="onMobileKeyPress($event)"
+          (input)="handleInput($event)"
+          (blur)="onTouched()"
+        />
+
+        <img src="/assets/images/Phone(2).svg" class="me-2" matSuffix />
+      </mat-form-field>
+    }
+    @case ('select') {
+      <mat-form-field
+        appearance="outline"
+        class="w-100"
+        [class.mat-form-field-invalid]="showError"
+        subscriptSizing="fixed"
+      >
+        <mat-label class="fw-medium">{{ displayLabel }}</mat-label>
+
+        <mat-select
+          [class.is-invalid]="showError"
+          [value]="value"
+          [disabled]="disabled"
+          (openedChange)="openedChange.emit($event)"
+          (selectionChange)="handleSelectChange($event)"
+          (blur)="onTouched()"
+        >
+          @for (option of options; track option.value) {
+            <mat-option [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+    @case ('email') {
+      <mat-form-field
+        [class.mat-form-field-invalid]="showError"
+        appearance="outline"
+        class="w-100"
+        subscriptSizing="fixed"
+      >
+        <mat-label class="fw-medium">{{ displayLabel }}</mat-label>
+
+        <img matSuffix src="assets/images/EnvelopeSimple.svg" class="me-2" />
+
+        <input
+          matInput
+          type="email"
+          [value]="value"
+          [disabled]="disabled"
+          (input)="handleInput($event)"
+          (blur)="validateEmail(); onTouched()"
+        />
+      </mat-form-field>
+    }
+    @case ('password') {
+      <mat-form-field
+        [class.mat-form-field-invalid]="showError"
+        appearance="outline"
+        class="w-100"
+        subscriptSizing="fixed"
+      >
+        <mat-label class="fw-medium">{{ displayLabel }}</mat-label>
+
+        <input
+          matInput
+          [type]="hidePassword ? 'password' : 'text'"
+          [value]="value"
+          [disabled]="disabled"
+          (input)="handleInput($event)"
+          (blur)="onTouched()"
+        />
+
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="hidePassword = !hidePassword"
+          tabindex="-1"
+        >
+          <img
+            [src]="hidePassword ? 'assets/icons/EyeSlash.svg' : 'assets/icons/download.svg'"
+            alt="toggle password"
+            class="password-icon"
+            (click)="togglePassword()"
+          />
+        </button>
+      </mat-form-field>
+    }
+    @case ('textarea') {
+      <mat-form-field
+        [class.mat-form-field-invalid]="showError"
+        appearance="outline"
+        class="w-100 textarea-field"
+        subscriptSizing="fixed"
+      >
+        <mat-label class="fw-medium">{{ displayLabel }}</mat-label>
+
+        <textarea
+          matInput
+          rows="3"
+          [value]="value"
+          [disabled]="disabled"
+          (input)="handleInput($event)"
+          (blur)="onTouched()"
+        ></textarea>
+      </mat-form-field>
+    }
+    @case ('percent') {
+      <mat-form-field
+        [class.mat-form-field-invalid]="showError"
+        appearance="outline"
+        class="w-100"
+        subscriptSizing="fixed"
+      >
+        <mat-label class="fw-medium">{{ displayLabel }}</mat-label>
+
+        <input
+          matInput
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          [value]="value"
+          [disabled]="disabled"
+          (input)="handleInput($event)"
+          (blur)="onTouched()"
+        />
+
+        <img class="me-3" src="/assets/images/Percent.svg" matSuffix />
+      </mat-form-field>
+    }
+    @case ('duration') {
+      <mat-form-field
+        appearance="outline"
+        class="w-100"
+        subscriptSizing="fixed"
+        [class.mat-form-field-invalid]="showError"
+      >
+        <mat-label class="fw-medium">{{ displayLabel }}</mat-label>
+
+        <input
+          matInput
+          type="number"
+          min="0"
+          step="1"
+          [value]="value"
+          [disabled]="disabled"
+          (input)="handleInput($event)"
+          (blur)="onTouched()"
+        />
+
+        <img class="me-3" src="/assets/images/Clock.svg" matSuffix />
+      </mat-form-field>
+    }
+    @case ('currency') {
+      <mat-form-field
+        appearance="outline"
+        class="w-100"
+        subscriptSizing="fixed"
+        [class.mat-form-field-invalid]="showError"
+      >
+        <mat-label class="fw-medium">{{ displayLabel }}</mat-label>
+
+        <input
+          matInput
+          type="number"
+          min="0"
+          [value]="value"
+          [disabled]="disabled"
+          (input)="handleInput($event)"
+          (blur)="onTouched()"
+        />
+
+        <img class="me-3" src="/assets/images/dollar.svg" matSuffix />
+      </mat-form-field>
+    }
+    @case ('number') {
+      <mat-form-field
+        [class.mat-form-field-invalid]="showError"
+        appearance="outline"
+        class="w-100"
+        subscriptSizing="fixed"
+      >
+        <mat-label class="fw-medium">{{ displayLabel }}</mat-label>
+
+        <input
+          matInput
+          type="number"
+          min="0"
+          [value]="value"
+          [disabled]="disabled"
+          (input)="handleInput($event)"
+          (blur)="onTouched()"
+        />
+      </mat-form-field>
+    }
+  }
+  @if (showError) {
+    @if (firstErrorKey) {
+      <mat-error>
+        {{ errorMessage }}
+      </mat-error>
+    }
+  }
+</div>

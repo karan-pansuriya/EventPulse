@@ -1,0 +1,148 @@
+<div class="table-container" (scroll)="closeAllDropdowns()">
+
+  <!-- Initial load spinner (no data yet) -->
+  @if (isLoading && (!data || data.length === 0)) {
+    <div class="grid-state-wrapper">
+      <div class="grid-spinner"></div>
+    </div>
+  }
+
+  <!-- Error state (not loading, no data) -->
+  @if (!isLoading && errorMessage && (!data || data.length === 0)) {
+    <div class="grid-state-wrapper text-danger">{{ errorMessage }}</div>
+  }
+
+  <!-- Table: only render when NOT in initial loading state -->
+  @if (!isLoading || (data && data.length > 0)) {
+    @if (!errorMessage || (data && data.length > 0)) {
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              @for (col of columns; track col.field) {
+              <th
+                (click)="col.sortable && sort(col.field)"
+                [style.cursor]="col.sortable ? 'pointer' : 'default'"
+              >
+                {{ col.header }}
+                @if (col.sortable && sortColumn === col.field) {
+                <span>{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                }
+              </th>
+              }
+            </tr>
+          </thead>
+
+          <tbody>
+            @if (!data || data.length === 0) {
+            <tr>
+              <td [attr.colspan]="columns.length" class="text-center">No data available</td>
+            </tr>
+            }
+            @for (row of data; track trackByFn($index, row)) {
+            <tr [style.cursor]="rowClick.observed ? 'pointer' : 'default'" (click)="rowClick.emit(row)">
+              @for (col of columns; track col.field) {
+              <td class="position-relative" [attr.data-label]="col.header">
+                @if (col.type === 'truncate') {
+                <span class="tooltip-container">
+                  {{
+                    (row[col.field] ?? '').toString().length > 50
+                      ? ((row[col.field] ?? '').toString() | slice : 0 : 50) + '...'
+                      : row[col.field] ?? ''
+                  }}
+                  <span class="tooltip-text">{{ row[col.field] }}</span>
+                </span>
+                } @else if (col.type === 'toggle') {
+                <div class="form-check form-switch mb-0" (click)="$event.stopPropagation()">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    [checked]="!!row[col.field]"
+                    (change)="toggle.emit(row)"
+                  />
+                </div>
+                } @else if (col.type === 'action') { @if (actionTemplate) {
+                <div (click)="$event.stopPropagation()">
+                  <ng-container
+                    *ngTemplateOutlet="actionTemplate; context: { $implicit: row }"
+                  ></ng-container>
+                </div>
+                } @else {
+                <div class="dropdown action-dropdown" (click)="$event.stopPropagation()">
+                  <button
+                    class="btn p-0 border-0 bg-transparent"
+                    type="button"
+                    (click)="$event.stopPropagation(); toggleDropdown($event, row)"
+                  >
+                    <img src="assets/icons/three-dots.svg" width="20" height="20" alt="actions" />
+                  </button>
+                  @if (activeDropdownRow === row) {
+                  <ul
+                    class="dropdown-menu profile-dropdown show"
+                    [style.top.px]="dropdownTop"
+                    [style.left.px]="dropdownLeft"
+                  >
+                    @for (action of getRowActionItems(row); track action.label) {
+                    <li>
+                      <button
+                        class="dropdown-item d-flex align-items-center gap-2"
+                        (click)="handleAction(action, row)"
+                      >
+                        <img [src]="action.icon" width="16" [alt]="action.label" />
+                        {{ action.label }}
+                      </button>
+                    </li>
+                    }
+                  </ul>
+                  }
+                </div>
+                } } @else if (col.type === 'currency') {
+                <span>${{ row[col.field] }}</span>
+                } @else if (col.type === 'percent') {
+                <span>{{ row[col.field] }}%</span>
+                } @else if (col.type === 'date') {
+                <span>{{ asDate(row[col.field]) | date : 'dd MMM yyyy' }}</span>
+                } @else {
+                  <span [innerHTML]="col.formatter ? col.formatter(row[col.field]) : row[col.field]"></span>
+                }
+              </td>
+              }
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  <!-- Inline refresh spinner when reloading existing data -->
+  @if (isLoading && data && data.length > 0) {
+    <div class="grid-state-wrapper">
+      <div class="grid-spinner"></div>
+    </div>
+  }
+
+  @if (totalRecords > 0) {
+  <div class="grid-footer">
+    <div class="rows-per-page">
+      Rows per page:
+      <select (change)="changePageSize($event)">
+        <option value="5" [selected]="pageSize === 5">5</option>
+        <option value="10" [selected]="pageSize === 10">10</option>
+        <option value="20" [selected]="pageSize === 20">20</option>
+        <option value="50" [selected]="pageSize === 50">50</option>
+      </select>
+    </div>
+    <div class="record-count">
+      {{ getStartRecord() }} – {{ getEndRecord() }} of {{ totalRecords }}
+    </div>
+    <div class="pagination-arrows">
+      <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">&#10094;</button>
+      <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">
+        &#10095;
+      </button>
+    </div>
+  </div>
+  }
+</div>
