@@ -1,0 +1,15 @@
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\bin\Debug\net10.0\EventPulse.BLL.deps.json
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\bin\Debug\net10.0\EventPulse.BLL.dll
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\bin\Debug\net10.0\EventPulse.BLL.pdb
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\bin\Debug\net10.0\EventPulse.DAL.dll
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\bin\Debug\net10.0\EventPulse.DAL.pdb
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\EventPulse.BLL.csproj.AssemblyReference.cache
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\EventPulse.BLL.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\EventPulse.BLL.AssemblyInfoInputs.cache
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\EventPulse.BLL.AssemblyInfo.cs
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\EventPulse.BLL.csproj.CoreCompileInputs.cache
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\EventPul.8B794F5F.Up2Date
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\EventPulse.BLL.dll
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\refint\EventPulse.BLL.dll
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\EventPulse.BLL.pdb
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\ref\EventPulse.BLL.dll

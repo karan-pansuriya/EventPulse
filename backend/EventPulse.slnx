@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="EventPulse.API/EventPulse.API.csproj" />
+  <Project Path="EventPulse.BLL/EventPulse.BLL.csproj" />
+  <Project Path="EventPulse.DAL/EventPulse.DAL.csproj" />
+</Solution>
