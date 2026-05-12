@@ -13,3 +13,4 @@ C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\Even
 C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\refint\EventPulse.BLL.dll
 C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\EventPulse.BLL.pdb
 C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\ref\EventPulse.BLL.dll
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.BLL\obj\Debug\net10.0\EventPulse.BLL.sourcelink.json

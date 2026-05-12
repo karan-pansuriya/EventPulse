@@ -56,3 +56,4 @@ C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.API\obj\Debug\net10.0\Even
 C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.API\obj\Debug\net10.0\EventPulse.API.genruntimeconfig.cache
 C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.API\obj\Debug\net10.0\ref\EventPulse.API.dll
 C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.API\bin\Debug\net10.0\EventPulse.API.staticwebassets.runtime.json
+C:\Users\pci138\Desktop\EventPulse\backend\EventPulse.API\obj\Debug\net10.0\EventPulse.API.sourcelink.json
