@@ -1,0 +1,83 @@
+##################################################
+# ANGULAR / NODE (frontend)
+##################################################
+
+# Dependencies
+node_modules/
+frontend/**/node_modules/
+
+# Angular build output
+frontend/**/dist/
+frontend/**/out-tsc/
+frontend/**/coverage/
+frontend/**/.angular/
+frontend/**/.ng/
+frontend/**/tmp/
+
+# Environment files
+frontend/**/.env
+frontend/**/.env.*
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+##################################################
+# .NET BACKEND
+##################################################
+
+# Build artifacts
+**/bin/
+**/obj/
+
+# Publish
+**/publish/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet
+packages/
+*.nupkg
+
+##################################################
+# DATABASE / EF
+##################################################
+
+# Local DB files
+*.mdf
+*.ldf
+
+##################################################
+# OS FILES (Windows + macOS)
+##################################################
+
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+##################################################
+# GENERAL
+##################################################
+
+# Logs & temp
+*.log
+*.tmp
+*.temp
+
+# Secrets
+secrets.json
+appsettings.Development.json
