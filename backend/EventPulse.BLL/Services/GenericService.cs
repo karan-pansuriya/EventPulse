@@ -1,9 +1,10 @@
 using System.Linq.Expressions;
 using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
+using EventPulse.Common.Entities;
 using EventPulse.DAL.Entities;
-using EventPulse.DAL.Models.Request;
-using EventPulse.DAL.Models.Response;
+using EventPulse.Common.Models;
+using EventPulse.Common.Models.Response;
 using EventPulse.DAL.Repositories.Interfaces;
 
 namespace EventPulse.BLL.Services
