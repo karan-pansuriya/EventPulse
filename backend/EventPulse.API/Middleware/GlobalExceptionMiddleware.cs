@@ -1,6 +1,6 @@
 using System.Net;
 using System.Text.Json;
-using EventPulse.API.Models.Request;
+using EventPulse.BLL.Models.Request;
 using EventPulse.BLL.Exceptions;
 
 namespace EventPulse.API.Middleware;

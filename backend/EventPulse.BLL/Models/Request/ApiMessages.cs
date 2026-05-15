@@ -1,4 +1,4 @@
-namespace EventPulse.API.Models.Request;
+namespace EventPulse.BLL.Models.Request;
 
 public static class ApiMessages
 {

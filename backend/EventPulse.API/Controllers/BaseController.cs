@@ -1,24 +1,35 @@
-using EventPulse.API.Models.Request;
+using EventPulse.BLL.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace EventPulse.API.Controllers
 {
     [ApiController]
     public class BaseController : ControllerBase
     {
-        protected int GetCustomerId()
+        protected int GetUserId()
         {
-            // Customer tokens use JwtRegisteredClaimNames.Sub ("sub")
-            // Admin tokens use ClaimTypes.NameIdentifier (long MS URI)
-            var claim = User.FindFirst(JwtRegisteredClaimNames.Sub)
-                     ?? User.FindFirst(ClaimTypes.NameIdentifier);
-
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirst("sub");
             if (claim == null || !int.TryParse(claim.Value, out int id))
-                throw new UnauthorizedAccessException("Customer ID not found in token");
-
+                throw new UnauthorizedAccessException("User ID not found in token.");
             return id;
+        }
+
+        protected string? GetUserEmail()
+        {
+            return User.FindFirst(ClaimTypes.Email)?.Value
+                ?? User.FindFirst("email")?.Value;
+        }
+
+        protected List<string> GetUserRoles()
+        {
+            return User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+        }
+
+        protected bool IsInRole(string role)
+        {
+            return User.IsInRole(role);
         }
 
         protected IActionResult SuccessResponse<T>(T? data, string message = ApiMessages.RequestSuccessful)
@@ -63,6 +74,7 @@ namespace EventPulse.API.Controllers
             );
             return Unauthorized(response);
         }
+
         protected IActionResult NotFoundResponse(string message)
         {
             return NotFound(new ApiResponse<object>(

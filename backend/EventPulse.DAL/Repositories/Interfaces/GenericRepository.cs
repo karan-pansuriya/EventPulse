@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
-using EventPulse.DAL.Entities;
-using EventPulse.DAL.Models.Request;
-using EventPulse.DAL.Models.Response;
+using EventPulse.Common.Entities;
+using EventPulse.Common.Models;
+using EventPulse.Common.Models.Response;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventPulse.DAL.Repositories.Interfaces;

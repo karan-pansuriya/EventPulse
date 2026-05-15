@@ -1,4 +1,4 @@
-namespace EventPulse.API.Models.Request
+namespace EventPulse.BLL.Models.Request
 {
     public class ApiResponse<T>(bool success, int statusCode, string message, T? data = default)
     {
