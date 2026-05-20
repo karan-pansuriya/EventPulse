@@ -45,12 +45,16 @@ namespace EventPulse.DAL.Entities
 
         public bool IsVerified { get; set; } = false;
 
+        public int? VenueId { get; set; }
 
         [ForeignKey(nameof(OrganizerId))]
         public virtual User Organizer { get; set; } = null!;
 
         [ForeignKey(nameof(CategoryId))]
         public virtual Category? Category { get; set; }
+
+        [ForeignKey(nameof(VenueId))]
+        public virtual Venue? Venue { get; set; }
 
         public virtual ICollection<EventPoster> Posters { get; set; } = new List<EventPoster>();
     }

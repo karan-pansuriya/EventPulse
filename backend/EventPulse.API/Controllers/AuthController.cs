@@ -1,5 +1,6 @@
 using EventPulse.BLL.DTOs.Auth;
 using EventPulse.BLL.Interfaces;
+using EventPulse.BLL.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventPulse.API.Controllers
@@ -13,21 +14,24 @@ namespace EventPulse.API.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             var result = await authService.RegisterAsync(request);
-            return Ok(new { success = true, statusCode = 200, message = "Registration successful.", data = result });
+            var response = new ApiResponse<TokenResponse>(true, 200, "Registration successful.", result);
+            return Ok(response);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var result = await authService.LoginAsync(request);
-            return Ok(new { success = true, statusCode = 200, message = "Login successful.", data = result });
+            var response = new ApiResponse<TokenResponse>(true, 200, "Login successful.", result);
+            return Ok(response);
         }
 
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
         {
             var result = await authService.RefreshTokenAsync(request);
-            return Ok(new { success = true, statusCode = 200, message = "Token refreshed.", data = result });
+            var response = new ApiResponse<TokenResponse>(true, 200, "Token refreshed.", result);
+            return Ok(response);
         }
     }
 }
