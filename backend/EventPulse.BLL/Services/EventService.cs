@@ -50,13 +50,50 @@ public class EventService : IEventService
         return MapToResponse(eventEntity);
     }
 
-    public async Task<PagedResult<EventListResponse>> GetPagedAsync(PageRequest pageRequest)
+    public async Task<PagedResult<EventListResponse>> GetPagedAsync(EventFilterRequest filter)
     {
-        SetPageDefaults(pageRequest);
+        SetPageDefaults(filter);
 
-        return await _eventRepo.GetPagedAsync(
-            null,
-            e => new EventListResponse
+        var query = _context.Events.Where(e => !e.IsDeleted);
+
+        if (filter.DateFrom.HasValue)
+            query = query.Where(e => e.EventDate >= filter.DateFrom.Value);
+
+        if (filter.DateTo.HasValue)
+            query = query.Where(e => e.EventDate <= filter.DateTo.Value);
+
+        if (filter.CategoryId.HasValue)
+            query = query.Where(e => e.CategoryId == filter.CategoryId.Value);
+
+        if (!string.IsNullOrWhiteSpace(filter.City))
+            query = query.Where(e => e.Venue != null && e.Venue.City.ToLower().Contains(filter.City.ToLower()));
+
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            var search = filter.Search.ToLower();
+            query = query.Where(e =>
+                e.Title.ToLower().Contains(search) ||
+                (e.Description != null && e.Description.ToLower().Contains(search)) ||
+                (e.Performers != null && e.Performers.ToLower().Contains(search)));
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.SortBy))
+        {
+            var property = typeof(Event).GetProperty(filter.SortBy);
+            if (property != null)
+            {
+                query = filter.SortDirection?.ToLower() == "desc"
+                    ? query.OrderByDescending(e => EF.Property<object>(e, filter.SortBy))
+                    : query.OrderBy(e => EF.Property<object>(e, filter.SortBy));
+            }
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((filter.PageNumber - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .Select(e => new EventListResponse
             {
                 Id = e.Id,
                 Title = e.Title,
@@ -70,8 +107,14 @@ public class EventService : IEventService
                 IsVerified = e.IsVerified,
                 IsActive = e.IsActive,
                 PosterUrl = e.Posters.Select(p => p.PosterUrl).FirstOrDefault(),
-            },
-            pageRequest);
+            })
+            .ToListAsync();
+
+        return new PagedResult<EventListResponse>
+        {
+            Items = items,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<PagedResult<EventListResponse>> GetMyEventsAsync(int organizerId, PageRequest pageRequest)
