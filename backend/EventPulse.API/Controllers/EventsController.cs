@@ -29,9 +29,9 @@ public class EventsController : BaseController
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] PageRequest pageRequest)
+    public async Task<IActionResult> GetAll([FromQuery] EventFilterRequest filter)
     {
-        var result = await _eventService.GetPagedAsync(pageRequest);
+        var result = await _eventService.GetPagedAsync(filter);
         return SuccessResponse(result);
     }
 
