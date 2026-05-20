@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using EventPulse.BLL.Models.Request;
 using EventPulse.BLL.Exceptions;
 
@@ -11,6 +12,12 @@ public class GlobalExceptionMiddleware(
 {
     private readonly RequestDelegate _next = next;
     private readonly ILogger<GlobalExceptionMiddleware> _logger = logger;
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    };
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -42,6 +49,10 @@ public class GlobalExceptionMiddleware(
                 statusCode = (int)HttpStatusCode.BadRequest;
                 break;
 
+            case ForbiddenException:
+                statusCode = (int)HttpStatusCode.Forbidden;
+                break;
+
             case UnauthorizedAccessException:
                 statusCode = (int)HttpStatusCode.Unauthorized;
                 break;
@@ -61,6 +72,6 @@ public class GlobalExceptionMiddleware(
             null
         );
 
-        return context.Response.WriteAsync(JsonSerializer.Serialize(response));
+        return context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions));
     }
 }

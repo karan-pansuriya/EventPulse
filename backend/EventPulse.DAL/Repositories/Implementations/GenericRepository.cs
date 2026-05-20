@@ -2,13 +2,14 @@ using System.Linq.Expressions;
 using EventPulse.Common.Entities;
 using EventPulse.Common.Models;
 using EventPulse.Common.Models.Response;
+using EventPulse.DAL.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventPulse.DAL.Repositories.Interfaces;
 
-public class GenericRepository<T>(DbContext context) : IGenericRepository<T> where T : BaseEntity
+public class GenericRepository<T>(EventPulseDbContext context) : IGenericRepository<T> where T : BaseEntity
 {
-    private readonly DbContext _context = context;
+    private readonly EventPulseDbContext _context = context;
     private readonly DbSet<T> _dbSet = context.Set<T>();
 
     public async Task<IEnumerable<T>> GetAllAsync()

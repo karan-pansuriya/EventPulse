@@ -28,5 +28,7 @@ namespace EventPulse.DAL.Entities
         public decimal? Latitude { get; set; }
 
         public decimal? Longitude { get; set; }
+
+        public virtual ICollection<Event> Events { get; set; } = new List<Event>();
     }
 }

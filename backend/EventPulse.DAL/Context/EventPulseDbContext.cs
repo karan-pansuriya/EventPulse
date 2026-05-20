@@ -119,6 +119,11 @@ namespace EventPulse.DAL.Context
                       .HasForeignKey(e => e.CategoryId)
                       .OnDelete(DeleteBehavior.SetNull);
 
+                entity.HasOne(e => e.Venue)
+                      .WithMany(v => v.Events)
+                      .HasForeignKey(e => e.VenueId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
 
