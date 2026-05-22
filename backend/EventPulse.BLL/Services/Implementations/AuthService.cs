@@ -3,7 +3,6 @@ using System.Text;
 using EventPulse.BLL.DTOs.Auth;
 using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
-using EventPulse.DAL.Context;
 using EventPulse.DAL.Entities;
 using EventPulse.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -11,17 +10,17 @@ using Microsoft.EntityFrameworkCore;
 namespace EventPulse.BLL.Services
 {
     public class AuthService(
-        EventPulseDbContext context,
+        IAuthRepository authRepository,
         JwtService jwtService,
         IUnitOfWork unitOfWork) : IAuthService
     {
         public async Task<TokenResponse> RegisterAsync(RegisterRequest request)
         {
             string normalizedEmail = request.Email.Trim().ToLowerInvariant();
-            if (await context.Users.AnyAsync(u => u.Email.ToLower() == normalizedEmail))
+            if (await authRepository.UserEmailExistsAsync(normalizedEmail))
                 throw new BadRequestException("Email is already in use.");
 
-            Role role = await context.Roles.FirstOrDefaultAsync(r => r.Name == request.Role)
+            Role role = await authRepository.GetRoleByNameAsync(request.Role)
                 ?? throw new BadRequestException($"Role '{request.Role}' not found.");
 
             CreatePasswordHash(request.Password, out string hash, out string salt);
@@ -35,8 +34,8 @@ namespace EventPulse.BLL.Services
                 PasswordSalt = salt,
             };
 
-            context.Users.Add(user);
-            context.UserRoles.Add(new UserRole { User = user, Role = role });
+            await authRepository.AddUserAsync(user);
+            await authRepository.AddUserRoleAsync(new UserRole { User = user, Role = role });
 
             try
             {
@@ -52,7 +51,7 @@ namespace EventPulse.BLL.Services
             string refreshToken = jwtService.GenerateRefreshToken();
             int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roles);
 
-            context.RefreshTokens.Add(new RefreshToken
+            await authRepository.AddRefreshTokenAsync(new RefreshToken
             {
                 UserId = user.Id,
                 Token = refreshToken,
@@ -74,10 +73,7 @@ namespace EventPulse.BLL.Services
         public async Task<TokenResponse> LoginAsync(LoginRequest request)
         {
             string normalizedEmail = request.Email.Trim().ToLowerInvariant();
-            User user = await context.Users
-                .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail)
+            User user = await authRepository.GetUserWithRolesByEmailAsync(normalizedEmail)
                 ?? throw new UnauthorizedAccessException("Invalid email or password.");
 
             if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
@@ -88,7 +84,7 @@ namespace EventPulse.BLL.Services
             string refreshToken = jwtService.GenerateRefreshToken();
             int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roles);
 
-            context.RefreshTokens.Add(new RefreshToken
+            await authRepository.AddRefreshTokenAsync(new RefreshToken
             {
                 UserId = user.Id,
                 Token = refreshToken,
@@ -109,11 +105,7 @@ namespace EventPulse.BLL.Services
 
         public async Task<TokenResponse> RefreshTokenAsync(RefreshTokenRequest request)
         {
-            RefreshToken storedToken = await context.RefreshTokens
-                .Include(rt => rt.User)
-                    .ThenInclude(u => u.UserRoles)
-                        .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken)
+            RefreshToken storedToken = await authRepository.GetRefreshTokenWithUserAsync(request.RefreshToken)
                 ?? throw new UnauthorizedAccessException("Invalid refresh token.");
 
             if (storedToken.IsRevoked || storedToken.ExpiresAt <= DateTime.UtcNow)
@@ -127,7 +119,7 @@ namespace EventPulse.BLL.Services
             string newRefreshToken = jwtService.GenerateRefreshToken();
             int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roles);
 
-            context.RefreshTokens.Add(new RefreshToken
+            await authRepository.AddRefreshTokenAsync(new RefreshToken
             {
                 UserId = user.Id,
                 Token = newRefreshToken,

@@ -45,9 +45,11 @@ public class CreateEventDto
     [MaxLength(10)]
     [RegularExpression(@"^[0-9+]{0,10}$", ErrorMessage = "Age restriction must be numeric.")]
     public string? AgeRestriction { get; set; }
+
     [MaxLength(200)]
     public string? Performers { get; set; }
 
+    [Range(1, 420, ErrorMessage = "Duration must be between 1 and 1440 minutes.")]
     public int? DurationMins { get; set; }
 
     [Required]
@@ -55,6 +57,7 @@ public class CreateEventDto
     public DateTime EventDate { get; set; }
 
     [Required]
+    [Range(typeof(TimeSpan), "00:00:00", "23:59:59", ErrorMessage = "Start time must be between 00:00 and 23:59.")]
     public TimeSpan StartTime { get; set; }
 
     [Required]

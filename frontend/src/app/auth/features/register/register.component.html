@@ -28,9 +28,7 @@
       </div>
 
       <h2 class="form-title">Create account</h2>
-      <p class="form-sub">
-        Already have one? <a routerLink="/login">Sign in instead</a>
-      </p>
+
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
 
@@ -166,6 +164,10 @@
           Create account
           }
         </button>
+
+        <p class="form-sub">
+          Already have one? <a routerLink="/login">Sign in instead</a>
+        </p>
 
       </form>
     </div>

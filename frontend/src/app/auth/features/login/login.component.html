@@ -28,9 +28,7 @@
       </div>
 
       <h2 class="form-title">Welcome back</h2>
-      <p class="form-sub">
-        New here? <a routerLink="/register">Create a free account</a>
-      </p>
+
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
 
@@ -99,6 +97,10 @@
           }
         </button>
 
+        <p class="form-sub">
+          New here? <a routerLink="/register">Create a free account</a>
+        </p>
+        
       </form>
     </div>
   </div>
