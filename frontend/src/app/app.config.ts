@@ -1,14 +1,23 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideToastr } from 'ngx-toastr';
 
 import { routes } from './app.routes';
+import { authInterceptor } from './auth/interceptors/auth.interceptor';
+import { errorToastInterceptor } from './shared/interceptors/error-toast.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([authInterceptor, errorToastInterceptor])),
     provideAnimationsAsync(),
+    provideToastr({
+      timeOut: 3000,
+      positionClass: 'toast-top-right',
+      preventDuplicates: true,
+      closeButton: true,
+    }),
   ]
 };

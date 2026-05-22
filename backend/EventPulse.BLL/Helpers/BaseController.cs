@@ -1,15 +1,16 @@
 using EventPulse.BLL.Models.Request;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace EventPulse.API.Controllers
+namespace EventPulse.Bll.Helpers
 {
     [ApiController]
     public class BaseController : ControllerBase
     {
         protected int GetUserId()
         {
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier)
+            Claim? claim = User.FindFirst(ClaimTypes.NameIdentifier)
                      ?? User.FindFirst("sub");
             if (claim == null || !int.TryParse(claim.Value, out int id))
                 throw new UnauthorizedAccessException("User ID not found in token.");

@@ -1,0 +1,50 @@
+export const APP_ROUTES = {
+    AUTH: {
+      ROOT: 'auth',
+      LOGIN: 'login',
+      REGISTER: 'register',
+      FORGOT_PASSWORD: 'forgot-password',
+      RESET_PASSWORD: 'reset-password',
+    },
+  
+    ATTENDEE: {
+      ROOT: 'attendee',
+      HOME: 'home',
+      EVENTS: 'events',
+      EVENT_DETAILS: 'events/:id',
+      SEARCH: 'search',
+      MY_TICKETS: 'my-tickets',
+      TICKET_DETAILS: 'my-tickets/:id',
+      BOOKINGS: 'bookings',
+      PROFILE: 'profile',
+      CHECKOUT: 'checkout',
+      PAYMENT_SUCCESS: 'payment-success',
+    },
+  
+    ORGANIZER: {
+      ROOT: 'organizer',
+      DASHBOARD: 'dashboard',
+      EVENTS: 'events',
+      CREATE_EVENT: 'events/create',
+      EDIT_EVENT: 'events/edit/:id',
+      EVENT_DETAILS: 'events/:id',
+      ATTENDEES: 'attendees/:eventId',
+      SALES_ANALYTICS: 'analytics',
+      CHECK_IN: 'check-in',
+      PROFILE: 'profile',
+    },
+  
+    ADMIN: {
+      ROOT: 'admin',
+      DASHBOARD: 'dashboard',
+      EVENTS: 'events',
+      USERS: 'users',
+      USER_DETAILS: 'users/:id',
+      ORGANIZERS: 'organizers',
+      ATTENDEES: 'attendees',
+      CATEGORIES: 'categories',
+      BOOKINGS: 'bookings',
+      ANALYTICS: 'analytics',
+      PROFILE: 'profile',
+    },
+  } as const;

@@ -7,36 +7,49 @@ public class UpdateEventDto
     public int? CategoryId { get; set; }
 
     [MaxLength(150)]
+    [RegularExpression(@"^[A-Za-z0-9\s.,'\-]{2,150}$", ErrorMessage = "Venue name must be 2-150 characters and valid symbols only.")]
     public string? VenueName { get; set; }
 
+    [MaxLength(200)]
+    [RegularExpression(@"^[A-Za-z0-9\s.,#'\-]{5,200}$", ErrorMessage = "Venue address must be 5-200 characters and valid symbols only.")]
     public string? VenueAddress { get; set; }
 
     [MaxLength(100)]
+    [RegularExpression(@"^[A-Za-z\s'\-]{2,100}$", ErrorMessage = "City must be 2-100 letters.")]
     public string? VenueCity { get; set; }
 
     [MaxLength(100)]
+    [RegularExpression(@"^[A-Za-z\s'\-]{0,100}$", ErrorMessage = "State must be letters only.")]
     public string? VenueState { get; set; }
 
     [MaxLength(100)]
+    [RegularExpression(@"^[A-Za-z\s'\-]{2,100}$", ErrorMessage = "Country must be 2-100 letters.")]
     public string? VenueCountry { get; set; }
 
     [Required]
     [MaxLength(200)]
+    [RegularExpression(@"^[A-Za-z0-9\s.,'\-]{2,200}$", ErrorMessage = "Title must be 2-200 characters and valid symbols only.")]
     public string Title { get; set; } = string.Empty;
+
+    [MaxLength(1000)]
 
     public string? Description { get; set; }
 
     [MaxLength(100)]
+    [RegularExpression(@"^[A-Za-z0-9\s.,'\-]{0,100}$", ErrorMessage = "Genre must be 0-100 characters and valid symbols only.")]
     public string? Genre { get; set; }
 
     [MaxLength(10)]
+    [RegularExpression(@"^[0-9+]{0,10}$", ErrorMessage = "Age restriction must be numeric.")]
     public string? AgeRestriction { get; set; }
 
+    [MaxLength(200)]
     public string? Performers { get; set; }
 
     public int? DurationMins { get; set; }
 
     [Required]
+    [Range(typeof(DateTime), "2020-01-01", "2100-12-31", ErrorMessage = "Event date is out of range.")]
     public DateTime EventDate { get; set; }
 
     [Required]

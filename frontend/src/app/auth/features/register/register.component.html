@@ -1,0 +1,173 @@
+<div class="auth-shell">
+  <!-- Left panel -->
+  <div class="left-panel">
+    <div class="brand-mark">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+      </div>
+      <span class="brand-name">EventPulse</span>
+    </div>
+    <h1 class="panel-headline">Join the<br>platform <em>today</em></h1>
+    <p class="panel-sub">Create your account and start managing or attending events in minutes.</p>
+    <ul class="panel-features">
+      <li><span class="feat-dot"></span>Free for customers and organizers</li>
+      <li><span class="feat-dot"></span>Verified accounts only</li>
+      <li><span class="feat-dot"></span>Instant access after sign-up</li>
+    </ul>
+  </div>
+
+  <!-- Right panel: register form -->
+  <div class="right-panel">
+    <div class="form-card">
+
+      <div class="tab-switcher">
+        <a class="tab-btn" routerLink="/login">Sign in</a>
+        <span class="tab-btn active">Create account</span>
+      </div>
+
+      <h2 class="form-title">Create account</h2>
+      <p class="form-sub">
+        Already have one? <a routerLink="/login">Sign in instead</a>
+      </p>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="fullName">Full name</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <input id="fullName" type="text" formControlName="fullName" placeholder="Jane Smith" autocomplete="name"
+                [class.invalid]="form.get('fullName')?.invalid && form.get('fullName')?.touched" />
+            </div>
+          @if (form.get('fullName')?.errors?.['required'] && form.get('fullName')?.touched) {
+          <span class="field-error">Full name is required.</span>
+          }
+          @if (form.get('fullName')?.errors?.['minlength'] && form.get('fullName')?.touched) {
+          <span class="field-error">Minimum 2 characters.</span>
+          }
+          @if (form.get('fullName')?.errors?.['maxlength'] && form.get('fullName')?.touched) {
+          <span class="field-error">Maximum 100 characters.</span>
+          }
+        </div>
+
+          <div class="field-group">
+            <label for="phoneNumber">Phone number</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l1.27-.87a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+              <input id="phoneNumber" type="tel" formControlName="phoneNumber" placeholder="10-digit number"
+                maxlength="10" [class.invalid]="form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched" />
+            </div>
+          @if (form.get('phoneNumber')?.errors?.['required'] && form.get('phoneNumber')?.touched) {
+          <span class="field-error">Phone number is required.</span>
+          }
+          @if (form.get('phoneNumber')?.errors?.['pattern'] && form.get('phoneNumber')?.touched) {
+          <span class="field-error">Enter a valid 10-digit number.</span>
+          }
+        </div>
+        </div>
+
+        <div class="field-group">
+          <label for="email">Email address</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <polyline points="2,4 12,13 22,4" />
+            </svg>
+            <input id="email" type="email" formControlName="email" placeholder="you@example.com" autocomplete="email"
+              [class.invalid]="form.get('email')?.invalid && form.get('email')?.touched" />
+          </div>
+          @if (form.get('email')?.errors?.['required'] && form.get('email')?.touched) {
+          <span class="field-error">Email is required.</span>
+          }
+          @if (form.get('email')?.errors?.['pattern'] && form.get('email')?.touched) {
+          <span class="field-error">Enter a valid email.</span>
+          }
+          @if (form.get('email')?.errors?.['maxlength'] && form.get('email')?.touched) {
+          <span class="field-error">Maximum 255 characters.</span>
+          }
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="password">Password</label>
+            <div class="input-wrap has-suffix">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
+                placeholder="Min 6 characters"
+                [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched" />
+              <button type="button" class="eye-btn" (click)="showPassword = !showPassword" tabindex="-1"
+                aria-label="toggle">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </div>
+          @if (form.get('password')?.errors?.['required'] && form.get('password')?.touched) {
+          <span class="field-error">Password is required.</span>
+          }
+          @if (form.get('password')?.errors?.['pattern'] && form.get('password')?.touched) {
+          <span class="field-error">Minimum 8 characters with upper, lower, number, and special.</span>
+          }
+          </div>
+
+          <div class="field-group">
+            <label for="confirmPassword">Confirm password</label>
+            <div class="input-wrap has-suffix">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <input id="confirmPassword" [type]="showConfirm ? 'text' : 'password'" formControlName="confirmPassword"
+                placeholder="Re-enter password"
+                [class.invalid]="!passwordsMatch && form.get('confirmPassword')?.touched" />
+              <button type="button" class="eye-btn" (click)="showConfirm = !showConfirm" tabindex="-1"
+                aria-label="toggle">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </div>
+            @if (!passwordsMatch && form.get('confirmPassword')?.touched) {
+            <span class="field-error">Passwords do not match.</span>
+            }
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Account role</label>
+          <div class="role-options">
+            @for (option of roleOptions; track option.value) {
+            <div class="role-option" [class.selected]="form.get('role')?.value === option.value"
+              (click)="form.get('role')?.setValue(option.value)">
+              {{ option.label }}
+            </div>
+            }
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="loading || !passwordsMatch">
+          @if (loading) {
+          <span class="spinner"></span> Creating account…
+          } @else {
+          Create account
+          }
+        </button>
+
+      </form>
+    </div>
+  </div>
+</div>

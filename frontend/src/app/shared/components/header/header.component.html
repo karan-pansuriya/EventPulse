@@ -1,0 +1,22 @@
+<header class="app-header">
+    <div class="header-left">
+        <span class="brand-name">EventPulse</span>
+    </div>
+    <div class="header-right">
+        <div class="profile-section" (click)="toggleDropdown()" tabindex="0">
+            <div class="avatar">{{ initials }}</div>
+            <span class="user-name">{{ userName }}</span>
+            <svg class="chevron" [class.open]="dropdownOpen" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9" />
+            </svg>
+            @if (dropdownOpen) {
+            <div class="dropdown-menu" (click)="$event.stopPropagation()">
+                <a class="dropdown-item" [routerLink]="profileRoute">My Profile</a>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item logout" (click)="logout()">Logout</button>
+            </div>
+            }
+        </div>
+    </div>
+</header>

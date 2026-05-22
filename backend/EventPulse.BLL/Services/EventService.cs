@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using AutoMapper;
 using EventPulse.BLL.DTOs.Event;
 using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
@@ -19,24 +21,27 @@ public class EventService : IEventService
     private readonly IGenericRepository<EventPoster> _posterRepo;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IImageService _imageService;
+    private readonly IMapper _mapper;
 
     public EventService(
         EventPulseDbContext context,
         IGenericRepository<Event> eventRepo,
         IGenericRepository<EventPoster> posterRepo,
         IUnitOfWork unitOfWork,
-        IImageService imageService)
+        IImageService imageService,
+        IMapper mapper)
     {
         _context = context;
         _eventRepo = eventRepo;
         _posterRepo = posterRepo;
         _unitOfWork = unitOfWork;
         _imageService = imageService;
+        _mapper = mapper;
     }
 
     public async Task<EventResponse> GetByIdAsync(int id, int? userId = null, string? userRole = null)
     {
-        var eventEntity = await _context.Events
+        Event eventEntity = await _context.Events
             .Include(e => e.Category)
             .Include(e => e.Venue)
             .Include(e => e.Posters)
@@ -47,14 +52,12 @@ public class EventService : IEventService
         if (userRole == "Organizer" && eventEntity.OrganizerId != userId)
             throw new ForbiddenException("You are not authorized to view this event.");
 
-        return MapToResponse(eventEntity);
+        return _mapper.Map<EventResponse>(eventEntity);
     }
 
     public async Task<PagedResult<EventListResponse>> GetPagedAsync(EventFilterRequest filter)
     {
-        SetPageDefaults(filter);
-
-        var query = _context.Events.Where(e => !e.IsDeleted);
+        IQueryable<Event> query = _context.Events.Where(e => !e.IsDeleted);
 
         if (filter.DateFrom.HasValue)
             query = query.Where(e => e.EventDate >= filter.DateFrom.Value);
@@ -70,7 +73,7 @@ public class EventService : IEventService
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
         {
-            var search = filter.Search.ToLower();
+            string search = filter.Search.ToLower();
             query = query.Where(e =>
                 e.Title.ToLower().Contains(search) ||
                 (e.Description != null && e.Description.ToLower().Contains(search)) ||
@@ -79,7 +82,7 @@ public class EventService : IEventService
 
         if (!string.IsNullOrWhiteSpace(filter.SortBy))
         {
-            var property = typeof(Event).GetProperty(filter.SortBy);
+            PropertyInfo? property = typeof(Event).GetProperty(filter.SortBy);
             if (property != null)
             {
                 query = filter.SortDirection?.ToLower() == "desc"
@@ -88,9 +91,9 @@ public class EventService : IEventService
             }
         }
 
-        var totalCount = await query.CountAsync();
+        int totalCount = await query.CountAsync();
 
-        var items = await query
+        List<EventListResponse> items = await query
             .Skip((filter.PageNumber - 1) * filter.PageSize)
             .Take(filter.PageSize)
             .Select(e => new EventListResponse
@@ -119,8 +122,6 @@ public class EventService : IEventService
 
     public async Task<PagedResult<EventListResponse>> GetMyEventsAsync(int organizerId, PageRequest pageRequest)
     {
-        SetPageDefaults(pageRequest);
-
         return await _eventRepo.GetPagedAsync(
             e => e.OrganizerId == organizerId,
             e => new EventListResponse
@@ -146,9 +147,9 @@ public class EventService : IEventService
         if (posterImages?.Count > MaxPosterImages)
             throw new BadRequestException($"Maximum {MaxPosterImages} poster images allowed.");
 
-        var venueId = await ResolveVenueIdAsync(dto.VenueName, dto.VenueAddress, dto.VenueCity, dto.VenueState, dto.VenueCountry);
+        int? venueId = await ResolveVenueIdAsync(dto.VenueName, dto.VenueAddress, dto.VenueCity, dto.VenueState, dto.VenueCountry);
 
-        var eventEntity = new Event
+        Event eventEntity = new Event
         {
             OrganizerId = organizerId,
             CategoryId = dto.CategoryId,
@@ -171,10 +172,10 @@ public class EventService : IEventService
 
         if (posterImages is { Count: > 0 })
         {
-            foreach (var (imageBytes, fileName) in posterImages)
+            foreach ((byte[] imageBytes, string fileName) in posterImages)
             {
-                var relativePath = await _imageService.SaveImageAsync(imageBytes, fileName, "event_poster");
-                var poster = new EventPoster
+                string relativePath = await _imageService.SaveImageAsync(imageBytes, fileName, "event_poster");
+                EventPoster poster = new EventPoster
                 {
                     EventId = eventEntity.Id,
                     PosterUrl = relativePath,
@@ -192,13 +193,13 @@ public class EventService : IEventService
         if (posterImages?.Count > MaxPosterImages)
             throw new BadRequestException($"Maximum {MaxPosterImages} poster images allowed.");
 
-        var eventEntity = await _eventRepo.GetByIdAsync(id)
+        Event? eventEntity = await _eventRepo.GetByIdAsync(id)
             ?? throw new NotFoundException("Event not found.");
 
         if (userRole != "Admin" && eventEntity.OrganizerId != userId)
             throw new ForbiddenException("You are not authorized to update this event.");
 
-        var venueId = await ResolveVenueIdAsync(dto.VenueName, dto.VenueAddress, dto.VenueCity, dto.VenueState, dto.VenueCountry);
+        int? venueId = await ResolveVenueIdAsync(dto.VenueName, dto.VenueAddress, dto.VenueCity, dto.VenueState, dto.VenueCountry);
 
         eventEntity.CategoryId = dto.CategoryId;
         eventEntity.VenueId = venueId;
@@ -217,20 +218,20 @@ public class EventService : IEventService
 
         if (posterImages is { Count: > 0 })
         {
-            var existingPosters = await _context.EventPosters
+            List<EventPoster> existingPosters = await _context.EventPosters
                 .Where(p => p.EventId == id && !p.IsDeleted)
                 .ToListAsync();
 
-            foreach (var ep in existingPosters)
+            foreach (EventPoster ep in existingPosters)
             {
                 _imageService.DeleteImage(ep.PosterUrl);
                 _posterRepo.Delete(ep);
             }
 
-            foreach (var (imageBytes, fileName) in posterImages)
+            foreach ((byte[] imageBytes, string fileName) in posterImages)
             {
-                var relativePath = await _imageService.SaveImageAsync(imageBytes, fileName, "event_poster");
-                var poster = new EventPoster
+                string relativePath = await _imageService.SaveImageAsync(imageBytes, fileName, "event_poster");
+                EventPoster poster = new EventPoster
                 {
                     EventId = id,
                     PosterUrl = relativePath,
@@ -246,17 +247,17 @@ public class EventService : IEventService
 
     public async Task DeleteAsync(int id, int userId, string userRole)
     {
-        var eventEntity = await _eventRepo.GetByIdAsync(id)
+        Event? eventEntity = await _eventRepo.GetByIdAsync(id)
             ?? throw new NotFoundException("Event not found.");
 
         if (userRole != "Admin" && eventEntity.OrganizerId != userId)
             throw new ForbiddenException("You are not authorized to delete this event.");
 
-        var posters = await _context.EventPosters
+        List<EventPoster> posters = await _context.EventPosters
             .Where(p => p.EventId == id && !p.IsDeleted)
             .ToListAsync();
 
-        foreach (var poster in posters)
+        foreach (EventPoster poster in posters)
         {
             _imageService.DeleteImage(poster.PosterUrl);
             _posterRepo.Delete(poster);
@@ -266,44 +267,12 @@ public class EventService : IEventService
         await _unitOfWork.SaveAsync();
     }
 
-    private static EventResponse MapToResponse(Event eventEntity)
-    {
-        return new EventResponse
-        {
-            Id = eventEntity.Id,
-            OrganizerId = eventEntity.OrganizerId,
-            OrganizerName = eventEntity.Organizer?.Name,
-            CategoryId = eventEntity.CategoryId,
-            CategoryName = eventEntity.Category?.Name,
-            VenueId = eventEntity.VenueId,
-            VenueName = eventEntity.Venue?.Name,
-            VenueAddress = eventEntity.Venue?.Address,
-            VenueCity = eventEntity.Venue?.City,
-            Title = eventEntity.Title,
-            Description = eventEntity.Description,
-            Genre = eventEntity.Genre,
-            AgeRestriction = eventEntity.AgeRestriction,
-            Performers = eventEntity.Performers,
-            DurationMins = eventEntity.DurationMins,
-            EventDate = eventEntity.EventDate,
-            StartTime = eventEntity.StartTime,
-            Price = eventEntity.Price,
-            TotalSeats = eventEntity.TotalSeats,
-            IsVerified = eventEntity.IsVerified,
-            IsActive = eventEntity.IsActive,
-            PosterUrl = eventEntity.Posters.Select(p => p.PosterUrl).FirstOrDefault(),
-        PosterUrls = eventEntity.Posters.Select(p => p.PosterUrl).ToList(),
-            CreatedAt = eventEntity.CreatedAt,
-            UpdatedAt = eventEntity.UpdatedAt,
-        };
-    }
-
     private async Task<int?> ResolveVenueIdAsync(string? name, string? address, string? city, string? state, string? country)
     {
         if (string.IsNullOrWhiteSpace(name))
             return null;
 
-        var existing = await _context.Venues
+        Venue? existing = await _context.Venues
             .FirstOrDefaultAsync(v => v.Name.ToLower() == name.ToLower() && !v.IsDeleted);
 
         if (existing != null)
@@ -315,7 +284,7 @@ public class EventService : IEventService
             return existing.Id;
         }
 
-        var venue = new Venue
+        Venue venue = new Venue
         {
             Name = name,
             Address = address ?? string.Empty,
@@ -331,9 +300,4 @@ public class EventService : IEventService
         return venue.Id;
     }
 
-    private static void SetPageDefaults(PageRequest pageRequest)
-    {
-        if (pageRequest.PageNumber < 1) pageRequest.PageNumber = 1;
-        if (pageRequest.PageSize < 1) pageRequest.PageSize = 10;
-    }
 }

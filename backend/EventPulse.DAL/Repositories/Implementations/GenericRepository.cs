@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Reflection;
 using EventPulse.Common.Entities;
 using EventPulse.Common.Models;
 using EventPulse.Common.Models.Response;
@@ -68,7 +69,7 @@ public class GenericRepository<T>(EventPulseDbContext context) : IGenericReposit
 
         if (!string.IsNullOrWhiteSpace(pageRequest.SortBy))
         {
-            var property = typeof(T).GetProperty(pageRequest.SortBy);
+            PropertyInfo? property = typeof(T).GetProperty(pageRequest.SortBy);
             if (property != null)
             {
                 query = pageRequest.SortDirection?.ToLower() == "desc"
@@ -77,9 +78,9 @@ public class GenericRepository<T>(EventPulseDbContext context) : IGenericReposit
             }
         }
 
-        var totalCount = await query.CountAsync();
+        int totalCount = await query.CountAsync();
 
-        var items = await query
+        List<TResult> items = await query
             .Skip((pageRequest.PageNumber - 1) * pageRequest.PageSize)
             .Take(pageRequest.PageSize)
             .Select(selector)

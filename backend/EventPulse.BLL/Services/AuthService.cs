@@ -17,18 +17,19 @@ namespace EventPulse.BLL.Services
     {
         public async Task<TokenResponse> RegisterAsync(RegisterRequest request)
         {
-            if (await context.Users.AnyAsync(u => u.Email == request.Email))
-                throw new BadRequestException("Email is already registered.");
+            string normalizedEmail = request.Email.Trim().ToLowerInvariant();
+            if (await context.Users.AnyAsync(u => u.Email.ToLower() == normalizedEmail))
+                throw new BadRequestException("Email is already in use.");
 
-            var role = await context.Roles.FirstOrDefaultAsync(r => r.Name == request.Role)
+            Role role = await context.Roles.FirstOrDefaultAsync(r => r.Name == request.Role)
                 ?? throw new BadRequestException($"Role '{request.Role}' not found.");
 
-            CreatePasswordHash(request.Password, out var hash, out var salt);
+            CreatePasswordHash(request.Password, out string hash, out string salt);
 
-            var user = new User
+            User user = new User
             {
                 Name = request.Name,
-                Email = request.Email,
+                Email = normalizedEmail,
                 Phone = request.Phone,
                 PasswordHash = hash,
                 PasswordSalt = salt,
@@ -37,17 +38,25 @@ namespace EventPulse.BLL.Services
             context.Users.Add(user);
             context.UserRoles.Add(new UserRole { User = user, Role = role });
 
-            await unitOfWork.SaveAsync();
+            try
+            {
+                await unitOfWork.SaveAsync();
+            }
+            catch (DbUpdateException)
+            {
+                throw new BadRequestException("Email is already in use.");
+            }
 
-            var roles = new[] { role.Name };
-            var accessToken = jwtService.GenerateAccessToken(user, roles);
-            var refreshToken = jwtService.GenerateRefreshToken();
+            string[] roles = new[] { role.Name };
+            string accessToken = jwtService.GenerateAccessToken(user, roles);
+            string refreshToken = jwtService.GenerateRefreshToken();
+            int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roles);
 
             context.RefreshTokens.Add(new RefreshToken
             {
                 UserId = user.Id,
                 Token = refreshToken,
-                ExpiresAt = DateTime.UtcNow.AddDays(jwtService.GetRefreshTokenExpirationDays()),
+                ExpiresAt = DateTime.UtcNow.AddMinutes(refreshMinutes),
                 CreatedAt = DateTime.UtcNow,
             });
 
@@ -57,30 +66,33 @@ namespace EventPulse.BLL.Services
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes() * 60,
+                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes(roles) * 60,
+                RefreshExpiresIn = refreshMinutes * 60,
             };
         }
 
         public async Task<TokenResponse> LoginAsync(LoginRequest request)
         {
-            var user = await context.Users
+            string normalizedEmail = request.Email.Trim().ToLowerInvariant();
+            User user = await context.Users
                 .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Email == request.Email)
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail)
                 ?? throw new UnauthorizedAccessException("Invalid email or password.");
 
             if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
                 throw new UnauthorizedAccessException("Invalid email or password.");
 
-            var roles = user.UserRoles.Select(ur => ur.Role.Name).ToList();
-            var accessToken = jwtService.GenerateAccessToken(user, roles);
-            var refreshToken = jwtService.GenerateRefreshToken();
+            List<string> roles = user.UserRoles.Select(ur => ur.Role.Name).ToList();
+            string accessToken = jwtService.GenerateAccessToken(user, roles);
+            string refreshToken = jwtService.GenerateRefreshToken();
+            int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roles);
 
             context.RefreshTokens.Add(new RefreshToken
             {
                 UserId = user.Id,
                 Token = refreshToken,
-                ExpiresAt = DateTime.UtcNow.AddDays(jwtService.GetRefreshTokenExpirationDays()),
+                ExpiresAt = DateTime.UtcNow.AddMinutes(refreshMinutes),
                 CreatedAt = DateTime.UtcNow,
             });
 
@@ -90,13 +102,14 @@ namespace EventPulse.BLL.Services
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes() * 60,
+                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes(roles) * 60,
+                RefreshExpiresIn = refreshMinutes * 60,
             };
         }
 
         public async Task<TokenResponse> RefreshTokenAsync(RefreshTokenRequest request)
         {
-            var storedToken = await context.RefreshTokens
+            RefreshToken storedToken = await context.RefreshTokens
                 .Include(rt => rt.User)
                     .ThenInclude(u => u.UserRoles)
                         .ThenInclude(ur => ur.Role)
@@ -108,16 +121,17 @@ namespace EventPulse.BLL.Services
 
             storedToken.IsRevoked = true;
 
-            var user = storedToken.User;
-            var roles = user.UserRoles.Select(ur => ur.Role.Name).ToList();
-            var newAccessToken = jwtService.GenerateAccessToken(user, roles);
-            var newRefreshToken = jwtService.GenerateRefreshToken();
+            User user = storedToken.User;
+            List<string> roles = user.UserRoles.Select(ur => ur.Role.Name).ToList();
+            string newAccessToken = jwtService.GenerateAccessToken(user, roles);
+            string newRefreshToken = jwtService.GenerateRefreshToken();
+            int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roles);
 
             context.RefreshTokens.Add(new RefreshToken
             {
                 UserId = user.Id,
                 Token = newRefreshToken,
-                ExpiresAt = DateTime.UtcNow.AddDays(jwtService.GetRefreshTokenExpirationDays()),
+                ExpiresAt = DateTime.UtcNow.AddMinutes(refreshMinutes),
                 CreatedAt = DateTime.UtcNow,
             });
 
@@ -127,21 +141,22 @@ namespace EventPulse.BLL.Services
             {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
-                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes() * 60,
+                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes(roles) * 60,
+                RefreshExpiresIn = refreshMinutes * 60,
             };
         }
 
         private static void CreatePasswordHash(string password, out string passwordHash, out string passwordSalt)
         {
-            using var hmac = new HMACSHA512();
+            using HMACSHA512 hmac = new HMACSHA512();
             passwordSalt = Convert.ToBase64String(hmac.Key);
             passwordHash = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(password)));
         }
 
         private static bool VerifyPasswordHash(string password, string passwordHash, string passwordSalt)
         {
-            using var hmac = new HMACSHA512(Convert.FromBase64String(passwordSalt));
-            var computedHash = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(password)));
+            using HMACSHA512 hmac = new HMACSHA512(Convert.FromBase64String(passwordSalt));
+            string computedHash = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(password)));
             return computedHash == passwordHash;
         }
     }
