@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EventPulse.API.Controllers;
 
+[Authorize(Roles = "Organizer,Admin")]
 [Route("api/events")]
 public class EventsController : BaseController
 {
@@ -37,7 +38,6 @@ public class EventsController : BaseController
     }
 
     [HttpGet("my-events")]
-    [Authorize(Roles = "Organizer,Admin")]
     public async Task<IActionResult> GetMyEvents([FromQuery] PageRequest pageRequest)
     {
         int userId = GetUserId();
@@ -46,7 +46,6 @@ public class EventsController : BaseController
     }
 
     [HttpPost]
-    [Authorize(Roles = "Organizer,Admin")]
     public async Task<IActionResult> CreateEvent([FromForm] CreateEventDto dto, [FromForm] List<IFormFile>? posterImages)
     {
         int userId = GetUserId();
@@ -56,7 +55,6 @@ public class EventsController : BaseController
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "Organizer,Admin")]
     public async Task<IActionResult> UpdateEvent(int id, [FromForm] UpdateEventDto dto, [FromForm] List<IFormFile>? posterImages)
     {
         int userId = GetUserId();
@@ -67,7 +65,6 @@ public class EventsController : BaseController
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Organizer,Admin")]
     public async Task<IActionResult> DeleteEvent(int id)
     {
         int userId = GetUserId();
