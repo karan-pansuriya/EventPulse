@@ -20,7 +20,7 @@ export class LoginComponent {
   private cdr = inject(ChangeDetectorRef);
 
   private readonly emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-  private readonly passwordPattern = /^(?=.*[a-z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/;
+  private readonly passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/;
 
   form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.maxLength(255), Validators.pattern(this.emailPattern)]],
@@ -29,6 +29,7 @@ export class LoginComponent {
 
   loading = false;
   showPassword = false;
+  serverError = '';
 
   onSubmit(): void {
     if (this.form.invalid) {
@@ -37,6 +38,8 @@ export class LoginComponent {
       return;
     }
     this.loading = true;
+    this.serverError = '';
+    this.clearInvalidCredentials();
 
     this.authService.login(this.form.getRawValue())
       .pipe(
@@ -53,10 +56,34 @@ export class LoginComponent {
         else if (user?.roles.includes('Organizer')) this.router.navigate(['/organizer/dashboard']);
         else this.router.navigate(['/attendee/home']);
         },
-        error: () => {
+        error: (err) => {
+          const message = (err as { error?: { message?: string } })?.error?.message;
+          this.serverError = message || 'Invalid email or password.';
+          this.setInvalidCredentials();
           this.loading = false;
           this.cdr.markForCheck();
         },
       });
+  }
+
+  onAuthInput(): void {
+    if (this.serverError) {
+      this.serverError = '';
+    }
+    this.clearInvalidCredentials();
+  }
+
+  private setInvalidCredentials(): void {
+    const password = this.form.get('password');
+    if (!password) return;
+    const currentErrors = password.errors || {};
+    password.setErrors({ ...currentErrors, invalidCredentials: true });
+  }
+
+  private clearInvalidCredentials(): void {
+    const password = this.form.get('password');
+    if (!password?.errors?.['invalidCredentials']) return;
+    const { invalidCredentials, ...rest } = password.errors;
+    password.setErrors(Object.keys(rest).length ? rest : null);
   }
 }
