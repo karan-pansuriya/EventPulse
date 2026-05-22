@@ -20,7 +20,8 @@ namespace EventPulse.BLL.Services
 
         public string GenerateAccessToken(User user, IEnumerable<string> roles)
         {
-            var claims = new List<Claim>
+            int accessMinutes = GetAccessTokenExpirationMinutes(roles);
+            List<Claim> claims = new List<Claim>
             {
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new(JwtRegisteredClaimNames.Email, user.Email),
@@ -28,17 +29,17 @@ namespace EventPulse.BLL.Services
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
-            foreach (var role in roles)
+            foreach (string role in roles)
                 claims.Add(new Claim(ClaimTypes.Role, role));
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
+            SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
+            JwtSecurityToken token = new JwtSecurityToken(
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
+                expires: DateTime.UtcNow.AddMinutes(accessMinutes),
                 signingCredentials: creds
             );
 
@@ -47,14 +48,25 @@ namespace EventPulse.BLL.Services
 
         public string GenerateRefreshToken()
         {
-            var randomBytes = new byte[64];
-            using var rng = RandomNumberGenerator.Create();
+            byte[] randomBytes = new byte[64];
+            using RandomNumberGenerator rng = RandomNumberGenerator.Create();
             rng.GetBytes(randomBytes);
             return Convert.ToBase64String(randomBytes);
         }
 
-        public int GetAccessTokenExpirationMinutes() => _jwtSettings.AccessTokenExpirationMinutes;
+        public int GetAccessTokenExpirationMinutes(IEnumerable<string> roles)
+        {
+            return IsCustomer(roles) ? 7 * 24 * 60 : 30;
+        }
 
-        public int GetRefreshTokenExpirationDays() => _jwtSettings.RefreshTokenExpirationDays;
+        public int GetRefreshTokenExpirationMinutes(IEnumerable<string> roles)
+        {
+            return IsCustomer(roles) ? 7 * 24 * 60 : 30;
+        }
+
+        private static bool IsCustomer(IEnumerable<string> roles)
+        {
+            return roles.Any(role => string.Equals(role, "Customer", StringComparison.OrdinalIgnoreCase));
+        }
     }
 }

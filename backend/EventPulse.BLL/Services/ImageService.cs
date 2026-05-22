@@ -21,19 +21,19 @@ public class ImageService : IImageService
 
     public async Task<string> SaveImageAsync(byte[] imageBytes, string fileName, string subfolder)
     {
-        var extension = Path.GetExtension(fileName);
+        string extension = Path.GetExtension(fileName);
         if (!AllowedExtensions.Contains(extension))
             throw new BadRequestException($"File extension '{extension}' is not allowed. Allowed: .jpg, .jpeg, .png");
 
         if (imageBytes.Length > MaxFileSize)
             throw new BadRequestException("File size exceeds the maximum allowed size of 5MB.");
 
-        var relativeFolder = Path.Combine("uploads", subfolder);
-        var folderPath = Path.Combine(_webRootPath, relativeFolder);
+        string relativeFolder = Path.Combine("uploads", subfolder);
+        string folderPath = Path.Combine(_webRootPath, relativeFolder);
         Directory.CreateDirectory(folderPath);
 
-        var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-        var filePath = Path.Combine(folderPath, uniqueFileName);
+        string uniqueFileName = $"{Guid.NewGuid()}{extension}";
+        string filePath = Path.Combine(folderPath, uniqueFileName);
 
         await File.WriteAllBytesAsync(filePath, imageBytes);
 
@@ -45,7 +45,7 @@ public class ImageService : IImageService
         if (string.IsNullOrWhiteSpace(relativePath))
             return;
 
-        var fullPath = Path.Combine(_webRootPath, relativePath);
+        string fullPath = Path.Combine(_webRootPath, relativePath);
         if (File.Exists(fullPath))
             File.Delete(fullPath);
     }

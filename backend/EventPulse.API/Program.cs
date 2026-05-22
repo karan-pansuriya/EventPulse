@@ -2,7 +2,9 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
+using AutoMapper;
 using EventPulse.BLL.Interfaces;
+using EventPulse.BLL.Mappings;
 using EventPulse.BLL.Models.Configuration;
 using EventPulse.BLL.Services;
 using EventPulse.DAL.Context;
@@ -15,7 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;  
 using EFCore.NamingConventions;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // ─── JSON ────────────────────────────────────────────────────────────────────
 builder.Services.AddControllers()
@@ -88,7 +90,7 @@ builder.Services.AddDbContext<EventPulseDbContext>(options =>
 // ─── JWT Authentication ──────────────────────────────────────────────────────
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
 
-var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
+JwtSettings jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
     ?? throw new InvalidOperationException("JWT settings not configured.");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -112,7 +114,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnMessageReceived = context =>
             {
-                var authHeader = context.Request.Headers["Authorization"].ToString();
+                string authHeader = context.Request.Headers["Authorization"].ToString();
                 if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
                 {
                     context.Token = authHeader["Bearer ".Length..].Trim();
@@ -128,8 +130,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             {
                 if (context.Principal?.Identity is ClaimsIdentity identity)
                 {
-                    var roleClaims = context.Principal.FindAll("role").ToList();
-                    foreach (var claim in roleClaims)
+                    List<Claim> roleClaims = context.Principal.FindAll("role").ToList();
+                    foreach (Claim claim in roleClaims)
                     {
                         if (!identity.HasClaim(ClaimTypes.Role, claim.Value))
                             identity.AddClaim(new Claim(ClaimTypes.Role, claim.Value));
@@ -142,6 +144,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// ─── AutoMapper ─────────────────────────────────────────────────────────────
+builder.Services.AddAutoMapper(typeof(EventProfile));
+
 // ─── DI Registrations ────────────────────────────────────────────────────────
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -151,7 +156,7 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IImageService>(sp =>
 {
-    var env = sp.GetRequiredService<IWebHostEnvironment>();
+    IWebHostEnvironment env = sp.GetRequiredService<IWebHostEnvironment>();
     return new ImageService(env.WebRootPath);
 });
 
@@ -169,7 +174,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {

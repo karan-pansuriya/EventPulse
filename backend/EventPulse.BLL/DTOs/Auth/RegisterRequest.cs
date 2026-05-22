@@ -9,12 +9,12 @@ namespace EventPulse.BLL.DTOs.Auth
         public string Name { get; set; } = string.Empty;
 
         [Required]
-        [EmailAddress]
+        [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Invalid email format.")]
         [MaxLength(255)]
         public string Email { get; set; } = string.Empty;
 
         [Required]
-        [MinLength(8)]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$", ErrorMessage = "Password must be at least 8 characters and include upper, lower, number, and special character.")]
         public string Password { get; set; } = string.Empty;
 
         [Phone]
