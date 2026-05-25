@@ -23,8 +23,17 @@ public class EventsController : BaseController
     [HttpGet("{id}")]
     public async Task<IActionResult> GetEventById(int id)
     {
-        int? userId = User.Identity?.IsAuthenticated == true ? GetUserId() : (int?)null;
-        string? userRole = User.Identity?.IsAuthenticated == true ? (GetUserRoles().Contains("Admin") ? "Admin" : "Organizer") : null;
+        int? userId = null;
+        string? userRole = null;
+
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            userId = GetUserId();
+            var roles = GetUserRoles();
+            if (roles.Contains("Admin")) userRole = "Admin";
+            else if (roles.Contains("Organizer")) userRole = "Organizer";
+        }
+
         EventResponse result = await _eventService.GetByIdAsync(id, userId, userRole);
         return SuccessResponse(result);
     }

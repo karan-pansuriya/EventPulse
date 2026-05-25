@@ -67,6 +67,7 @@
 }
 
 .dropdown-menu {
+    display: none;
     position: absolute;
     top: calc(100% + 6px);
     right: 0;
@@ -77,6 +78,10 @@
     min-width: 160px;
     overflow: hidden;
     z-index: 200;
+}
+
+.dropdown-menu.open {
+    display: block;
 }
 
 .dropdown-item {

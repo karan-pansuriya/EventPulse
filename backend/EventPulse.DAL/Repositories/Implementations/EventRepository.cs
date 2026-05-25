@@ -23,7 +23,8 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
 
     public async Task<(List<Event> Items, int TotalCount)> GetPagedEventsAsync(EventFilterRequest filter)
     {
-        IQueryable<Event> query = _context.Events.Where(e => !e.IsDeleted);
+        IQueryable<Event> query = _context.Events
+            .Where(e => !e.IsDeleted && e.IsVerified && e.EventDate >= DateTime.Today);
 
         if (filter.DateFrom.HasValue)
             query = query.Where(e => e.EventDate >= filter.DateFrom.Value);
@@ -46,15 +47,17 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
                 (e.Performers != null && e.Performers.ToLower().Contains(search)));
         }
 
-        if (!string.IsNullOrWhiteSpace(filter.SortBy))
+        string sortBy = string.IsNullOrWhiteSpace(filter.SortBy) ? "EventDate" : filter.SortBy;
+        PropertyInfo? property = typeof(Event).GetProperty(sortBy, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+        if (property != null)
         {
-            PropertyInfo? property = typeof(Event).GetProperty(filter.SortBy);
-            if (property != null)
-            {
-                query = filter.SortDirection?.ToLower() == "desc"
-                    ? query.OrderByDescending(e => EF.Property<object>(e, filter.SortBy))
-                    : query.OrderBy(e => EF.Property<object>(e, filter.SortBy));
-            }
+            query = filter.SortDirection?.ToLower() == "desc"
+                ? query.OrderByDescending(e => EF.Property<object>(e, property.Name))
+                : query.OrderBy(e => EF.Property<object>(e, property.Name));
+        }
+        else
+        {
+            query = query.OrderBy(e => e.EventDate);
         }
 
         int totalCount = await query.CountAsync();

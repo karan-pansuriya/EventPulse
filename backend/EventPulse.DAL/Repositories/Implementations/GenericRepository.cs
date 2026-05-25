@@ -69,12 +69,12 @@ public class GenericRepository<T>(EventPulseDbContext context) : IGenericReposit
 
         if (!string.IsNullOrWhiteSpace(pageRequest.SortBy))
         {
-            PropertyInfo? property = typeof(T).GetProperty(pageRequest.SortBy);
+            PropertyInfo? property = typeof(T).GetProperty(pageRequest.SortBy, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
             if (property != null)
             {
                 query = pageRequest.SortDirection?.ToLower() == "desc"
-                    ? query.OrderByDescending(e => EF.Property<object>(e, pageRequest.SortBy))
-                    : query.OrderBy(e => EF.Property<object>(e, pageRequest.SortBy));
+                    ? query.OrderByDescending(e => EF.Property<object>(e, property.Name))
+                    : query.OrderBy(e => EF.Property<object>(e, property.Name));
             }
         }
 
