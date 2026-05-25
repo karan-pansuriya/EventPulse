@@ -1,8 +1,241 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, OnDestroy } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { DatePipe, CurrencyPipe } from '@angular/common';
+import { Subject, debounceTime, takeUntil, Subscription } from 'rxjs';
+import { EventService } from './services/event.service';
+import { CategoryService } from './services/category.service';
+import { CityService } from './services/city.service';
+import { EventListResponse, EventFilterRequest } from './models/event.models';
+import { Category } from './models/category.models';
+import { PagedResult } from '../../../../shared/models/paged-result.model';
+import { ApiResponse } from '../../../../shared/models/api-response.model';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
-  selector: 'app-my-tickets',
+  selector: 'app-home',
   standalone: true,
-  template: `<h1>Home Page</h1>`,
+  imports: [RouterLink, FormsModule, DatePipe, CurrencyPipe],
+  templateUrl: './home.component.html',
+  styleUrl: './home.component.css',
 })
-export class HomeComponent {}
+export class HomeComponent implements OnInit, OnDestroy {
+  private eventService = inject(EventService);
+  private categoryService = inject(CategoryService);
+  private cityService = inject(CityService);
+  private cdr = inject(ChangeDetectorRef);
+  private destroy$ = new Subject<void>();
+  private searchSubject = new Subject<string>();
+
+  private eventSub: Subscription | null = null;
+
+  result: PagedResult<EventListResponse> = { items: [], totalCount: 0 };
+  loading = false;
+  error: string | null = null;
+
+  searchQuery = '';
+  selectedCategory = '';
+  selectedCity = '';
+  dateFrom = '';
+  dateTo = '';
+  currentPage = 1;
+
+  categories: Category[] = [];
+  categoriesLoading = true;
+
+  cities: string[] = [];
+  citiesLoaded = false;
+  citiesLoading = false;
+
+  showCategoryDropdown = false;
+  showCityDropdown = false;
+
+  ngOnInit(): void {
+    this.searchSubject.pipe(debounceTime(400), takeUntil(this.destroy$)).subscribe(() => {
+      this.currentPage = 1;
+      this.loadEvents();
+    });
+
+    this.categoryService
+      .getAll()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          if (res.data) {
+            this.categories = res.data;
+          }
+          this.categoriesLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.categoriesLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
+
+    this.loadEvents();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.eventSub?.unsubscribe();
+  }
+
+  private readonly imageBaseUrl = environment.apiUrl.replace('/api', '');
+
+  onSearchInput(value: string): void {
+    this.searchQuery = value;
+    this.searchSubject.next(value);
+  }
+
+  getPosterUrl(url: string | null): string {
+    return url ? `${this.imageBaseUrl}/${url}` : '';
+  }
+
+  get selectedCategoryName(): string {
+    if (!this.selectedCategory) return 'All Categories';
+    const cat = this.categories.find((c) => c.id === Number(this.selectedCategory));
+    return cat ? cat.name : 'All Categories';
+  }
+
+  isCategorySelected(id: number): boolean {
+    return this.selectedCategory === String(id);
+  }
+
+  catId(id: number): string {
+    return String(id);
+  }
+
+  selectCategory(value: string): void {
+    this.selectedCategory = value;
+    this.showCategoryDropdown = false;
+    this.applyFilters();
+  }
+
+  toggleCategoryDropdown(): void {
+    this.showCategoryDropdown = !this.showCategoryDropdown;
+    this.showCityDropdown = false;
+  }
+
+  get selectedCityName(): string {
+    return this.selectedCity || 'All Cities';
+  }
+
+  selectCity(value: string): void {
+    this.selectedCity = value;
+    this.showCityDropdown = false;
+    this.applyFilters();
+  }
+
+  toggleCityDropdown(): void {
+    if (!this.citiesLoaded) this.loadCities();
+    this.showCityDropdown = !this.showCityDropdown;
+    this.showCategoryDropdown = false;
+  }
+
+  onBackdropClick(): void {
+    this.showCategoryDropdown = false;
+    this.showCityDropdown = false;
+  }
+
+  applyFilters(): void {
+    this.currentPage = 1;
+    this.loadEvents();
+  }
+
+  clearFilters(): void {
+    this.searchQuery = '';
+    this.selectedCategory = '';
+    this.selectedCity = '';
+    this.dateFrom = '';
+    this.dateTo = '';
+    this.currentPage = 1;
+    this.loadEvents();
+  }
+
+  retry(): void {
+    this.loadEvents();
+  }
+
+  loadCities(): void {
+    if (this.citiesLoaded || this.citiesLoading) return;
+    this.citiesLoading = true;
+    this.cityService
+      .getAll()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          if (res.data) {
+            this.cities = res.data;
+            this.citiesLoaded = true;
+          }
+          this.citiesLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.citiesLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+    this.currentPage = page;
+    this.loadEvents();
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.result.totalCount / 12);
+  }
+
+  get pages(): number[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const pages: number[] = [];
+    const start = Math.max(1, current - 2);
+    const end = Math.min(total, current + 2);
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  }
+
+  private loadEvents(): void {
+    this.eventSub?.unsubscribe();
+
+    this.loading = true;
+    this.error = null;
+
+    this.eventSub = this.eventService
+      .getEvents(this.buildFilters())
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res: ApiResponse<PagedResult<EventListResponse>>) => {
+          if (res.data) {
+            this.result = res.data;
+          }
+          this.loading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.error = 'Failed to load events. Please try again.';
+          this.loading = false;
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  private buildFilters(): EventFilterRequest {
+    return {
+      pageNumber: this.currentPage,
+      pageSize: 12,
+      sortBy: 'eventDate',
+      sortDirection: 'asc',
+      search: this.searchQuery || undefined,
+      categoryId: this.selectedCategory ? Number(this.selectedCategory) : undefined,
+      city: this.selectedCity || undefined,
+      dateFrom: this.dateFrom || undefined,
+      dateTo: this.dateTo || undefined,
+    };
+  }
+}

@@ -1,0 +1,192 @@
+<div class="home-page">
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">Discover Amazing Events</h1>
+      <p class="hero-subtitle">Find and book tickets for concerts, sports, workshops, and more</p>
+      <div class="search-bar">
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <path d="M21 21l-4.35-4.35" />
+        </svg>
+        <input type="text" class="search-input" placeholder="Search events by title, description, or performers..."
+          [value]="searchQuery" (input)="onSearchInput($any($event.target).value)" />
+      </div>
+    </div>
+  </section>
+
+  <section class="card shadow-sm rounded-3 border-0 p-3 p-xl-4 mb-4 bg-white">
+    @if (showCategoryDropdown || showCityDropdown) {
+    <div class="dropdown-backdrop" (click)="onBackdropClick()"></div>
+    }
+    <div class="row g-3 align-items-end">
+      <div class="col-12 col-sm-6 col-md-4 col-lg">
+        <label class="form-label text-uppercase fw-semibold text-muted small mb-1">Category</label>
+        <div class="custom-select">
+          <button type="button" class="custom-select-trigger" (click)="toggleCategoryDropdown()">
+            <span>{{ selectedCategoryName }}</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          @if (showCategoryDropdown) {
+          <div class="custom-select-options">
+            <button type="button" class="custom-select-option" [class.selected]="!selectedCategory"
+              (click)="selectCategory('')">All Categories</button>
+            @for (cat of categories; track cat.id) {
+            <button type="button" class="custom-select-option" [class.selected]="isCategorySelected(cat.id)"
+              (click)="selectCategory(catId(cat.id))">{{ cat.name }}</button>
+            }
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-4 col-lg">
+        <label class="form-label text-uppercase fw-semibold text-muted small mb-1">City</label>
+        <div class="custom-select">
+          <button type="button" class="custom-select-trigger" (click)="toggleCityDropdown()">
+            <span>{{ selectedCityName }}</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          @if (showCityDropdown) {
+          <div class="custom-select-options">
+            <button type="button" class="custom-select-option" [class.selected]="!selectedCity"
+              (click)="selectCity('')">All Cities</button>
+            @if (citiesLoading) {
+            <button type="button" class="custom-select-option" disabled>Loading cities...</button>
+            }
+            @for (city of cities; track city) {
+            <button type="button" class="custom-select-option" [class.selected]="selectedCity === city"
+              (click)="selectCity(city)">{{ city }}</button>
+            }
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-4 col-lg">
+        <label class="form-label text-uppercase fw-semibold text-muted small mb-1">From</label>
+        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateFrom" (change)="applyFilters()" />
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-4 col-lg">
+        <label class="form-label text-uppercase fw-semibold text-muted small mb-1">To</label>
+        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateTo" (change)="applyFilters()" />
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-4 col-lg-auto d-grid d-lg-block">
+        <button class="btn btn-outline-secondary btn-sm px-4" (click)="clearFilters()">Clear All</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="results-section">
+    <div class="results-header">
+      <h2 class="results-title">
+        @if (searchQuery || selectedCategory || selectedCity || dateFrom || dateTo) {
+        Search Results
+        } @else {
+        Upcoming Events
+        }
+      </h2>
+      <span class="results-count">{{ result.totalCount }} event{{ result.totalCount !== 1 ? 's' : '' }} found</span>
+    </div>
+
+    @if (loading) {
+    <div class="state-container">
+      <div class="spinner"></div>
+      <p class="state-text">Loading events...</p>
+    </div>
+    } @else if (error) {
+    <div class="state-container">
+      <p class="state-text error">{{ error }}</p>
+      <button class="btn-retry" (click)="retry()">Try Again</button>
+    </div>
+    } @else if (result.items.length === 0) {
+    <div class="state-container">
+      <svg class="empty-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.5">
+        <circle cx="11" cy="11" r="8" />
+        <path d="M21 21l-4.35-4.35" />
+      </svg>
+      <p class="state-text">No events found matching your criteria.</p>
+      <button class="btn-retry" (click)="clearFilters()">Clear Filters</button>
+    </div>
+    } @else {
+    <div class="events-grid">
+      @for (event of result.items; track event.id) {
+      <div class="event-card">
+        <div class="event-card-poster">
+          @if (event.posterUrl) {
+          <img [src]="getPosterUrl(event.posterUrl)" [alt]="event.title" class="event-poster-img" />
+          } @else {
+          <div class="event-poster-placeholder">
+            <img src="/images/fallback_image.png" alt="Fallback">
+          </div>
+          }
+          @if (event.categoryName) {
+          <span class="event-card-category">{{ event.categoryName }}</span>
+          }
+        </div>
+        <div class="event-card-body">
+          <h3 class="event-card-title">{{ event.title }}</h3>
+          <div class="event-card-meta">
+            <span class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+              </svg>
+              {{ event.eventDate | date:'MMM d, yyyy' }}
+            </span>
+            <span class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+              {{ event.startTime.substring(0, 5) }}
+            </span>
+            @if (event.venueName) {
+            <span class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              {{ event.venueName }}
+            </span>
+            }
+          </div>
+          <div class="event-card-footer">
+            <span class="event-card-price">{{ event.price | currency:'INR':'symbol':'1.2-2' }}</span>
+            <!-- <a class="btn-book" [routerLink]="['/attendee/events/:id', event.id]">Event Details</a> -->
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+
+    @if (totalPages > 1) {
+    <div class="pagination">
+      <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
+      @for (p of pages; track p) {
+      <button class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">
+        {{ p }}
+      </button>
+      }
+      <button class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </button>
+    </div>
+    }
+    }
+  </section>
+</div>

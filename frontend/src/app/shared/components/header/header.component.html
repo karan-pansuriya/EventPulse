@@ -10,13 +10,11 @@
                 stroke="currentColor" stroke-width="2">
                 <polyline points="6 9 12 15 18 9" />
             </svg>
-            @if (dropdownOpen) {
-            <div class="dropdown-menu" (click)="$event.stopPropagation()">
+            <div class="dropdown-menu" [class.open]="dropdownOpen" (click)="$event.stopPropagation()">
                 <a class="dropdown-item" [routerLink]="profileRoute">My Profile</a>
                 <div class="dropdown-divider"></div>
                 <button class="dropdown-item logout" (click)="logout()">Logout</button>
             </div>
-            }
         </div>
     </div>
 </header>

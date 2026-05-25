@@ -132,6 +132,13 @@ export const routes: Routes = [
           import('./core/features/attendee/home/home.component').then((m) => m.HomeComponent),
       },
       {
+        path: APP_ROUTES.ATTENDEE.EVENT_DETAILS,
+        loadComponent: () =>
+          import('./core/features/attendee/home/event_details/event_details.component').then(
+            (m) => m.EventDetailsComponent
+          ),
+      },
+      {
         path: APP_ROUTES.ATTENDEE.MY_TICKETS,
         loadComponent: () =>
           import('./core/features/attendee/my-tickets/my-tickets.component').then(

@@ -156,6 +156,7 @@ builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<IImageService>(sp =>
 {
     IWebHostEnvironment env = sp.GetRequiredService<IWebHostEnvironment>();
