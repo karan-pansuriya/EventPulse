@@ -67,23 +67,17 @@ namespace EventPulse.API.Controllers
 
         private void ClearTokenCookies()
         {
-            Response.Cookies.Append("access_token", "", new CookieOptions
+            CookieOptions cookieOptions = new CookieOptions
             {
                 HttpOnly = false,
                 Secure = false,
                 SameSite = SameSiteMode.Lax,
-                Path = "/",
-                MaxAge = TimeSpan.Zero,
-            });
+                Path = "/"
+            };
 
-            Response.Cookies.Append("refresh_token", "", new CookieOptions
-            {
-                HttpOnly = false,
-                Secure = false,
-                SameSite = SameSiteMode.Lax,
-                Path = "/",
-                MaxAge = TimeSpan.Zero,
-            });
+            Response.Cookies.Delete("access_token", cookieOptions);
+            Response.Cookies.Delete("refresh_token", cookieOptions);
+            Response.Headers.Append("Clear-Site-Data", "\"cookies\"");
         }
     }
 }

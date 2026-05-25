@@ -46,6 +46,7 @@ public class UpdateEventDto
     [MaxLength(200)]
     public string? Performers { get; set; }
 
+    [Range(10, 1440, ErrorMessage = "Duration must be between 1 and 1440 minutes.")]
     public int? DurationMins { get; set; }
 
     [Required]
@@ -53,6 +54,7 @@ public class UpdateEventDto
     public DateTime EventDate { get; set; }
 
     [Required]
+    [Range(typeof(TimeSpan), "00:00:00", "23:59:59", ErrorMessage = "Start time must be between 00:00 and 23:59.")]
     public TimeSpan StartTime { get; set; }
 
     [Required]

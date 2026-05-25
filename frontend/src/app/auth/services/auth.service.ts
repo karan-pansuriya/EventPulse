@@ -103,9 +103,15 @@ export class AuthService {
   }
 
   logout(): void {
+    // Clear local tokens first for instant UI responsiveness
     clearTokens();
     this.user.set(null);
     this.isAuthenticated.set(false);
+
+    // Call the backend logout API to trigger robust server-side cookie clearance (e.g., Clear-Site-Data)
+    this.http.post(`${this.baseUrl}/logout`, {}).subscribe({
+      error: (err) => console.error('Failed to clear cookies from backend on logout:', err)
+    });
   }
 
   getAccessToken(): string | null {

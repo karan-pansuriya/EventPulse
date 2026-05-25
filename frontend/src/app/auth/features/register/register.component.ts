@@ -29,7 +29,7 @@ export class RegisterComponent {
   private cdr = inject(ChangeDetectorRef);
 
   private readonly emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-  private readonly passwordPattern = /^(?=.*[a-z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/;
+  private readonly passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/;
 
   form = this.fb.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -43,6 +43,7 @@ export class RegisterComponent {
   loading = false;
   showPassword = false;
   showConfirm = false;
+  serverError = '';
 
   roleOptions = [
     { label: 'Customer', value: 'Customer' as const },
@@ -53,6 +54,13 @@ export class RegisterComponent {
     return this.form.value.password === this.form.value.confirmPassword;
   }
 
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '');
+    input.value = digits;
+    this.form.get('phoneNumber')?.setValue(digits, { emitEvent: false });
+  }
+
   onSubmit(): void {
     this.form.markAllAsTouched();
     if (this.form.invalid) {
@@ -61,6 +69,7 @@ export class RegisterComponent {
     }
 
     this.loading = true;
+    this.serverError = '';
 
     const raw = this.form.getRawValue();
     const request: RegisterRequest = {
@@ -86,7 +95,9 @@ export class RegisterComponent {
           else if (user?.roles.includes('Organizer')) this.router.navigate(['/organizer/dashboard']);
           else this.router.navigate(['/attendee/home']);
         },
-        error: () => {
+        error: (err) => {
+          const message = (err as { error?: { message?: string } })?.error?.message;
+          this.serverError = message || 'Registration failed. Please try again.';
           this.loading = false;
           this.cdr.markForCheck();
         },
