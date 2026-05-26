@@ -427,3 +427,32 @@
     gap: 4px;
   }
 }
+
+.custom-select-search {
+  padding: 6px 6px 4px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.custom-select-search-input {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  color: #212529;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.custom-select-search-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.custom-select-empty {
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  text-align: center;
+}

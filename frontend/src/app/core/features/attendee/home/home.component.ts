@@ -47,8 +47,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   categoriesLoading = true;
 
   cities: string[] = [];
-  citiesLoaded = false;
   citiesLoading = false;
+  citySearchText = '';
 
   showCategoryDropdown = false;
   showCityDropdown = false;
@@ -64,9 +64,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
-          if (res.data) {
-            this.categories = res.data;
-          }
+          if (res.data) this.categories = res.data;
           this.categoriesLoading = false;
           this.cdr.detectChanges();
         },
@@ -76,6 +74,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         },
       });
 
+    this.loadCities();
     this.loadEvents();
   }
 
@@ -96,6 +95,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     return url ? `${this.imageBaseUrl}/${url}` : '';
   }
 
+  // ── Category dropdown ──────────────────────────────────────
   get selectedCategoryName(): string {
     if (!this.selectedCategory) return 'All Categories';
     const cat = this.categories.find((c) => c.id === Number(this.selectedCategory));
@@ -121,25 +121,53 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.showCityDropdown = false;
   }
 
-  get selectedCityName(): string {
-    return this.selectedCity || 'All Cities';
-  }
-
-  selectCity(value: string): void {
-    this.selectedCity = value;
-    this.showCityDropdown = false;
-    this.applyFilters();
+  // ── City dropdown ──────────────────────────────────────────
+  get filteredCities(): string[] {
+    if (!this.citySearchText) return this.cities;
+    const q = this.citySearchText.toLowerCase();
+    return this.cities.filter((c) => c.toLowerCase().includes(q));
   }
 
   toggleCityDropdown(): void {
-    if (!this.citiesLoaded) this.loadCities();
     this.showCityDropdown = !this.showCityDropdown;
     this.showCategoryDropdown = false;
+    if (this.showCityDropdown) this.citySearchText = '';
   }
 
+  onCitySearchInput(value: string): void {
+    this.citySearchText = value;
+  }
+
+  selectCityOption(city: string): void {
+    this.selectedCity = city;
+    this.showCityDropdown = false;
+    this.citySearchText = '';
+    this.applyFilters();
+  }
+
+  // ── Shared ─────────────────────────────────────────────────
   onBackdropClick(): void {
     this.showCategoryDropdown = false;
     this.showCityDropdown = false;
+  }
+
+  loadCities(): void {
+    if (this.citiesLoading) return;
+    this.citiesLoading = true;
+    this.cityService
+      .getAll()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          if (res.data) this.cities = res.data;
+          this.citiesLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.citiesLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   applyFilters(): void {
@@ -159,28 +187,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   retry(): void {
     this.loadEvents();
-  }
-
-  loadCities(): void {
-    if (this.citiesLoaded || this.citiesLoading) return;
-    this.citiesLoading = true;
-    this.cityService
-      .getAll()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (res) => {
-          if (res.data) {
-            this.cities = res.data;
-            this.citiesLoaded = true;
-          }
-          this.citiesLoading = false;
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.citiesLoading = false;
-          this.cdr.detectChanges();
-        },
-      });
   }
 
   goToPage(page: number): void {
@@ -205,7 +211,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private loadEvents(): void {
     this.eventSub?.unsubscribe();
-
     this.loading = true;
     this.error = null;
 
@@ -214,9 +219,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res: ApiResponse<PagedResult<EventListResponse>>) => {
-          if (res.data) {
-            this.result = res.data;
-          }
+          if (res.data) this.result = res.data;
           this.loading = false;
           this.cdr.detectChanges();
         },

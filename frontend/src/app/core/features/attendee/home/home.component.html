@@ -21,6 +21,8 @@
     <div class="dropdown-backdrop" (click)="onBackdropClick()"></div>
     }
     <div class="row g-3 align-items-end">
+
+      <!-- Category Filter -->
       <div class="col-12 col-sm-6 col-md-4 col-lg">
         <label class="form-label text-uppercase fw-semibold text-muted small mb-1">Category</label>
         <div class="custom-select">
@@ -43,25 +45,36 @@
         </div>
       </div>
 
+      <!-- City Filter — same pattern as Category, with inline search -->
       <div class="col-12 col-sm-6 col-md-4 col-lg">
         <label class="form-label text-uppercase fw-semibold text-muted small mb-1">City</label>
         <div class="custom-select">
           <button type="button" class="custom-select-trigger" (click)="toggleCityDropdown()">
-            <span>{{ selectedCityName }}</span>
+            <span>{{ selectedCity || 'All Cities' }}</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </button>
           @if (showCityDropdown) {
           <div class="custom-select-options">
+            <div class="custom-select-search">
+              <input
+                type="text"
+                class="custom-select-search-input"
+                placeholder="Type a city..."
+                [value]="citySearchText"
+                (input)="onCitySearchInput($any($event.target).value)"
+                (click)="$event.stopPropagation()"
+              />
+            </div>
             <button type="button" class="custom-select-option" [class.selected]="!selectedCity"
-              (click)="selectCity('')">All Cities</button>
-            @if (citiesLoading) {
-            <button type="button" class="custom-select-option" disabled>Loading cities...</button>
-            }
-            @for (city of cities; track city) {
+              (click)="selectCityOption('')">All Cities</button>
+            @for (city of filteredCities; track city) {
             <button type="button" class="custom-select-option" [class.selected]="selectedCity === city"
-              (click)="selectCity(city)">{{ city }}</button>
+              (click)="selectCityOption(city)">{{ city }}</button>
+            }
+            @if (filteredCities.length === 0) {
+            <div class="custom-select-empty">No cities found</div>
             }
           </div>
           }
