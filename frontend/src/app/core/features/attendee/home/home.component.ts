@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit, inject, OnDestroy } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DatePipe, CurrencyPipe } from '@angular/common';
+
 import { Subject, debounceTime, takeUntil, Subscription } from 'rxjs';
 import { EventService } from './services/event.service';
 import { CategoryService } from './services/category.service';
@@ -11,12 +10,12 @@ import { Category } from './models/category.models';
 import { PagedResult } from '../../../../shared/models/paged-result.model';
 import { ApiResponse } from '../../../../shared/models/api-response.model';
 import { environment } from '../../../../../environments/environment';
-import { formatTime } from '../../../../shared/utils/format-utils';
+import { EventCardComponent } from '../../../../shared/components/event-card/event-card.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, FormsModule, DatePipe, CurrencyPipe],
+  imports: [FormsModule, EventCardComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
@@ -29,8 +28,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   private searchSubject = new Subject<string>();
 
   private eventSub: Subscription | null = null;
-
-  readonly formatTime = formatTime;
 
   result: PagedResult<EventListResponse> = { items: [], totalCount: 0 };
   loading = false;
@@ -84,15 +81,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.eventSub?.unsubscribe();
   }
 
-  private readonly imageBaseUrl = environment.apiUrl.replace('/api', '');
+  readonly imageBaseUrl = environment.apiUrl.replace('/api', '');
 
   onSearchInput(value: string): void {
     this.searchQuery = value;
     this.searchSubject.next(value);
-  }
-
-  getPosterUrl(url: string | null): string {
-    return url ? `${this.imageBaseUrl}/${url}` : '';
   }
 
   // ── Category dropdown ──────────────────────────────────────
