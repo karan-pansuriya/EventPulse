@@ -17,25 +17,43 @@ namespace EventPulse.BLL.Services
         public async Task<TokenResponse> RegisterAsync(RegisterRequest request)
         {
             string normalizedEmail = request.Email.Trim().ToLowerInvariant();
-            if (await authRepository.UserEmailExistsAsync(normalizedEmail))
-                throw new BadRequestException("Email is already in use.");
 
             Role role = await authRepository.GetRoleByNameAsync(request.Role)
                 ?? throw new BadRequestException($"Role '{request.Role}' not found.");
 
-            CreatePasswordHash(request.Password, out string hash, out string salt);
+            User? existingUser = await authRepository.GetUserWithRolesByEmailAsync(normalizedEmail);
 
-            User user = new User
+            User user;
+            List<string> allRoles;
+
+            if (existingUser != null)
             {
-                Name = request.Name,
-                Email = normalizedEmail,
-                Phone = request.Phone,
-                PasswordHash = hash,
-                PasswordSalt = salt,
-            };
+                user = existingUser;
+                allRoles = user.UserRoles.Select(ur => ur.Role.Name).ToList();
 
-            await authRepository.AddUserAsync(user);
-            await authRepository.AddUserRoleAsync(new UserRole { User = user, Role = role });
+                if (allRoles.Contains(role.Name))
+                    throw new BadRequestException($"You already have the '{role.Name}' role.");
+
+                await authRepository.AddUserRoleAsync(new UserRole { UserId = user.Id, RoleId = role.Id });
+                allRoles.Add(role.Name);
+            }
+            else
+            {
+                CreatePasswordHash(request.Password, out string hash, out string salt);
+
+                user = new User
+                {
+                    Name = request.Name,
+                    Email = normalizedEmail,
+                    Phone = request.Phone,
+                    PasswordHash = hash,
+                    PasswordSalt = salt,
+                };
+
+                await authRepository.AddUserAsync(user);
+                await authRepository.AddUserRoleAsync(new UserRole { User = user, Role = role });
+                allRoles = new List<string> { role.Name };
+            }
 
             try
             {
@@ -46,10 +64,9 @@ namespace EventPulse.BLL.Services
                 throw new BadRequestException("Email is already in use.");
             }
 
-            string[] roles = new[] { role.Name };
-            string accessToken = jwtService.GenerateAccessToken(user, roles);
+            string accessToken = jwtService.GenerateAccessToken(user, allRoles);
             string refreshToken = jwtService.GenerateRefreshToken();
-            int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roles);
+            int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(allRoles);
 
             await authRepository.AddRefreshTokenAsync(new RefreshToken
             {
@@ -65,7 +82,7 @@ namespace EventPulse.BLL.Services
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes(roles) * 60,
+                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes(allRoles) * 60,
                 RefreshExpiresIn = refreshMinutes * 60,
             };
         }
@@ -79,7 +96,11 @@ namespace EventPulse.BLL.Services
             if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
                 throw new UnauthorizedAccessException("Invalid email or password.");
 
-            List<string> roles = user.UserRoles.Select(ur => ur.Role.Name).ToList();
+            if (!user.UserRoles.Any(ur =>
+                ur.Role.Name.Equals(request.Role, StringComparison.OrdinalIgnoreCase)))
+                throw new UnauthorizedAccessException("Invalid email or password.");
+
+            List<string> roles = new List<string> { request.Role };
             string accessToken = jwtService.GenerateAccessToken(user, roles);
             string refreshToken = jwtService.GenerateRefreshToken();
             int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roles);
@@ -90,6 +111,7 @@ namespace EventPulse.BLL.Services
                 Token = refreshToken,
                 ExpiresAt = DateTime.UtcNow.AddMinutes(refreshMinutes),
                 CreatedAt = DateTime.UtcNow,
+                Role = request.Role,
             });
 
             await unitOfWork.SaveAsync();
@@ -103,6 +125,12 @@ namespace EventPulse.BLL.Services
             };
         }
 
+        public async Task<List<RoleResponse>> GetRolesAsync()
+        {
+            List<Role> roles = await authRepository.GetRolesAsync();
+            return roles.Select(r => new RoleResponse { Id = r.Id, Name = r.Name }).ToList();
+        }
+
         public async Task<TokenResponse> RefreshTokenAsync(RefreshTokenRequest request)
         {
             RefreshToken storedToken = await authRepository.GetRefreshTokenWithUserAsync(request.RefreshToken)
@@ -114,7 +142,9 @@ namespace EventPulse.BLL.Services
             storedToken.IsRevoked = true;
 
             User user = storedToken.User;
-            List<string> roles = user.UserRoles.Select(ur => ur.Role.Name).ToList();
+            List<string> roles = string.IsNullOrEmpty(storedToken.Role)
+                ? user.UserRoles.Select(ur => ur.Role.Name).ToList()
+                : new List<string> { storedToken.Role };
             string newAccessToken = jwtService.GenerateAccessToken(user, roles);
             string newRefreshToken = jwtService.GenerateRefreshToken();
             int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roles);
@@ -125,6 +155,7 @@ namespace EventPulse.BLL.Services
                 Token = newRefreshToken,
                 ExpiresAt = DateTime.UtcNow.AddMinutes(refreshMinutes),
                 CreatedAt = DateTime.UtcNow,
+                Role = storedToken.Role,
             });
 
             await unitOfWork.SaveAsync();

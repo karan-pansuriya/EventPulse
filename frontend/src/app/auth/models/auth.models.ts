@@ -1,6 +1,7 @@
 export interface LoginRequest {
   email: string;
   password: string;
+  role: string;
 }
 
 export interface RegisterRequest {
@@ -8,7 +9,12 @@ export interface RegisterRequest {
   email: string;
   password: string;
   phone: string;
-  role: 'Organizer' | 'Customer';
+  role: string;
+}
+
+export interface RoleResponse {
+  id: number;
+  name: string;
 }
 
 export interface TokenResponse {

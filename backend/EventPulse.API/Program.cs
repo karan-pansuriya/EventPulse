@@ -145,7 +145,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 // ─── AutoMapper ─────────────────────────────────────────────────────────────
-builder.Services.AddAutoMapper(typeof(EventProfile));
+builder.Services.AddAutoMapper(typeof(EventProfile), typeof(BookingProfile));
 
 // ─── DI Registrations ────────────────────────────────────────────────────────
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -156,6 +156,7 @@ builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<IImageService>(sp =>
 {

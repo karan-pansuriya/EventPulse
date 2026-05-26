@@ -8,6 +8,8 @@ public interface IAuthRepository
 
     Task<Role?> GetRoleByNameAsync(string roleName);
 
+    Task<List<Role>> GetRolesAsync();
+
     Task<User?> GetUserWithRolesByEmailAsync(string normalizedEmail);
 
     Task<RefreshToken?> GetRefreshTokenWithUserAsync(string token);

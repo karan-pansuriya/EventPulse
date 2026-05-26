@@ -4,7 +4,7 @@ import { map, tap, Observable, throwError, BehaviorSubject, filter, take, catchE
 import { ToastService } from '../../shared/services/toast.service';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../../shared/models/api-response.model';
-import { LoginRequest, RegisterRequest, TokenResponse, UserInfo } from '../models/auth.models';
+import { LoginRequest, RegisterRequest, TokenResponse, UserInfo, RoleResponse } from '../models/auth.models';
 import {
   decodeToken,
   getAccessToken,
@@ -100,6 +100,12 @@ export class AuthService {
           return throwError(() => err);
         }),
       );
+  }
+
+  getRoles(): Observable<RoleResponse[]> {
+    return this.http.get<ApiResponse<RoleResponse[]>>(`${this.baseUrl}/roles`).pipe(
+      map((res) => res.data ?? []),
+    );
   }
 
   logout(): void {
