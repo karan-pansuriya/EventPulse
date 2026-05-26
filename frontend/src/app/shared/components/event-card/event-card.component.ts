@@ -21,7 +21,7 @@ export class EventCardComponent {
   readonly formatTime = formatTime;
 
   get posterSrc(): string {
-    return this.event.posterUrl ? `${this.imageBaseUrl}/${this.event.posterUrl}` : '/images/fallback_image.png';
+    return this.event.posterUrl ? `${this.imageBaseUrl}/${this.event.posterUrl}` : '/images/default_event_image.png';
   }
 
   get hasPoster(): boolean {
