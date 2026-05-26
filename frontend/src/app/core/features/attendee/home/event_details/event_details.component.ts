@@ -6,6 +6,7 @@ import { EventService } from '../services/event.service';
 import { EventDetailResponse } from '../models/event.models';
 import { environment } from '../../../../../../environments/environment';
 import { SignalRService } from '../../../../../shared/services/signalr.service';
+import { formatTime, formatDuration } from '../../../../../shared/utils/format-utils';
 
 @Component({
   selector: 'app-event-details',
@@ -24,6 +25,9 @@ export class EventDetailsComponent implements OnInit, OnDestroy {
 
   private readonly imageBaseUrl = environment.apiUrl.replace('/api', '');
   private eventId = 0;
+
+  readonly formatTime = formatTime;
+  readonly formatDuration = formatDuration;
 
   event: EventDetailResponse | null = null;
   loading = true;

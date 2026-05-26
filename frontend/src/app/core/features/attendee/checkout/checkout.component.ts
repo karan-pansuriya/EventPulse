@@ -6,6 +6,7 @@ import { BookingService, CreateBookingRequest } from '../home/services/booking.s
 import { EventDetailResponse } from '../home/models/event.models';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { environment } from '../../../../../environments/environment';
+import { formatTime } from '../../../../shared/utils/format-utils';
 import { take } from 'rxjs';
 
 @Component({
@@ -24,6 +25,7 @@ export class CheckoutComponent implements OnInit {
   private toast = inject(ToastService);
 
   event: EventDetailResponse | null = null;
+  readonly formatTime = formatTime;
   quantity = 1;
   loading = true;
   processing = false;

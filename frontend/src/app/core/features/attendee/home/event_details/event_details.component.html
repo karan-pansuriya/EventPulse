@@ -76,7 +76,7 @@
                   <circle cx="12" cy="12" r="10"/>
                   <path d="M12 6v6l4 2"/>
                 </svg>
-                {{ event.startTime ? event.startTime.substring(0, 5) : '' }}
+                {{ formatTime(event.startTime) }}
               </span>
               @if (event.venueCity || event.venueName) {
                 <span class="hero-meta-item">
@@ -118,7 +118,7 @@
             </div>
             <div class="info-item">
               <span class="info-label">Duration</span>
-              <span class="info-value">{{ event.durationMins != null ? event.durationMins + ' mins' : 'Not mentioned' }}</span>
+              <span class="info-value">{{ formatDuration(event.durationMins) }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Age Restriction</span>
@@ -134,7 +134,7 @@
             </div>
             <div class="info-item">
               <span class="info-label">Time</span>
-              <span class="info-value">{{ event.startTime ? event.startTime.substring(0, 5) : '' }}</span>
+              <span class="info-value">{{ formatTime(event.startTime) }}</span>
             </div>
           </div>
         </section>
@@ -196,7 +196,7 @@
             </div>
             <div class="booking-info-row">
               <span class="booking-info-label">Time</span>
-              <span class="booking-info-value">{{ event.startTime ? event.startTime.substring(0, 5) : '' }}</span>
+              <span class="booking-info-value">{{ formatTime(event.startTime) }}</span>
             </div>
             <div class="booking-info-row">
               <span class="booking-info-label">Available Seats</span>

@@ -11,6 +11,7 @@ import { Category } from './models/category.models';
 import { PagedResult } from '../../../../shared/models/paged-result.model';
 import { ApiResponse } from '../../../../shared/models/api-response.model';
 import { environment } from '../../../../../environments/environment';
+import { formatTime } from '../../../../shared/utils/format-utils';
 
 @Component({
   selector: 'app-home',
@@ -28,6 +29,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   private searchSubject = new Subject<string>();
 
   private eventSub: Subscription | null = null;
+
+  readonly formatTime = formatTime;
 
   result: PagedResult<EventListResponse> = { items: [], totalCount: 0 };
   loading = false;
