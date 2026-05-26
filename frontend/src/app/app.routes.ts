@@ -153,6 +153,20 @@ export const routes: Routes = [
           ),
       },
       {
+        path: APP_ROUTES.ATTENDEE.CHECKOUT,
+        loadComponent: () =>
+          import('./core/features/attendee/checkout/checkout.component').then(
+            (m) => m.CheckoutComponent,
+          ),
+      },
+      {
+        path: APP_ROUTES.ATTENDEE.PAYMENT_SUCCESS,
+        loadComponent: () =>
+          import('./core/features/attendee/payment-success/payment-success.component').then(
+            (m) => m.PaymentSuccessComponent,
+          ),
+      },
+      {
         path: APP_ROUTES.ATTENDEE.PROFILE,
         loadComponent: () =>
           import('./core/features/attendee/profile/profile.component').then(

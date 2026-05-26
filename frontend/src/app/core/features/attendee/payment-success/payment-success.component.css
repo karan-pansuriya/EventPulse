@@ -1,0 +1,25 @@
+.payment-success-page {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.success-icon svg {
+  filter: drop-shadow(0 4px 12px rgba(16, 185, 129, 0.3));
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 28px;
+}
+
+.btn-primary:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.btn-outline-secondary {
+  border-radius: 10px;
+  padding: 12px 28px;
+}

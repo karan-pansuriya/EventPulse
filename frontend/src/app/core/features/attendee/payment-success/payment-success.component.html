@@ -1,0 +1,19 @@
+<div class="payment-success-page">
+  <div class="container py-5">
+    <div class="text-center">
+      <div class="success-icon mb-3">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M8 12l2 2 4-4"/>
+        </svg>
+      </div>
+      <h2 class="fw-bold mb-2">Payment Successful!</h2>
+      <p class="text-muted mb-1">Your booking has been confirmed.</p>
+      @if (bookingCode) {
+        <p class="fw-semibold text-primary mb-4">Booking Code: {{ bookingCode }}</p>
+      }
+      <a class="btn btn-primary btn-lg" routerLink="/attendee/my-tickets">View My Tickets</a>
+      <a class="btn btn-outline-secondary btn-lg ms-2" routerLink="/attendee/home">Browse Events</a>
+    </div>
+  </div>
+</div>

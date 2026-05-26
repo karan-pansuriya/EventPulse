@@ -57,5 +57,7 @@ namespace EventPulse.DAL.Entities
         public virtual Venue? Venue { get; set; }
 
         public virtual ICollection<EventPoster> Posters { get; set; } = new List<EventPoster>();
+
+        public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     }
 }

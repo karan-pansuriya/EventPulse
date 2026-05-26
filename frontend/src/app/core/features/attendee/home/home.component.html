@@ -10,7 +10,7 @@
           <circle cx="11" cy="11" r="8" />
           <path d="M21 21l-4.35-4.35" />
         </svg>
-        <input type="text" class="search-input" placeholder="Search events by title, description, or performers..."
+        <input type="text" class="search-input" placeholder="Search events by title"
           [value]="searchQuery" (input)="onSearchInput($any($event.target).value)" />
       </div>
     </div>
@@ -119,7 +119,7 @@
     } @else {
     <div class="events-grid">
       @for (event of result.items; track event.id) {
-      <div class="event-card">
+      <div class="event-card" [routerLink]="['/attendee/events', event.id]">
         <div class="event-card-poster">
           @if (event.posterUrl) {
           <img [src]="getPosterUrl(event.posterUrl)" [alt]="event.title" class="event-poster-img" />
@@ -161,7 +161,6 @@
           </div>
           <div class="event-card-footer">
             <span class="event-card-price">{{ event.price | currency:'INR':'symbol':'1.2-2' }}</span>
-            <!-- <a class="btn-book" [routerLink]="['/attendee/events/:id', event.id]">Event Details</a> -->
           </div>
         </div>
       </div>

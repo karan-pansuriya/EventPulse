@@ -17,7 +17,7 @@ export const APP_ROUTES = {
       TICKET_DETAILS: 'my-tickets/:id',
       BOOKINGS: 'bookings',
       PROFILE: 'profile',
-      CHECKOUT: 'checkout',
+      CHECKOUT: 'checkout/:eventId',
       PAYMENT_SUCCESS: 'payment-success',
     },
   
