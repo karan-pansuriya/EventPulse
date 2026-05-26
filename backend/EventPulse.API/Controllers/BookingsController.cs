@@ -1,5 +1,5 @@
 using EventPulse.API.Hubs;
-using EventPulse.Bll.Helpers;
+using EventPulse.API.Helpers;
 using EventPulse.BLL.DTOs.Booking;
 using EventPulse.BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +10,7 @@ namespace EventPulse.API.Controllers;
 
 [Authorize(Roles = "Customer")]
 [Route("api/bookings")]
-public class BookingsController : BaseController
+public class BookingsController : BaseHelper
 {
     private readonly IBookingService _bookingService;
     private readonly IHubContext<SeatHub> _hubContext;

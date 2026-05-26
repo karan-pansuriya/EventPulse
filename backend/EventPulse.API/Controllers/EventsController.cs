@@ -1,4 +1,4 @@
-using EventPulse.Bll.Helpers;
+using EventPulse.API.Helpers;
 using EventPulse.BLL.DTOs.Event;
 using EventPulse.BLL.Interfaces;
 using EventPulse.Common.Models;
@@ -10,7 +10,7 @@ namespace EventPulse.API.Controllers;
 
 [Authorize(Roles = "Organizer,Admin")]
 [Route("api/events")]
-public class EventsController : BaseController
+public class EventsController : BaseHelper
 {
     private readonly IEventService _eventService;
 

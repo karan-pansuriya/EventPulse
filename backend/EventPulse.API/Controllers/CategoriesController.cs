@@ -1,5 +1,5 @@
 using AutoMapper;
-using EventPulse.Bll.Helpers;
+using EventPulse.API.Helpers;
 using EventPulse.BLL.DTOs.Category;
 using EventPulse.BLL.Interfaces;
 using EventPulse.DAL.Entities;
@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EventPulse.API.Controllers;
 
 [Route("api/categories")]
-public class CategoriesController : BaseController
+public class CategoriesController : BaseHelper
 {
     private readonly IGenericService<Category> _categoryService;
     private readonly IMapper _mapper;

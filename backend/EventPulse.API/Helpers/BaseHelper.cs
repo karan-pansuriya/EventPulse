@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace EventPulse.Bll.Helpers
+namespace EventPulse.API.Helpers
 {
     [ApiController]
-    public class BaseController : ControllerBase
+    public class BaseHelper : ControllerBase
     {
         protected int GetUserId()
         {
