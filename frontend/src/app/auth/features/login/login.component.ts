@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize, take } from 'rxjs';
 import { ToastService } from '../../../shared/services/toast.service';
 import { AuthService } from '../../services/auth.service';
+import { RoleResponse } from '../../models/auth.models';
 
 @Component({
   selector: 'app-login',
@@ -12,7 +13,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['../../shared/auth-styles.css', './login.component.css'],
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -22,9 +23,30 @@ export class LoginComponent {
   private readonly emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
   private readonly passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/;
 
+  loginRoleOptions: RoleResponse[] = [];
+  rolesLoading = true;
+
+  ngOnInit(): void {
+    this.authService.getRoles().pipe(take(1)).subscribe({
+      next: (roles) => {
+        this.loginRoleOptions = roles;
+        this.rolesLoading = false;
+        if (roles.length > 0) {
+          this.form.get('role')?.setValue(roles[0].name);
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.rolesLoading = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
   form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.maxLength(255), Validators.pattern(this.emailPattern)]],
     password: ['', [Validators.required, Validators.pattern(this.passwordPattern)]],
+    role: ['Customer', Validators.required],
   });
 
   loading = false;
@@ -50,12 +72,7 @@ export class LoginComponent {
         }),
       )
       .subscribe({
-        next: () => {
-          const user = this.authService.user();
-        if (user?.roles.includes('Admin')) this.router.navigate(['/admin/dashboard']);
-        else if (user?.roles.includes('Organizer')) this.router.navigate(['/organizer/dashboard']);
-        else this.router.navigate(['/attendee/home']);
-        },
+        next: () => this.navigateByRole(this.form.get('role')!.value),
         error: (err) => {
           const message = (err as { error?: { message?: string } })?.error?.message;
           this.serverError = message || 'Invalid email or password.';
@@ -64,6 +81,12 @@ export class LoginComponent {
           this.cdr.markForCheck();
         },
       });
+  }
+
+  private navigateByRole(role: string): void {
+    if (role === 'Admin') this.router.navigate(['/admin/dashboard']);
+    else if (role === 'Organizer') this.router.navigate(['/organizer/dashboard']);
+    else this.router.navigate(['/attendee/home']);
   }
 
   onAuthInput(): void {

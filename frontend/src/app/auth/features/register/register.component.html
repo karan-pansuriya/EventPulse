@@ -170,15 +170,26 @@
         </div>
 
         <div class="field-group">
-          <label>Account role</label>
-          <div class="role-options">
-            @for (option of roleOptions; track option.value) {
-            <div class="role-option" [class.selected]="form.get('role')?.value === option.value"
-              (click)="form.get('role')?.setValue(option.value)">
-              {{ option.label }}
-            </div>
-            }
+          <label for="role">Account role</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="8.5" cy="7" r="4" />
+              <polyline points="17 11 19 13 23 9" />
+            </svg>
+            <select id="role" formControlName="role" class="form-select"
+              [class.invalid]="form.get('role')?.invalid && form.get('role')?.touched">
+              @if (rolesLoading) {
+                <option value="" disabled>Loading...</option>
+              }
+              @for (option of roleOptions; track option.name) {
+                <option [value]="option.name">{{ option.name }}</option>
+              }
+            </select>
           </div>
+          @if (form.get('role')?.errors?.['required'] && form.get('role')?.touched) {
+            <span class="field-error">Please select a role.</span>
+          }
         </div>
 
         <button type="submit" class="submit-btn" [disabled]="loading || !passwordsMatch">

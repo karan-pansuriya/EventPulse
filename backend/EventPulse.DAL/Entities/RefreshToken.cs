@@ -22,6 +22,9 @@ namespace EventPulse.DAL.Entities
 
         public DateTime CreatedAt { get; set; }
 
+        [MaxLength(50)]
+        public string? Role { get; set; }
+
         [ForeignKey(nameof(UserId))]
         public virtual User User { get; set; } = null!;
     }

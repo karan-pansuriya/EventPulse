@@ -1,6 +1,7 @@
 using EventPulse.BLL.DTOs.Auth;
 using EventPulse.BLL.Interfaces;
 using EventPulse.BLL.Models.Request;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventPulse.API.Controllers
@@ -34,6 +35,15 @@ namespace EventPulse.API.Controllers
             TokenResponse result = await authService.RefreshTokenAsync(request);
             SetTokenCookies(result);
             ApiResponse<TokenResponse> response = new ApiResponse<TokenResponse>(true, 200, "Token refreshed.", result);
+            return Ok(response);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("roles")]
+        public async Task<IActionResult> GetRoles()
+        {
+            List<RoleResponse> roles = await authService.GetRolesAsync();
+            ApiResponse<List<RoleResponse>> response = new ApiResponse<List<RoleResponse>>(true, 200, "Roles retrieved successfully.", roles);
             return Ok(response);
         }
 

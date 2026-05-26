@@ -1,10 +1,10 @@
-import { ChangeDetectorRef, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize, take } from 'rxjs';
 import { ToastService } from '../../../shared/services/toast.service';
 import { AuthService } from '../../services/auth.service';
-import { RegisterRequest } from '../../models/auth.models';
+import { RegisterRequest, RoleResponse } from '../../models/auth.models';
 
 const passwordsMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const password = control.get('password');
@@ -21,7 +21,7 @@ const passwordsMatchValidator: ValidatorFn = (control: AbstractControl): Validat
   templateUrl: './register.component.html',
   styleUrls: ['../../shared/auth-styles.css', './register.component.css'],
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -37,18 +37,33 @@ export class RegisterComponent {
     phoneNumber: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
     password: ['', [Validators.required, Validators.pattern(this.passwordPattern)]],
     confirmPassword: ['', [Validators.required]],
-    role: ['Customer' as 'Customer' | 'Organizer', Validators.required],
+    role: ['', Validators.required],
   }, { validators: passwordsMatchValidator });
 
   loading = false;
   showPassword = false;
   showConfirm = false;
   serverError = '';
+  roleOptions: RoleResponse[] = [];
+  rolesLoading = true;
 
-  roleOptions = [
-    { label: 'Customer', value: 'Customer' as const },
-    { label: 'Organizer', value: 'Organizer' as const },
-  ];
+  ngOnInit(): void {
+    this.authService.getRoles().pipe(take(1)).subscribe({
+      next: (roles) => {
+        this.roleOptions = roles.filter(r => r.name !== 'Admin');
+        this.rolesLoading = false;
+        if (this.roleOptions.length > 0) {
+          this.form.get('role')?.setValue(this.roleOptions[0].name);
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.rolesLoading = false;
+        this.toast.error('Failed to load roles.', 'Error');
+        this.cdr.markForCheck();
+      },
+    });
+  }
 
   get passwordsMatch(): boolean {
     return this.form.value.password === this.form.value.confirmPassword;
