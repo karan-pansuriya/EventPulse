@@ -37,6 +37,15 @@ namespace EventPulse.API.Helpers
             return GetUserRoleIds().Contains(roleId);
         }
 
+        // Returns the role the user explicitly logged in with.
+        protected int? GetActiveRoleId()
+        {
+            string? value = User.FindFirst("active_role_id")?.Value;
+            if (int.TryParse(value, out int roleId) && roleId > 0)
+                return roleId;
+            return null;
+        }
+
         protected IActionResult SuccessResponse<T>(T? data, string message = ApiMessages.RequestSuccessful)
         {
             ApiResponse<T> response = new ApiResponse<T>(

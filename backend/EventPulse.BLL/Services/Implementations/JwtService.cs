@@ -22,6 +22,8 @@ namespace EventPulse.BLL.Services
         public string GenerateAccessToken(User user, IEnumerable<int> roleIds)
         {
             int accessMinutes = GetAccessTokenExpirationMinutes(roleIds);
+            List<int> roleIdList = roleIds.ToList();
+
             List<Claim> claims = new List<Claim>
             {
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -30,11 +32,16 @@ namespace EventPulse.BLL.Services
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
-            foreach (int roleId in roleIds)
+            foreach (int roleId in roleIdList)
             {
                 claims.Add(new Claim("role_id", roleId.ToString()));
                 claims.Add(new Claim(ClaimTypes.Role, roleId.ToString()));
             }
+
+            // Store the active role — the role the user explicitly logged in with.
+            // Since login always passes a single RoleId, first entry is the active role.
+            if (roleIdList.Count > 0)
+                claims.Add(new Claim("active_role_id", roleIdList[0].ToString()));
 
             SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
             SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -58,15 +65,15 @@ namespace EventPulse.BLL.Services
             return Convert.ToBase64String(randomBytes);
         }
 
-    public int GetAccessTokenExpirationMinutes(IEnumerable<int> roleIds)
-    {
-        return IsCustomer(roleIds) ? 24 * 60 : 30;
-    }
+        public int GetAccessTokenExpirationMinutes(IEnumerable<int> roleIds)
+        {
+            return IsCustomer(roleIds) ? 24 * 60 : 30;
+        }
 
-    public int GetRefreshTokenExpirationMinutes(IEnumerable<int> roleIds)
-    {
-        return IsCustomer(roleIds) ? 24 * 60 : 30;
-    }
+        public int GetRefreshTokenExpirationMinutes(IEnumerable<int> roleIds)
+        {
+            return IsCustomer(roleIds) ? 24 * 60 : 30;
+        }
 
         private static bool IsCustomer(IEnumerable<int> roleIds)
         {

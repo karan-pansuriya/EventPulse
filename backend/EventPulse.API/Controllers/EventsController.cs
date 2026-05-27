@@ -30,9 +30,7 @@ public class EventsController : BaseHelper
         if (User.Identity?.IsAuthenticated == true)
         {
             userId = GetUserId();
-            var roleIds = GetUserRoleIds();
-            if (roleIds.Contains(RoleId.Admin)) userRoleId = RoleId.Admin;
-            else if (roleIds.Contains(RoleId.Organizer)) userRoleId = RoleId.Organizer;
+            userRoleId = GetActiveRoleId(); // respects login role, not Admin-priority
         }
 
         EventResponse result = await _eventService.GetByIdAsync(id, userId, userRoleId);
@@ -68,9 +66,13 @@ public class EventsController : BaseHelper
     public async Task<IActionResult> UpdateEvent(int id, [FromForm] UpdateEventDto dto, [FromForm] List<IFormFile>? posterImages)
     {
         int userId = GetUserId();
-        int roleId = GetUserRoleIds().Contains(RoleId.Admin) ? RoleId.Admin : RoleId.Organizer;
+
+        int? activeRoleId = GetActiveRoleId();
+        if (activeRoleId == null)
+            return Forbid();
+
         List<(byte[] ImageBytes, string FileName)> files = await ReadFormFilesAsync(posterImages);
-        EventResponse result = await _eventService.UpdateAsync(id, userId, roleId, dto, files);
+        EventResponse result = await _eventService.UpdateAsync(id, userId, activeRoleId.Value, dto, files);
         return SuccessResponse(result);
     }
 
@@ -78,8 +80,12 @@ public class EventsController : BaseHelper
     public async Task<IActionResult> DeleteEvent(int id)
     {
         int userId = GetUserId();
-        int roleId = GetUserRoleIds().Contains(RoleId.Admin) ? RoleId.Admin : RoleId.Organizer;
-        await _eventService.DeleteAsync(id, userId, roleId);
+
+        int? activeRoleId = GetActiveRoleId();
+        if (activeRoleId == null)
+            return Forbid();
+
+        await _eventService.DeleteAsync(id, userId, activeRoleId.Value);
         return SuccessResponse("Event deleted successfully.");
     }
 
