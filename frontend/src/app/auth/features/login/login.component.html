@@ -114,7 +114,7 @@
                 <option value="" disabled>Loading...</option>
               }
               @for (option of loginRoleOptions; track option.id) {
-                <option [value]="option.id">{{ option.name }}</option>
+                <option [ngValue]="option.id">{{ option.name }}</option>
               }
             </select>
           </div>
