@@ -14,9 +14,9 @@ public class AuthRepository(EventPulseDbContext context) : IAuthRepository
         return await _context.Users.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
     }
 
-    public async Task<Role?> GetRoleByNameAsync(string roleName)
+    public async Task<Role?> GetRoleByIdAsync(int roleId)
     {
-        return await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
+        return await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId);
     }
 
     public async Task<List<Role>> GetRolesAsync()

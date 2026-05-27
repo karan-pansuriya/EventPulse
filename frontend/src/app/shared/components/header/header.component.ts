@@ -1,6 +1,7 @@
 import { Component, ElementRef, HostListener, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
+import { RoleId } from '../../../auth/models/auth.models';
 
 @Component({
   selector: 'app-header',
@@ -29,9 +30,9 @@ export class HeaderComponent {
   }
 
   get profileRoute(): string {
-    const roles = this.authService.user()?.roles || [];
-    if (roles.includes('Admin')) return '/admin/profile';
-    if (roles.includes('Organizer')) return '/organizer/profile';
+    const roleIds = this.authService.user()?.roleIds || [];
+    if (roleIds.includes(RoleId.Admin)) return '/admin/profile';
+    if (roleIds.includes(RoleId.Organizer)) return '/organizer/profile';
     return '/attendee/profile';
   }
 

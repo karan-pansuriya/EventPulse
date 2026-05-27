@@ -170,24 +170,24 @@
         </div>
 
         <div class="field-group">
-          <label for="role">Account role</label>
+          <label for="roleId">Account role</label>
           <div class="input-wrap">
             <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
               <circle cx="8.5" cy="7" r="4" />
               <polyline points="17 11 19 13 23 9" />
             </svg>
-            <select id="role" formControlName="role" class="form-select"
-              [class.invalid]="form.get('role')?.invalid && form.get('role')?.touched">
+            <select id="roleId" formControlName="roleId" class="form-select"
+              [class.invalid]="form.get('roleId')?.invalid && form.get('roleId')?.touched">
               @if (rolesLoading) {
                 <option value="" disabled>Loading...</option>
               }
-              @for (option of roleOptions; track option.name) {
-                <option [value]="option.name">{{ option.name }}</option>
+              @for (option of roleOptions; track option.id) {
+                <option [value]="option.id">{{ option.name }}</option>
               }
             </select>
           </div>
-          @if (form.get('role')?.errors?.['required'] && form.get('role')?.touched) {
+          @if (form.get('roleId')?.errors?.['required'] && form.get('roleId')?.touched) {
             <span class="field-error">Please select a role.</span>
           }
         </div>

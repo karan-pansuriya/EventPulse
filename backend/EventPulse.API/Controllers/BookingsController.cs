@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace EventPulse.API.Controllers;
 
-[Authorize(Roles = "Customer")]
+[Authorize(Policy = "CustomerOnly")]
 [Route("api/bookings")]
 public class BookingsController : BaseHelper
 {

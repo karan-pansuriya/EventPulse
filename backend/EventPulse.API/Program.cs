@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using AutoMapper;
+using EventPulse.BLL.Common;
 using EventPulse.BLL.Interfaces;
 using EventPulse.BLL.Mappings;
 using EventPulse.BLL.Models.Configuration;
@@ -11,6 +12,7 @@ using EventPulse.DAL.Context;
 using EventPulse.DAL.Repositories.Implementations;
 using EventPulse.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -108,6 +110,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = jwtSettings.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
             ClockSkew = TimeSpan.Zero,
+            RoleClaimType = ClaimTypes.Role,
         };
 
         options.Events = new JwtBearerEvents
@@ -126,23 +129,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 }
                 return Task.CompletedTask;
             },
-            OnTokenValidated = context =>
-            {
-                if (context.Principal?.Identity is ClaimsIdentity identity)
-                {
-                    List<Claim> roleClaims = context.Principal.FindAll("role").ToList();
-                    foreach (Claim claim in roleClaims)
-                    {
-                        if (!identity.HasClaim(ClaimTypes.Role, claim.Value))
-                            identity.AddClaim(new Claim(ClaimTypes.Role, claim.Value));
-                    }
-                }
-                return Task.CompletedTask;
-            },
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireClaim("role_id", RoleId.Admin.ToString()));
+
+    options.AddPolicy("OrganizerOnly", policy =>
+        policy.RequireClaim("role_id", RoleId.Organizer.ToString()));
+
+    options.AddPolicy("OrganizerOrAdmin", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim("role_id", RoleId.Admin.ToString()) ||
+            context.User.HasClaim("role_id", RoleId.Organizer.ToString())));
+
+    options.AddPolicy("CustomerOnly", policy =>
+        policy.RequireClaim("role_id", RoleId.Customer.ToString()));
+});
 
 // ─── AutoMapper ─────────────────────────────────────────────────────────────
 builder.Services.AddAutoMapper(typeof(EventProfile), typeof(BookingProfile));

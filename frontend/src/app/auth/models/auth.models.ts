@@ -1,7 +1,13 @@
+export const RoleId = {
+  Admin: 1,
+  Organizer: 2,
+  Customer: 3,
+} as const;
+
 export interface LoginRequest {
   email: string;
   password: string;
-  role: string;
+  roleId: number;
 }
 
 export interface RegisterRequest {
@@ -9,7 +15,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   phone: string;
-  role: string;
+  roleId: number;
 }
 
 export interface RoleResponse {
@@ -28,5 +34,5 @@ export interface UserInfo {
   id: number;
   email: string;
   name: string;
-  roles: string[];
+  roleIds: number[];
 }

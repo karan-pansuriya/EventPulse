@@ -1,4 +1,5 @@
 using AutoMapper;
+using EventPulse.BLL.Common;
 using EventPulse.BLL.DTOs.Event;
 using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
@@ -36,12 +37,12 @@ public class EventService : IEventService
         _mapper = mapper;
     }
 
-    public async Task<EventResponse> GetByIdAsync(int id, int? userId = null, string? userRole = null)
+    public async Task<EventResponse> GetByIdAsync(int id, int? userId = null, int? userRoleId = null)
     {
         Event eventEntity = await _eventRepository.GetEventWithDetailsAsync(id)
             ?? throw new NotFoundException("Event not found.");
 
-        if (userRole == "Organizer" && eventEntity.OrganizerId != userId)
+        if (userRoleId == RoleId.Organizer && eventEntity.OrganizerId != userId)
             throw new ForbiddenException("You are not authorized to view this event.");
 
         return _mapper.Map<EventResponse>(eventEntity);
@@ -146,7 +147,7 @@ public class EventService : IEventService
         return await GetByIdAsync(eventEntity.Id);
     }
 
-    public async Task<EventResponse> UpdateAsync(int id, int userId, string userRole, UpdateEventDto dto, List<(byte[] ImageBytes, string FileName)>? posterImages)
+    public async Task<EventResponse> UpdateAsync(int id, int userId, int userRoleId, UpdateEventDto dto, List<(byte[] ImageBytes, string FileName)>? posterImages)
     {
         if (posterImages?.Count > MaxPosterImages)
             throw new BadRequestException($"Maximum {MaxPosterImages} poster images allowed.");
@@ -154,7 +155,7 @@ public class EventService : IEventService
         Event? eventEntity = await _eventRepo.GetByIdAsync(id)
             ?? throw new NotFoundException("Event not found.");
 
-        if (userRole != "Admin" && eventEntity.OrganizerId != userId)
+        if (userRoleId != RoleId.Admin && eventEntity.OrganizerId != userId)
             throw new ForbiddenException("You are not authorized to update this event.");
 
         Venue? venue = await _eventRepository.ResolveVenueAsync(dto.VenueName, dto.VenueAddress, dto.VenueCity, dto.VenueState, dto.VenueCountry);
@@ -205,12 +206,12 @@ public class EventService : IEventService
         return await GetByIdAsync(id);
     }
 
-    public async Task DeleteAsync(int id, int userId, string userRole)
+    public async Task DeleteAsync(int id, int userId, int userRoleId)
     {
         Event? eventEntity = await _eventRepo.GetByIdAsync(id)
             ?? throw new NotFoundException("Event not found.");
 
-        if (userRole != "Admin" && eventEntity.OrganizerId != userId)
+        if (userRoleId != RoleId.Admin && eventEntity.OrganizerId != userId)
             throw new ForbiddenException("You are not authorized to delete this event.");
 
         List<EventPoster> posters = await _eventRepository.GetActivePostersByEventIdAsync(id);

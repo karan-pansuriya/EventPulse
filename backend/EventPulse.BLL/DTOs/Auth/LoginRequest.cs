@@ -14,6 +14,7 @@ public class LoginRequest
     public string Password { get; set; } = string.Empty;
 
     [Required]
-    public string Role { get; set; } = string.Empty;
+    [Range(1, 3)]
+    public int RoleId { get; set; }
 }
 }

@@ -109,12 +109,12 @@
               <circle cx="8.5" cy="7" r="4" />
               <polyline points="17 11 19 13 23 9" />
             </svg>
-            <select id="loginRole" formControlName="role" class="form-select">
+            <select id="loginRole" formControlName="roleId" class="form-select">
               @if (rolesLoading) {
                 <option value="" disabled>Loading...</option>
               }
-              @for (option of loginRoleOptions; track option.name) {
-                <option [value]="option.name">{{ option.name }}</option>
+              @for (option of loginRoleOptions; track option.id) {
+                <option [value]="option.id">{{ option.name }}</option>
               }
             </select>
           </div>
@@ -136,5 +136,4 @@
     </div>
   </div>
 </div>
-
 

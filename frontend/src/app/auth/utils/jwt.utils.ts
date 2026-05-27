@@ -19,18 +19,16 @@ function removeCookie(name: string): void {
 export function decodeToken(token: string): UserInfo | null {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
-    const roles: string[] = [];
-    const roleClaim = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
-      ?? payload.role
-      ?? payload.roles;
-    if (Array.isArray(roleClaim)) roles.push(...roleClaim);
-    else if (roleClaim) roles.push(roleClaim);
+    const roleIds: number[] = [];
+    const roleIdClaim = payload.role_id;
+    if (Array.isArray(roleIdClaim)) roleIds.push(...roleIdClaim.map(Number));
+    else if (roleIdClaim != null) roleIds.push(Number(roleIdClaim));
 
     return {
       id: parseInt(payload.sub, 10) || 0,
       email: payload.email || '',
       name: payload.name || payload.unique_name || '',
-      roles,
+      roleIds,
     };
   } catch {
     return null;

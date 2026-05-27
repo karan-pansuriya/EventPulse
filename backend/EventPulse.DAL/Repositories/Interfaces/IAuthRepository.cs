@@ -6,7 +6,7 @@ public interface IAuthRepository
 {
     Task<bool> UserEmailExistsAsync(string normalizedEmail);
 
-    Task<Role?> GetRoleByNameAsync(string roleName);
+    Task<Role?> GetRoleByIdAsync(int roleId);
 
     Task<List<Role>> GetRolesAsync();
 

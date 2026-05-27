@@ -23,14 +23,18 @@ namespace EventPulse.API.Helpers
                 ?? User.FindFirst("email")?.Value;
         }
 
-        protected List<string> GetUserRoles()
+        protected List<int> GetUserRoleIds()
         {
-            return User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+            return User.FindAll("role_id").Select(c =>
+            {
+                int.TryParse(c.Value, out int id);
+                return id;
+            }).Where(id => id > 0).ToList();
         }
 
-        protected bool IsInRole(string role)
+        protected bool IsInRole(int roleId)
         {
-            return User.IsInRole(role);
+            return GetUserRoleIds().Contains(roleId);
         }
 
         protected IActionResult SuccessResponse<T>(T? data, string message = ApiMessages.RequestSuccessful)

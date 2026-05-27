@@ -1,4 +1,5 @@
 using EventPulse.API.Helpers;
+using EventPulse.BLL.Common;
 using EventPulse.BLL.DTOs.Event;
 using EventPulse.BLL.Interfaces;
 using EventPulse.Common.Models;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EventPulse.API.Controllers;
 
-[Authorize(Roles = "Organizer,Admin")]
+[Authorize(Policy = "OrganizerOrAdmin")]
 [Route("api/events")]
 public class EventsController : BaseHelper
 {
@@ -24,17 +25,17 @@ public class EventsController : BaseHelper
     public async Task<IActionResult> GetEventById(int id)
     {
         int? userId = null;
-        string? userRole = null;
+        int? userRoleId = null;
 
         if (User.Identity?.IsAuthenticated == true)
         {
             userId = GetUserId();
-            var roles = GetUserRoles();
-            if (roles.Contains("Admin")) userRole = "Admin";
-            else if (roles.Contains("Organizer")) userRole = "Organizer";
+            var roleIds = GetUserRoleIds();
+            if (roleIds.Contains(RoleId.Admin)) userRoleId = RoleId.Admin;
+            else if (roleIds.Contains(RoleId.Organizer)) userRoleId = RoleId.Organizer;
         }
 
-        EventResponse result = await _eventService.GetByIdAsync(id, userId, userRole);
+        EventResponse result = await _eventService.GetByIdAsync(id, userId, userRoleId);
         return SuccessResponse(result);
     }
 
@@ -67,9 +68,9 @@ public class EventsController : BaseHelper
     public async Task<IActionResult> UpdateEvent(int id, [FromForm] UpdateEventDto dto, [FromForm] List<IFormFile>? posterImages)
     {
         int userId = GetUserId();
-        string role = GetUserRoles().Contains("Admin") ? "Admin" : "Organizer";
+        int roleId = GetUserRoleIds().Contains(RoleId.Admin) ? RoleId.Admin : RoleId.Organizer;
         List<(byte[] ImageBytes, string FileName)> files = await ReadFormFilesAsync(posterImages);
-        EventResponse result = await _eventService.UpdateAsync(id, userId, role, dto, files);
+        EventResponse result = await _eventService.UpdateAsync(id, userId, roleId, dto, files);
         return SuccessResponse(result);
     }
 
@@ -77,8 +78,8 @@ public class EventsController : BaseHelper
     public async Task<IActionResult> DeleteEvent(int id)
     {
         int userId = GetUserId();
-        string role = GetUserRoles().Contains("Admin") ? "Admin" : "Organizer";
-        await _eventService.DeleteAsync(id, userId, role);
+        int roleId = GetUserRoleIds().Contains(RoleId.Admin) ? RoleId.Admin : RoleId.Organizer;
+        await _eventService.DeleteAsync(id, userId, roleId);
         return SuccessResponse("Event deleted successfully.");
     }
 
