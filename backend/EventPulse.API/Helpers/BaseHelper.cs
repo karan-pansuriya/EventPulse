@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace EventPulse.Bll.Helpers
+namespace EventPulse.API.Helpers
 {
     [ApiController]
-    public class BaseController : ControllerBase
+    public class BaseHelper : ControllerBase
     {
         protected int GetUserId()
         {
@@ -23,14 +23,27 @@ namespace EventPulse.Bll.Helpers
                 ?? User.FindFirst("email")?.Value;
         }
 
-        protected List<string> GetUserRoles()
+        protected List<int> GetUserRoleIds()
         {
-            return User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+            return User.FindAll("role_id").Select(c =>
+            {
+                int.TryParse(c.Value, out int id);
+                return id;
+            }).Where(id => id > 0).ToList();
         }
 
-        protected bool IsInRole(string role)
+        protected bool IsInRole(int roleId)
         {
-            return User.IsInRole(role);
+            return GetUserRoleIds().Contains(roleId);
+        }
+
+        // Returns the role the user explicitly logged in with.
+        protected int? GetActiveRoleId()
+        {
+            string? value = User.FindFirst("active_role_id")?.Value;
+            if (int.TryParse(value, out int roleId) && roleId > 0)
+                return roleId;
+            return null;
         }
 
         protected IActionResult SuccessResponse<T>(T? data, string message = ApiMessages.RequestSuccessful)

@@ -1,11 +1,11 @@
-using EventPulse.Bll.Helpers;
+using EventPulse.API.Helpers;
 using EventPulse.BLL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventPulse.API.Controllers;
 
 [Route("api/venues")]
-public class VenuesController : BaseController
+public class VenuesController : BaseHelper
 {
     private readonly IVenueService _venueService;
 

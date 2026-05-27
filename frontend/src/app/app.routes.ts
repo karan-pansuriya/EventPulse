@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './auth/guards/auth.guard';
 import { APP_ROUTES } from './shared/constants/app-routes.constants';
+import { RoleId } from './auth/models/auth.models';
 
 export const routes: Routes = [
   // ── Auth
@@ -19,7 +20,7 @@ export const routes: Routes = [
   {
     path: APP_ROUTES.ADMIN.ROOT,
     canActivate: [authGuard],
-    data: { roles: ['Admin'] },
+    data: { roleIds: [RoleId.Admin] },
     loadComponent: () =>
       import('./core/features/admin/layout/admin-layout/admin-layout.component').then(
         (m) => m.AdminLayoutComponent,
@@ -64,7 +65,7 @@ export const routes: Routes = [
   {
     path: APP_ROUTES.ORGANIZER.ROOT,
     canActivate: [authGuard],
-    data: { roles: ['Organizer'] },
+    data: { roleIds: [RoleId.Organizer] },
     loadComponent: () =>
       import('./core/features/organizer/layout/organizer-layout/organizer-layout.component').then(
         (m) => m.OrganizerLayoutComponent,
@@ -120,7 +121,7 @@ export const routes: Routes = [
   {
     path: APP_ROUTES.ATTENDEE.ROOT,
     canActivate: [authGuard],
-    data: { roles: ['Customer'] },
+    data: { roleIds: [RoleId.Customer] },
     loadComponent: () =>
       import('./core/features/attendee/layout/attendee-layout/attendee-layout.component').then(
         (m) => m.AttendeeLayoutComponent,
@@ -150,6 +151,20 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./core/features/attendee/bookings/bookings.component').then(
             (m) => m.BookingsComponent,
+          ),
+      },
+      {
+        path: APP_ROUTES.ATTENDEE.CHECKOUT,
+        loadComponent: () =>
+          import('./core/features/attendee/checkout/checkout.component').then(
+            (m) => m.CheckoutComponent,
+          ),
+      },
+      {
+        path: APP_ROUTES.ATTENDEE.PAYMENT_SUCCESS,
+        loadComponent: () =>
+          import('./core/features/attendee/payment-success/payment-success.component').then(
+            (m) => m.PaymentSuccessComponent,
           ),
       },
       {

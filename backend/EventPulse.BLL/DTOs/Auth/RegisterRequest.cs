@@ -21,7 +21,7 @@ namespace EventPulse.BLL.DTOs.Auth
         public string? Phone { get; set; }
 
         [Required]
-        [RegularExpression("^(Admin|Organizer|Customer)$")]
-        public string Role { get; set; } = "Customer";
+        [Range(1, 3)]
+        public int RoleId { get; set; } = 3;
     }
 }

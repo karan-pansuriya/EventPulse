@@ -3,7 +3,7 @@ import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BaseHttpService } from '../../../../../shared/services/base-http.service';
 import { ApiResponse } from '../../../../../shared/models/api-response.model';
-import { EventFilterRequest, EventListResponse } from '../models/event.models';
+import { EventFilterRequest, EventListResponse, EventDetailResponse } from '../models/event.models';
 import { PagedResult } from '../../../../../shared/models/paged-result.model';
 
 @Injectable({ providedIn: 'root' })
@@ -24,5 +24,9 @@ export class EventService {
     if (filters.sortDirection) params = params.set('SortDirection', filters.sortDirection);
 
     return this.http.get<PagedResult<EventListResponse>>('events', { params });
+  }
+
+  getEventById(id: number): Observable<ApiResponse<EventDetailResponse>> {
+    return this.http.get<EventDetailResponse>(`events/${id}`);
   }
 }

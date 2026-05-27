@@ -4,7 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { finalize, take } from 'rxjs';
 import { ToastService } from '../../../shared/services/toast.service';
 import { AuthService } from '../../services/auth.service';
-import { RoleResponse } from '../../models/auth.models';
+import { RoleResponse, RoleId } from '../../models/auth.models';
 
 @Component({
   selector: 'app-login',
@@ -32,7 +32,7 @@ export class LoginComponent implements OnInit {
         this.loginRoleOptions = roles;
         this.rolesLoading = false;
         if (roles.length > 0) {
-          this.form.get('role')?.setValue(roles[0].name);
+          this.form.get('roleId')?.setValue(roles[0].id);
         }
         this.cdr.markForCheck();
       },
@@ -46,7 +46,7 @@ export class LoginComponent implements OnInit {
   form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.maxLength(255), Validators.pattern(this.emailPattern)]],
     password: ['', [Validators.required, Validators.pattern(this.passwordPattern)]],
-    role: ['Customer', Validators.required],
+    roleId: [RoleId.Customer as number, Validators.required],
   });
 
   loading = false;
@@ -72,7 +72,7 @@ export class LoginComponent implements OnInit {
         }),
       )
       .subscribe({
-        next: () => this.navigateByRole(this.form.get('role')!.value),
+        next: () => this.navigateByRole(this.form.get('roleId')!.value),
         error: (err) => {
           const message = (err as { error?: { message?: string } })?.error?.message;
           this.serverError = message || 'Invalid email or password.';
@@ -83,9 +83,9 @@ export class LoginComponent implements OnInit {
       });
   }
 
-  private navigateByRole(role: string): void {
-    if (role === 'Admin') this.router.navigate(['/admin/dashboard']);
-    else if (role === 'Organizer') this.router.navigate(['/organizer/dashboard']);
+  private navigateByRole(roleId: number): void {
+    if (roleId === RoleId.Admin) this.router.navigate(['/admin/dashboard']);
+    else if (roleId === RoleId.Organizer) this.router.navigate(['/organizer/dashboard']);
     else this.router.navigate(['/attendee/home']);
   }
 

@@ -12,6 +12,9 @@ namespace EventPulse.DAL.Entities
         public int UserId { get; set; }
 
         [Required]
+        public int EventId { get; set; }
+
+        [Required]
         public string UniqueCode { get; set; } = string.Empty;
 
         [Required]
@@ -34,6 +37,9 @@ namespace EventPulse.DAL.Entities
 
         [ForeignKey(nameof(UserId))]
         public virtual User User { get; set; } = null!;
+
+        [ForeignKey(nameof(EventId))]
+        public virtual Event Event { get; set; } = null!;
 
         public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
     }

@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using EventPulse.BLL.Common;
 using EventPulse.BLL.DTOs.Auth;
 using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
@@ -18,24 +19,24 @@ namespace EventPulse.BLL.Services
         {
             string normalizedEmail = request.Email.Trim().ToLowerInvariant();
 
-            Role role = await authRepository.GetRoleByNameAsync(request.Role)
-                ?? throw new BadRequestException($"Role '{request.Role}' not found.");
+            Role role = await authRepository.GetRoleByIdAsync(request.RoleId)
+                ?? throw new BadRequestException($"Role with ID '{request.RoleId}' not found.");
 
             User? existingUser = await authRepository.GetUserWithRolesByEmailAsync(normalizedEmail);
 
             User user;
-            List<string> allRoles;
+            List<int> roleIds;
 
             if (existingUser != null)
             {
                 user = existingUser;
-                allRoles = user.UserRoles.Select(ur => ur.Role.Name).ToList();
+                roleIds = user.UserRoles.Select(ur => ur.Role.Id).ToList();
 
-                if (allRoles.Contains(role.Name))
+                if (roleIds.Contains(role.Id))
                     throw new BadRequestException($"You already have the '{role.Name}' role.");
 
                 await authRepository.AddUserRoleAsync(new UserRole { UserId = user.Id, RoleId = role.Id });
-                allRoles.Add(role.Name);
+                roleIds.Add(role.Id);
             }
             else
             {
@@ -52,7 +53,7 @@ namespace EventPulse.BLL.Services
 
                 await authRepository.AddUserAsync(user);
                 await authRepository.AddUserRoleAsync(new UserRole { User = user, Role = role });
-                allRoles = new List<string> { role.Name };
+                roleIds = new List<int> { role.Id };
             }
 
             try
@@ -64,9 +65,9 @@ namespace EventPulse.BLL.Services
                 throw new BadRequestException("Email is already in use.");
             }
 
-            string accessToken = jwtService.GenerateAccessToken(user, allRoles);
+            string accessToken = jwtService.GenerateAccessToken(user, roleIds);
             string refreshToken = jwtService.GenerateRefreshToken();
-            int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(allRoles);
+            int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roleIds);
 
             await authRepository.AddRefreshTokenAsync(new RefreshToken
             {
@@ -74,6 +75,7 @@ namespace EventPulse.BLL.Services
                 Token = refreshToken,
                 ExpiresAt = DateTime.UtcNow.AddMinutes(refreshMinutes),
                 CreatedAt = DateTime.UtcNow,
+                Role = role.Name,
             });
 
             await unitOfWork.SaveAsync();
@@ -82,7 +84,7 @@ namespace EventPulse.BLL.Services
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes(allRoles) * 60,
+                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes(roleIds) * 60,
                 RefreshExpiresIn = refreshMinutes * 60,
             };
         }
@@ -96,14 +98,17 @@ namespace EventPulse.BLL.Services
             if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
                 throw new UnauthorizedAccessException("Invalid email or password.");
 
-            if (!user.UserRoles.Any(ur =>
-                ur.Role.Name.Equals(request.Role, StringComparison.OrdinalIgnoreCase)))
+            Role? matchedRole = user.UserRoles
+                .Select(ur => ur.Role)
+                .FirstOrDefault(r => r.Id == request.RoleId);
+
+            if (matchedRole is null)
                 throw new UnauthorizedAccessException("Invalid email or password.");
 
-            List<string> roles = new List<string> { request.Role };
-            string accessToken = jwtService.GenerateAccessToken(user, roles);
+            List<int> roleIds = new List<int> { request.RoleId };
+            string accessToken = jwtService.GenerateAccessToken(user, roleIds);
             string refreshToken = jwtService.GenerateRefreshToken();
-            int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roles);
+            int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roleIds);
 
             await authRepository.AddRefreshTokenAsync(new RefreshToken
             {
@@ -111,7 +116,7 @@ namespace EventPulse.BLL.Services
                 Token = refreshToken,
                 ExpiresAt = DateTime.UtcNow.AddMinutes(refreshMinutes),
                 CreatedAt = DateTime.UtcNow,
-                Role = request.Role,
+                Role = matchedRole.Name,
             });
 
             await unitOfWork.SaveAsync();
@@ -120,7 +125,7 @@ namespace EventPulse.BLL.Services
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes(roles) * 60,
+                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes(roleIds) * 60,
                 RefreshExpiresIn = refreshMinutes * 60,
             };
         }
@@ -142,12 +147,31 @@ namespace EventPulse.BLL.Services
             storedToken.IsRevoked = true;
 
             User user = storedToken.User;
-            List<string> roles = string.IsNullOrEmpty(storedToken.Role)
-                ? user.UserRoles.Select(ur => ur.Role.Name).ToList()
-                : new List<string> { storedToken.Role };
-            string newAccessToken = jwtService.GenerateAccessToken(user, roles);
+            List<int> roleIds;
+
+            if (string.IsNullOrEmpty(storedToken.Role))
+            {
+                roleIds = user.UserRoles.Select(ur => ur.Role.Id).ToList();
+            }
+            else
+            {
+                Role? role = await authRepository.GetRoleByIdAsync(
+                    storedToken.Role switch
+                    {
+                        "Admin" => RoleId.Admin,
+                        "Organizer" => RoleId.Organizer,
+                        "Customer" => RoleId.Customer,
+                        _ => 0
+                    });
+
+                roleIds = role is not null
+                    ? new List<int> { role.Id }
+                    : user.UserRoles.Select(ur => ur.Role.Id).ToList();
+            }
+
+            string newAccessToken = jwtService.GenerateAccessToken(user, roleIds);
             string newRefreshToken = jwtService.GenerateRefreshToken();
-            int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roles);
+            int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roleIds);
 
             await authRepository.AddRefreshTokenAsync(new RefreshToken
             {
@@ -164,7 +188,7 @@ namespace EventPulse.BLL.Services
             {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
-                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes(roles) * 60,
+                ExpiresIn = jwtService.GetAccessTokenExpirationMinutes(roleIds) * 60,
                 RefreshExpiresIn = refreshMinutes * 60,
             };
         }

@@ -182,6 +182,11 @@ namespace EventPulse.DAL.Context
                       .HasForeignKey(b => b.UserId)
                       .OnDelete(DeleteBehavior.Restrict);
 
+                entity.HasOne(b => b.Event)
+                      .WithMany(e => e.Bookings)
+                      .HasForeignKey(b => b.EventId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
             });
 
             // ── Ticket ────────────────────────────────────────────────────────

@@ -11,10 +11,10 @@ export const authGuard: CanActivateFn = (route, state) => {
     return false;
   }
 
-  const requiredRoles = route.data?.['roles'] as string[] | undefined;
-  if (requiredRoles?.length) {
-    const userRoles = authService.user()?.roles || [];
-    const hasRole = requiredRoles.some(r => userRoles.includes(r));
+  const requiredRoleIds = route.data?.['roleIds'] as number[] | undefined;
+  if (requiredRoleIds?.length) {
+    const userRoleIds = authService.user()?.roleIds || [];
+    const hasRole = requiredRoleIds.some(r => userRoleIds.includes(r));
     if (!hasRole) {
       router.navigate(['/']);
       return false;

@@ -1,0 +1,243 @@
+<div class="event-details-page">
+
+  @if (loading) {
+
+  <div class="skeleton-hero">
+    <div class="skeleton-img shimmer"></div>
+  </div>
+  <div class="container py-4">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="skeleton-line shimmer w-75 mb-3"></div>
+        <div class="skeleton-line shimmer w-50 mb-3"></div>
+        <div class="skeleton-line shimmer w-100 mb-2"></div>
+        <div class="skeleton-line shimmer w-100 mb-2"></div>
+        <div class="skeleton-line shimmer w-60 mb-4"></div>
+        <div class="skeleton-line shimmer w-40 mb-3"></div>
+        <div class="skeleton-line shimmer w-100 mb-2"></div>
+        <div class="skeleton-line shimmer w-100 mb-2"></div>
+        <div class="skeleton-line shimmer w-45"></div>
+      </div>
+      <div class="col-lg-4">
+        <div class="skeleton-card shimmer p-4">
+          <div class="skeleton-line shimmer w-50 mb-3"></div>
+          <div class="skeleton-line shimmer w-75 mb-3"></div>
+          <div class="skeleton-line shimmer w-60 mb-3"></div>
+          <div class="skeleton-line shimmer w-100 mb-4"></div>
+          <div class="skeleton-btn shimmer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  } @else if (error) {
+
+  <div class="error-container">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+    <p class="error-text">{{ error }}</p>
+    <button class="btn-retry" (click)="retry()">Try Again</button>
+    <a class="btn-back" routerLink="/attendee/home">Back to Events</a>
+  </div>
+
+  } @else if (event) {
+
+  <!-- Hero Banner -->
+  <section class="hero-banner" [style.background-image]="'url(' + getPosterUrl(event.posterUrl) + ')'">
+    <div class="hero-overlay">
+      <div class="container h-100">
+        <div class="row h-100 align-items-end">
+          <div class="col-lg-8 pb-4">
+            <div class="hero-badges mb-2">
+              @if (event.categoryName) {
+                <span class="badge-category">{{ event.categoryName }}</span>
+              }
+              @if (event.isVerified) {
+                <span class="badge-verified">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+                  Verified
+                </span>
+              }
+            </div>
+            <h1 class="hero-title">{{ event.title }}</h1>
+            <div class="hero-meta">
+              <span class="hero-meta-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <path d="M16 2v4M8 2v4M3 10h18"/>
+                </svg>
+                {{ event.eventDate | date:'EEE, MMM d, yyyy' }}
+              </span>
+              <span class="hero-meta-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+                {{ formatTime(event.startTime) }}
+              </span>
+              @if (event.venueCity || event.venueName) {
+                <span class="hero-meta-item">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  {{ event.venueCity }}{{ event.venueCity && event.venueName ? ', ' : '' }}{{ event.venueName }}
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container py-4">
+    <div class="row g-4">
+
+      <!-- Left Column: Event Details -->
+      <div class="col-lg-8">
+
+        <!-- Description -->
+        @if (event.description) {
+          <section class="detail-card mb-4">
+            <h2 class="section-title">About This Event</h2>
+            <p class="event-description">{{ event.description }}</p>
+          </section>
+        }
+
+        <!-- Event Info Grid -->
+        <section class="detail-card mb-4">
+          <h2 class="section-title">Event Details</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Genre</span>
+              <span class="info-value">{{ event.genre || 'Not mentioned' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Duration</span>
+              <span class="info-value">{{ formatDuration(event.durationMins) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Age Restriction</span>
+              <span class="info-value">{{ event.ageRestriction || 'Not mentioned' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Organized By</span>
+              <span class="info-value">{{ event.organizerName || 'Not mentioned' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Date</span>
+              <span class="info-value">{{ event.eventDate | date:'MMM d, yyyy' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Time</span>
+              <span class="info-value">{{ formatTime(event.startTime) }}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Performers -->
+        <section class="detail-card mb-4">
+          <h2 class="section-title">Performers</h2>
+          <p class="performers-text">{{ event.performers || 'Not mentioned' }}</p>
+        </section>
+
+        <!-- Venue -->
+        @if (event.venueName || event.venueAddress || event.venueCity) {
+          <section class="detail-card mb-4">
+            <h2 class="section-title">Venue</h2>
+            <div class="venue-details">
+              @if (event.venueName) {
+                <p class="venue-name">{{ event.venueName }}</p>
+              }
+              @if (event.venueAddress) {
+                <p class="venue-address">{{ event.venueAddress }}</p>
+              }
+              @if (event.venueCity) {
+                <p class="venue-city">{{ event.venueCity }}</p>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- Image Gallery -->
+        <!-- @if (event.posterUrls.length > 0) {
+          <section class="detail-card mb-4">
+            <h2 class="section-title">Gallery</h2>
+            <div class="gallery-grid">
+              @for (url of event.posterUrls; track url) {
+                <div class="gallery-item">
+                  <img [src]="getPosterUrl(url)" alt="Event image" class="gallery-img" loading="lazy" />
+                </div>
+              }
+            </div>
+          </section>
+        } -->
+
+      </div>
+
+      <!-- Right Column: Booking Card -->
+      <div class="col-lg-4">
+        <div class="booking-card">
+          <div class="booking-price">
+            <span class="price-amount">{{ event.price | currency:'INR':'symbol':'1.2-2' }}</span>
+            <span class="price-label">per ticket</span>
+          </div>
+
+          <div class="booking-divider"></div>
+
+          <div class="booking-info">
+            <div class="booking-info-row">
+              <span class="booking-info-label">Date</span>
+              <span class="booking-info-value">{{ event.eventDate | date:'MMM d, yyyy' }}</span>
+            </div>
+            <div class="booking-info-row">
+              <span class="booking-info-label">Time</span>
+              <span class="booking-info-value">{{ formatTime(event.startTime) }}</span>
+            </div>
+            <div class="booking-info-row">
+              <span class="booking-info-label">Available Seats</span>
+              <span class="booking-info-value seats-value">{{ availableSeats }} seats</span>
+            </div>
+          </div>
+
+          <div class="quantity-selector mb-3">
+            <label class="quantity-label">Number of Tickets</label>
+            <div class="quantity-controls">
+              <button class="qty-btn" (click)="selectedQuantity = selectedQuantity > 1 ? selectedQuantity - 1 : 1"
+                      [disabled]="selectedQuantity <= 1">−</button>
+              <span class="qty-value">{{ selectedQuantity }}</span>
+              <button class="qty-btn" (click)="selectedQuantity = selectedQuantity < availableSeats ? selectedQuantity + 1 : availableSeats"
+                      [disabled]="selectedQuantity >= availableSeats">+</button>
+            </div>
+          </div>
+
+          @if (event) {
+            <div class="booking-total mb-3">
+              <span class="total-label">Total</span>
+              <span class="total-amount">{{ event.price * selectedQuantity | currency:'INR':'symbol':'1.2-2' }}</span>
+            </div>
+          }
+
+          <button class="btn-book-now" [disabled]="availableSeats === 0" (click)="bookNow()">
+            @if (availableSeats > 0) {
+              Book Now
+            } @else {
+              Sold Out
+            }
+          </button>
+
+          @if (availableSeats > 0 && availableSeats <= 20) {
+            <p class="seats-warning">Only {{ availableSeats }} seats left! Book soon.</p>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  }
+</div>

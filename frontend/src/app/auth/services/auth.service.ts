@@ -52,7 +52,7 @@ export class AuthService {
       email: request.email,
       password: request.password,
       phone: request.phone,
-      role: request.role,
+      roleId: request.roleId,
     };
     return this.http.post<ApiResponse<TokenResponse>>(`${this.baseUrl}/register`, body).pipe(
       map((res) => res.data!),

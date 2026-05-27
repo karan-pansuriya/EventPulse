@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using EventPulse.BLL.Common;
 using EventPulse.BLL.Models.Configuration;
 using EventPulse.DAL.Entities;
 using Microsoft.Extensions.Options;
@@ -18,9 +19,11 @@ namespace EventPulse.BLL.Services
             _jwtSettings = jwtSettings.Value;
         }
 
-        public string GenerateAccessToken(User user, IEnumerable<string> roles)
+        public string GenerateAccessToken(User user, IEnumerable<int> roleIds)
         {
-            int accessMinutes = GetAccessTokenExpirationMinutes(roles);
+            int accessMinutes = GetAccessTokenExpirationMinutes(roleIds);
+            List<int> roleIdList = roleIds.ToList();
+
             List<Claim> claims = new List<Claim>
             {
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -29,8 +32,16 @@ namespace EventPulse.BLL.Services
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
-            foreach (string role in roles)
-                claims.Add(new Claim(ClaimTypes.Role, role));
+            foreach (int roleId in roleIdList)
+            {
+                claims.Add(new Claim("role_id", roleId.ToString()));
+                claims.Add(new Claim(ClaimTypes.Role, roleId.ToString()));
+            }
+
+            // Store the active role — the role the user explicitly logged in with.
+            // Since login always passes a single RoleId, first entry is the active role.
+            if (roleIdList.Count > 0)
+                claims.Add(new Claim("active_role_id", roleIdList[0].ToString()));
 
             SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
             SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -54,19 +65,19 @@ namespace EventPulse.BLL.Services
             return Convert.ToBase64String(randomBytes);
         }
 
-    public int GetAccessTokenExpirationMinutes(IEnumerable<string> roles)
-    {
-        return IsCustomer(roles) ? 24 * 60 : 30;
-    }
-
-    public int GetRefreshTokenExpirationMinutes(IEnumerable<string> roles)
-    {
-        return IsCustomer(roles) ? 24 * 60 : 30;
-    }
-
-        private static bool IsCustomer(IEnumerable<string> roles)
+        public int GetAccessTokenExpirationMinutes(IEnumerable<int> roleIds)
         {
-            return roles.Any(role => string.Equals(role, "Customer", StringComparison.OrdinalIgnoreCase));
+            return IsCustomer(roleIds) ? 24 * 60 : 30;
+        }
+
+        public int GetRefreshTokenExpirationMinutes(IEnumerable<int> roleIds)
+        {
+            return IsCustomer(roleIds) ? 24 * 60 : 30;
+        }
+
+        private static bool IsCustomer(IEnumerable<int> roleIds)
+        {
+            return roleIds.Any(id => id == RoleId.Customer);
         }
     }
 }

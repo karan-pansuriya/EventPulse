@@ -4,7 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { finalize, take } from 'rxjs';
 import { ToastService } from '../../../shared/services/toast.service';
 import { AuthService } from '../../services/auth.service';
-import { RegisterRequest, RoleResponse } from '../../models/auth.models';
+import { RegisterRequest, RoleResponse, RoleId } from '../../models/auth.models';
 
 const passwordsMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const password = control.get('password');
@@ -37,7 +37,7 @@ export class RegisterComponent implements OnInit {
     phoneNumber: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
     password: ['', [Validators.required, Validators.pattern(this.passwordPattern)]],
     confirmPassword: ['', [Validators.required]],
-    role: ['', Validators.required],
+    roleId: [3 as number, Validators.required],
   }, { validators: passwordsMatchValidator });
 
   loading = false;
@@ -50,10 +50,10 @@ export class RegisterComponent implements OnInit {
   ngOnInit(): void {
     this.authService.getRoles().pipe(take(1)).subscribe({
       next: (roles) => {
-        this.roleOptions = roles.filter(r => r.name !== 'Admin');
+        this.roleOptions = roles.filter(r => r.id !== RoleId.Admin);
         this.rolesLoading = false;
         if (this.roleOptions.length > 0) {
-          this.form.get('role')?.setValue(this.roleOptions[0].name);
+          this.form.get('roleId')?.setValue(this.roleOptions[0].id);
         }
         this.cdr.markForCheck();
       },
@@ -92,7 +92,7 @@ export class RegisterComponent implements OnInit {
       email: raw.email,
       password: raw.password,
       phone: raw.phoneNumber,
-      role: raw.role,
+      roleId: raw.roleId,
     };
 
     this.authService.register(request)
@@ -106,8 +106,8 @@ export class RegisterComponent implements OnInit {
       .subscribe({
         next: () => {
           const user = this.authService.user();
-          if (user?.roles.includes('Admin')) this.router.navigate(['/admin/dashboard']);
-          else if (user?.roles.includes('Organizer')) this.router.navigate(['/organizer/dashboard']);
+          if (user?.roleIds.includes(RoleId.Admin)) this.router.navigate(['/admin/dashboard']);
+          else if (user?.roleIds.includes(RoleId.Organizer)) this.router.navigate(['/organizer/dashboard']);
           else this.router.navigate(['/attendee/home']);
         },
         error: (err) => {
