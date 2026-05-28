@@ -22,7 +22,7 @@
 
               <div class="d-flex align-items-center gap-3 mb-4">
                 <div class="event-thumb"
-                     [style.background-image]="'url(' + getPosterUrl(event.posterUrl) + ')'">
+                     [style.background-image]="getPosterStyle(event.posterUrl)">
                 </div>
                 <div>
                   <h5 class="mb-1">{{ event.title }}</h5>
@@ -50,49 +50,33 @@
           </div>
         </div>
 
-        <!-- Right: Card Payment -->
+        <!-- Right: Stripe Card Payment -->
         <div class="col-lg-5">
           <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
               <h4 class="fw-bold mb-4">Card Payment</h4>
 
               <div class="mb-3">
-                <label class="form-label small fw-semibold">Card Number</label>
-                <input type="text" class="form-control form-control-lg"
-                       placeholder="1234 5678 9012 3456"
-                       maxlength="19"
-                       [value]="cardNumber"
-                       (input)="onCardNumberInput($event)" />
-              </div>
-
-              <div class="row g-3 mb-3">
-                <div class="col-6">
-                  <label class="form-label small fw-semibold">Expiry Date</label>
-                  <input type="text" class="form-control form-control-lg"
-                         placeholder="MM/YY"
-                         maxlength="5"
-                         [value]="cardExpiry"
-                         (input)="onExpiryInput($event)" />
-                </div>
-                <div class="col-6">
-                  <label class="form-label small fw-semibold">CVV</label>
-                  <input type="password" class="form-control form-control-lg"
-                         placeholder="***"
-                         maxlength="3"
-                         [value]="cardCvv"
-                         (input)="onCvvInput($event)" />
+                <label class="form-label small fw-semibold">Card Details</label>
+                <div id="{{ cardElementId }}" #cardElement
+                     class="form-control form-control-lg stripe-card-wrapper"
+                     [class.border-danger]="error">
                 </div>
               </div>
 
               <button class="btn btn-primary w-100 btn-lg fw-semibold mt-3"
                       (click)="pay()"
-                      [disabled]="processing">
+                      [disabled]="processing || !stripeReady">
                 @if (processing) {
                   Processing...
                 } @else {
                   Pay {{ totalPrice | currency:'INR':'symbol':'1.2-2' }}
                 }
               </button>
+
+              <p class="text-muted small mt-3 mb-0 text-center">
+                Your card details are securely handled by Stripe.
+              </p>
             </div>
           </div>
         </div>

@@ -1,13 +1,14 @@
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe, CurrencyPipe } from '@angular/common';
+import { take } from 'rxjs';
+import { loadStripe, Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-js';
 import { EventService } from '../home/services/event.service';
-import { BookingService, CreateBookingRequest } from '../home/services/booking.service';
+import { PaymentService, PaymentIntentResponse } from '../home/services/payment.service';
 import { EventDetailResponse } from '../home/models/event.models';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { environment } from '../../../../../environments/environment';
 import { formatTime } from '../../../../shared/utils/format-utils';
-import { take } from 'rxjs';
 
 @Component({
   selector: 'app-checkout',
@@ -17,11 +18,13 @@ import { take } from 'rxjs';
   styleUrl: './checkout.component.css',
 })
 export class CheckoutComponent implements OnInit {
+  @ViewChild('cardElement') cardElementRef!: ElementRef;
+
   private cdr = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private eventService = inject(EventService);
-  private bookingService = inject(BookingService);
+  private paymentService = inject(PaymentService);
   private toast = inject(ToastService);
 
   event: EventDetailResponse | null = null;
@@ -31,9 +34,12 @@ export class CheckoutComponent implements OnInit {
   processing = false;
   error: string | null = null;
 
-  cardNumber = '';
-  cardExpiry = '';
-  cardCvv = '';
+  private stripe: Stripe | null = null;
+  private elements: StripeElements | null = null;
+  private card: StripeCardElement | null = null;
+  cardElementId = 'stripe-card-element';
+  stripeReady = false;
+  paymentIntent: PaymentIntentResponse | null = null;
 
   ngOnInit(): void {
     const eventId = Number(this.route.snapshot.paramMap.get('eventId'));
@@ -48,9 +54,12 @@ export class CheckoutComponent implements OnInit {
 
     this.eventService.getEventById(eventId).pipe(take(1)).subscribe({
       next: (res) => {
-        if (res.data) this.event = res.data;
+        if (res.data) {
+          this.event = res.data;
+        }
         this.loading = false;
         this.cdr.detectChanges();
+        setTimeout(() => this.initStripe(), 0);
       },
       error: () => {
         this.error = 'Failed to load event details.';
@@ -60,70 +69,101 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
+  private async initStripe(): Promise<void> {
+    if (this.stripeReady) return;
+
+    const el = document.getElementById(this.cardElementId);
+    if (!el) {
+      this.error = 'Card element not found in DOM.';
+      return;
+    }
+
+    try {
+      this.stripe = await loadStripe(environment.stripePublishableKey);
+      if (!this.stripe) {
+        this.error = 'Failed to load payment system (Stripe.js did not initialize).';
+        return;
+      }
+
+      this.elements = this.stripe.elements({ locale: 'en' });
+      this.card = this.elements.create('card', {
+        style: {
+          base: {
+            fontSize: '16px',
+            color: '#1f2937',
+            '::placeholder': { color: '#9ca3af' },
+          },
+        },
+      });
+      this.card.mount(`#${this.cardElementId}`);
+      this.stripeReady = true;
+      this.cdr.detectChanges();
+    } catch (err) {
+      this.error = `Stripe init error: ${err instanceof Error ? err.message : 'Unknown'}`;
+      this.cdr.detectChanges();
+    }
+  }
+
   get totalPrice(): number {
     return this.event ? this.event.price * this.quantity : 0;
   }
 
-  onCardNumberInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    let val = input.value.replace(/\D/g, '').slice(0, 16);
-    this.cardNumber = val.replace(/(\d{4})(?=\d)/g, '$1 ');
-  }
-
-  onExpiryInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    let val = input.value.replace(/\D/g, '').slice(0, 4);
-    if (val.length > 2) val = val.slice(0, 2) + '/' + val.slice(2);
-    this.cardExpiry = val;
-  }
-
-  onCvvInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.cardCvv = input.value.replace(/\D/g, '').slice(0, 3);
-  }
-
   private readonly imageBaseUrl = '';
 
-  getPosterUrl(url: string | null): string {
-    return url ? `${environment.apiUrl.replace('/api', '')}/${url}` : '';
+  getPosterStyle(url: string | null): string {
+    const fullUrl = url ? `${environment.apiUrl.replace('/api', '')}/${url}` : '';
+    return `url(${fullUrl})`;
   }
 
-  pay(): void {
-    if (!this.event || this.processing) return;
-
-    if (this.cardNumber.replace(/\s/g, '').length < 13) {
-      this.toast.error('Please enter a valid card number.', 'Invalid Card');
-      return;
-    }
-    if (this.cardExpiry.length < 5) {
-      this.toast.error('Please enter a valid expiry date (MM/YY).', 'Invalid Expiry');
-      return;
-    }
-    if (this.cardCvv.length < 3) {
-      this.toast.error('Please enter a valid CVV.', 'Invalid CVV');
-      return;
-    }
+  async pay(): Promise<void> {
+    if (!this.event || this.processing || !this.stripe || !this.card) return;
 
     this.processing = true;
 
-    const data: CreateBookingRequest = {
+    this.paymentService.createPaymentIntent({
       eventId: this.event.id,
       quantity: this.quantity,
-    };
+    }).pipe(take(1)).subscribe({
+      next: async (pi) => {
+        this.paymentIntent = pi;
 
-    this.bookingService.createBooking(data).pipe(take(1)).subscribe({
-      next: (res) => {
-        this.processing = false;
-        if (res.data) {
-          this.router.navigate(['/attendee/payment-success'], {
-            queryParams: { code: res.data.uniqueCode },
-          });
+        const { error, paymentIntent } = await this.stripe!.confirmCardPayment(pi.clientSecret, {
+          payment_method: { card: this.card! },
+        });
+
+        if (error) {
+          this.processing = false;
+          this.toast.error(error.message || 'Payment failed.', 'Error');
+          this.cdr.detectChanges();
+          return;
+        }
+
+        if (paymentIntent?.status === 'succeeded') {
+          this.paymentService.confirmPayment({ paymentIntentId: pi.paymentIntentId })
+            .pipe(take(1))
+            .subscribe({
+              next: (booking) => {
+                this.processing = false;
+                this.router.navigate(['/attendee/payment-success'], {
+                  queryParams: { code: booking.uniqueCode },
+                });
+              },
+              error: () => {
+                this.processing = false;
+                this.toast.error('Failed to finalize booking.', 'Error');
+                this.cdr.detectChanges();
+              },
+            });
+        } else {
+          this.processing = false;
+          this.toast.error('Payment was not completed.', 'Error');
+          this.cdr.detectChanges();
         }
       },
       error: () => {
         this.processing = false;
+        this.toast.error('Failed to initiate payment.', 'Error');
         this.cdr.detectChanges();
-        this.toast.error('Payment failed. Please try again.', 'Error');
       },
     });
   }
