@@ -175,6 +175,20 @@ builder.Services.AddScoped<IImageService>(sp =>
     return new ImageService(env.WebRootPath);
 });
 
+builder.Services.AddScoped<ITicketGenerationService>(sp =>
+{
+    IWebHostEnvironment env = sp.GetRequiredService<IWebHostEnvironment>();
+    return new TicketGenerationService(env.WebRootPath);
+});
+
+builder.Services.AddScoped<ITicketService>(sp =>
+{
+    IBookingRepository bookingRepository = sp.GetRequiredService<IBookingRepository>();
+    IHttpContextAccessor httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+    IWebHostEnvironment env = sp.GetRequiredService<IWebHostEnvironment>();
+    return new TicketService(bookingRepository, httpContextAccessor, env.WebRootPath);
+});
+
 builder.Services.AddHttpContextAccessor();
 
 // ─── CORS ────────────────────────────────────────────────────────────────────

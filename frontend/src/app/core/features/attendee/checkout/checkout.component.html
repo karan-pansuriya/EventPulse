@@ -56,11 +56,39 @@
             <div class="card-body p-4">
               <h4 class="fw-bold mb-4">Card Payment</h4>
 
+              <!-- Card Number -->
               <div class="mb-3">
-                <label class="form-label small fw-semibold">Card Details</label>
-                <div id="{{ cardElementId }}" #cardElement
-                     class="form-control form-control-lg stripe-card-wrapper"
-                     [class.border-danger]="error">
+                <label class="form-label small fw-semibold">Card Number</label>
+                <div id="stripe-card-number"
+                     class="form-control form-control-lg stripe-field"
+                     [class.field-error]="cardNumberError">
+                </div>
+                @if (cardNumberError) {
+                  <small class="validation-error">{{ cardNumberError }}</small>
+                }
+              </div>
+
+              <!-- Expiry + CVC row -->
+              <div class="row g-3 mb-3">
+                <div class="col-6">
+                  <label class="form-label small fw-semibold">Expiry Date</label>
+                  <div id="stripe-card-expiry"
+                       class="form-control form-control-lg stripe-field"
+                       [class.field-error]="cardExpiryError">
+                  </div>
+                  @if (cardExpiryError) {
+                    <small class="validation-error">{{ cardExpiryError }}</small>
+                  }
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-semibold">CVC</label>
+                  <div id="stripe-card-cvc"
+                       class="form-control form-control-lg stripe-field"
+                       [class.field-error]="cardCvcError">
+                  </div>
+                  @if (cardCvcError) {
+                    <small class="validation-error">{{ cardCvcError }}</small>
+                  }
                 </div>
               </div>
 

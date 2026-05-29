@@ -24,16 +24,7 @@ public class EventsController : BaseHelper
     [HttpGet("{id}")]
     public async Task<IActionResult> GetEventById(int id)
     {
-        int? userId = null;
-        int? userRoleId = null;
-
-        if (User.Identity?.IsAuthenticated == true)
-        {
-            userId = GetUserId();
-            userRoleId = GetActiveRoleId(); // respects login role, not Admin-priority
-        }
-
-        EventResponse result = await _eventService.GetByIdAsync(id, userId, userRoleId);
+        EventResponse result = await _eventService.GetByIdAsync(id);
         return SuccessResponse(result);
     }
 
@@ -48,44 +39,30 @@ public class EventsController : BaseHelper
     [HttpGet("my-events")]
     public async Task<IActionResult> GetMyEvents([FromQuery] PageRequest pageRequest)
     {
-        int userId = GetUserId();
-        PagedResult<EventListResponse> result = await _eventService.GetMyEventsAsync(userId, pageRequest);
+        PagedResult<EventListResponse> result = await _eventService.GetMyEventsAsync(pageRequest);
         return SuccessResponse(result);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateEvent([FromForm] CreateEventDto dto, [FromForm] List<IFormFile>? posterImages)
     {
-        int userId = GetUserId();
         List<(byte[] ImageBytes, string FileName)> files = await ReadFormFilesAsync(posterImages);
-        EventResponse result = await _eventService.CreateAsync(userId, dto, files);
+        EventResponse result = await _eventService.CreateAsync(dto, files);
         return CreatedResponse(result);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateEvent(int id, [FromForm] UpdateEventDto dto, [FromForm] List<IFormFile>? posterImages)
     {
-        int userId = GetUserId();
-
-        int? activeRoleId = GetActiveRoleId();
-        if (activeRoleId == null)
-            return Forbid();
-
         List<(byte[] ImageBytes, string FileName)> files = await ReadFormFilesAsync(posterImages);
-        EventResponse result = await _eventService.UpdateAsync(id, userId, activeRoleId.Value, dto, files);
+        EventResponse result = await _eventService.UpdateAsync(id, dto, files);
         return SuccessResponse(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteEvent(int id)
     {
-        int userId = GetUserId();
-
-        int? activeRoleId = GetActiveRoleId();
-        if (activeRoleId == null)
-            return Forbid();
-
-        await _eventService.DeleteAsync(id, userId, activeRoleId.Value);
+        await _eventService.DeleteAsync(id);
         return SuccessResponse("Event deleted successfully.");
     }
 

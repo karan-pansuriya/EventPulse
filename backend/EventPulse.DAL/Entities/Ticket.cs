@@ -15,6 +15,10 @@ namespace EventPulse.DAL.Entities
 
         public string? QrCode { get; set; }
 
+        public string? QrCodePath { get; set; }
+
+        public string? PdfPath { get; set; }
+
         [ForeignKey(nameof(BookingId))]
         public virtual Booking Booking { get; set; } = null!;
     }

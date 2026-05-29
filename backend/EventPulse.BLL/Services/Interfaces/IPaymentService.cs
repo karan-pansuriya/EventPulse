@@ -5,7 +5,7 @@ namespace EventPulse.BLL.Interfaces;
 
 public interface IPaymentService
 {
-    Task<PaymentIntentResponse> CreatePaymentIntentAsync(CreatePaymentIntentRequest request, int userId);
+    Task<PaymentIntentResponse> CreatePaymentIntentAsync(CreatePaymentIntentRequest request);
     Task<BookingResponse> ConfirmPaymentAsync(string paymentIntentId);
     Task HandleWebhookAsync(string json, string signatureHeader);
     Task<BookingResponse?> GetByPaymentIntentAsync(string paymentIntentId);

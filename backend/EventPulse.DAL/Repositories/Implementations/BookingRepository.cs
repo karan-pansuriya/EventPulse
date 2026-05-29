@@ -3,6 +3,7 @@ using EventPulse.DAL.Entities;
 using EventPulse.DAL.Enums;
 using EventPulse.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace EventPulse.DAL.Repositories.Implementations;
 
@@ -47,6 +48,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
         if (existing == null)
             throw new InvalidOperationException("Booking not found for this payment.");
 
+        // Duplicate prevention — already paid, return current state
         if (existing.PaymentStatus == PaymentStatus.Paid)
         {
             int currentSeats = await _context.Events
@@ -77,14 +79,14 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
                 throw new InvalidOperationException($"Only {eventEntity.TotalSeats} seats available.");
 
             eventEntity.TotalSeats -= existing.Quantity;
-
             existing.PaymentStatus = PaymentStatus.Paid;
 
+            // Generate one unique GUID ticket code per seat
             for (int i = 0; i < existing.Quantity; i++)
             {
                 existing.Tickets.Add(new Ticket
                 {
-                    TicketCode = $"{existing.UniqueCode}-{i + 1}",
+                    TicketCode = Guid.NewGuid().ToString("N").ToUpper(),
                 });
             }
 
@@ -120,12 +122,58 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
             .FirstOrDefaultAsync(b => b.PaymentRef == paymentIntentId);
     }
 
+    public async Task<Booking?> GetBookingByTicketIdAsync(int ticketId)
+    {
+        return await _context.Bookings
+            .Where(b => b.Tickets.Any(t => t.Id == ticketId))
+            .Include(b => b.Tickets)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<Booking?> GetBookingWithDetailsAsync(int bookingId)
     {
         return await _context.Bookings
             .Where(b => b.Id == bookingId)
-            .Include(b => b.Event)
+            .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
+            .Include(b => b.User)
             .Include(b => b.Tickets)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task UpdateTicketPathsAsync(ICollection<Ticket> tickets)
+    {
+        foreach (Ticket ticket in tickets)
+        {
+            Ticket? tracked = _context.ChangeTracker.Entries<Ticket>()
+                .Select(e => e.Entity)
+                .FirstOrDefault(e => e.Id == ticket.Id);
+
+            if (tracked != null)
+            {
+                tracked.QrCodePath = ticket.QrCodePath;
+                tracked.PdfPath = ticket.PdfPath;
+            }
+        }
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<Booking>> GetUserBookingsAsync(int userId, int bookingId)
+    {
+        return await _context.Bookings
+            .Where(b => b.UserId == userId && b.PaymentStatus == PaymentStatus.Paid && b.Id == bookingId)
+            .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
+            .Include(b => b.Tickets)
+            .OrderByDescending(b => b.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<List<Booking>> GetUserAllBookingsAsync(int userId)
+    {
+        return await _context.Bookings
+            .Where(b => b.UserId == userId && b.PaymentStatus == PaymentStatus.Paid && b.IsDeleted == false)
+            .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
+            .Include(b => b.Tickets)
+            .OrderByDescending(b => b.CreatedAt)
+            .ToListAsync();
     }
 }

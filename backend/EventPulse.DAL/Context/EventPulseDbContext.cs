@@ -190,20 +190,35 @@ namespace EventPulse.DAL.Context
             });
 
             // ── Ticket ────────────────────────────────────────────────────────
-            modelBuilder.Entity<Ticket>(entity =>
-            {
-                entity.ToTable("tickets");
-                entity.HasKey(t => t.Id);
+modelBuilder.Entity<Ticket>(entity =>
+{
+    entity.ToTable("tickets");
 
-                entity.HasIndex(t => t.TicketCode).IsUnique();
+    entity.HasKey(t => t.Id);
 
-                entity.Property(t => t.CreatedAt).HasDefaultValueSql("now()");
+    entity.HasIndex(t => t.TicketCode)
+          .IsUnique();
 
-                entity.HasOne(t => t.Booking)
-                      .WithMany(b => b.Tickets)
-                      .HasForeignKey(t => t.BookingId)
-                      .OnDelete(DeleteBehavior.Cascade);
-            });
+    entity.Property(t => t.TicketCode)
+          .IsRequired();
+
+    entity.Property(t => t.QrCode)
+          .HasColumnName("qr_code");
+
+    entity.Property(t => t.QrCodePath)
+          .HasColumnName("qr_code_path");
+
+    entity.Property(t => t.PdfPath)
+          .HasColumnName("pdf_path");
+
+    entity.Property(t => t.CreatedAt)
+          .HasDefaultValueSql("now()");
+
+    entity.HasOne(t => t.Booking)
+          .WithMany(b => b.Tickets)
+          .HasForeignKey(t => t.BookingId)
+          .OnDelete(DeleteBehavior.Cascade);
+});
 
             // ── Seed roles ────────────────────────────────────────────────────
             SeedData(modelBuilder);

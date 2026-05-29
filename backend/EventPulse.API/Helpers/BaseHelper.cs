@@ -5,7 +5,6 @@ using System.Security.Claims;
 
 namespace EventPulse.API.Helpers
 {
-    [ApiController]
     public class BaseHelper : ControllerBase
     {
         protected int GetUserId()
@@ -15,26 +14,6 @@ namespace EventPulse.API.Helpers
             if (claim == null || !int.TryParse(claim.Value, out int id))
                 throw new UnauthorizedAccessException("User ID not found in token.");
             return id;
-        }
-
-        protected string? GetUserEmail()
-        {
-            return User.FindFirst(ClaimTypes.Email)?.Value
-                ?? User.FindFirst("email")?.Value;
-        }
-
-        protected List<int> GetUserRoleIds()
-        {
-            return User.FindAll("role_id").Select(c =>
-            {
-                int.TryParse(c.Value, out int id);
-                return id;
-            }).Where(id => id > 0).ToList();
-        }
-
-        protected bool IsInRole(int roleId)
-        {
-            return GetUserRoleIds().Contains(roleId);
         }
 
         // Returns the role the user explicitly logged in with.

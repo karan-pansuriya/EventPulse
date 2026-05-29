@@ -1,19 +1,126 @@
 <div class="payment-success-page">
   <div class="container py-5">
-    <div class="text-center">
+
+    <!-- ── Success Banner ───────────────────────────── -->
+    <div class="text-center mb-5">
       <div class="success-icon mb-3">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+        <svg width="72" height="72" viewBox="0 0 24 24" fill="none"
+             stroke="#10b981" stroke-width="2">
           <circle cx="12" cy="12" r="10"/>
           <path d="M8 12l2 2 4-4"/>
         </svg>
       </div>
       <h2 class="fw-bold mb-2">Payment Successful!</h2>
       <p class="text-muted mb-1">Your booking has been confirmed.</p>
-      @if (bookingCode) {
-        <p class="fw-semibold text-primary mb-4">Booking Code: {{ bookingCode }}</p>
-      }
-      <a class="btn btn-primary btn-lg" routerLink="/attendee/my-tickets">View My Tickets</a>
-      <a class="btn btn-outline-secondary btn-lg ms-2" routerLink="/attendee/home">Browse Events</a>
+      <!-- @if (bookingCode) {
+        <p class="booking-code-badge mb-4">
+          Booking Code: <span>{{ bookingCode }}</span>
+        </p>
+      } -->
     </div>
+
+    <!-- ── Loading ──────────────────────────────────── -->
+    @if (isLoading) {
+      <div class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-2">Fetching your tickets…</p>
+      </div>
+    }
+
+    <!-- ── Error fallback ───────────────────────────── -->
+    @if (!isLoading && hasError) {
+      <div class="alert alert-warning text-center" role="alert">
+        Could not load ticket details right now.
+        <a routerLink="/attendee/my-tickets" class="alert-link ms-1">View My Tickets</a>
+        to access them anytime.
+      </div>
+    }
+
+    <!-- ── Booking + Ticket Cards ───────────────────── -->
+    @if (!isLoading && !hasError && booking) {
+      <!-- Event summary card -->
+      <div class="booking-summary-card mb-4">
+        <div class="row align-items-center">
+          <div class="col">
+            <h5 class="fw-bold mb-1">{{ booking.eventTitle }}</h5>
+            @if (booking.eventDate) {
+              <p class="mb-1 text-muted">
+                <i class="bi bi-calendar3 me-1"></i>
+                {{ formatDate(booking.eventDate) }}
+              </p>
+            }
+            @if (booking.venueName) {
+              <p class="mb-0 text-muted">
+                <i class="bi bi-geo-alt me-1"></i>
+                {{ booking.venueName }}{{ booking.venueCity ? ', ' + booking.venueCity : '' }}
+              </p>
+            }
+          </div>
+          <div class="col-auto text-end">
+            <div class="qty-badge">{{ booking.quantity }} Ticket{{ booking.quantity > 1 ? 's' : '' }}</div>
+            <div class="total-amount mt-1">₹{{ booking.totalAmount | number: '1.2-2' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Individual ticket cards -->
+      <h6 class="fw-semibold mb-3 text-muted text-uppercase letter-spacing">Your Tickets</h6>
+
+      @for (ticket of booking.tickets; track ticket.id) {
+        <div class="ticket-card mb-3">
+          <div class="ticket-card-inner row align-items-center g-0">
+
+            <!-- QR Code -->
+            <div class="col-auto qr-section">
+              @if (ticket.qrCodeUrl) {
+                <img [src]="ticket.qrCodeUrl" alt="QR for {{ ticket.ticketCode }}"
+                     class="qr-img" width="80" height="80" />
+              } @else {
+                <div class="qr-placeholder">
+                  <i class="bi bi-qr-code fs-2 text-muted"></i>
+                </div>
+              }
+            </div>
+
+            <!-- Ticket info -->
+            <div class="col px-3">
+              <p class="ticket-code mb-1">{{ ticket.ticketCode }}</p>
+              <p class="ticket-label mb-0">Show this QR at the venue for entry</p>
+            </div>
+
+            <!-- Download -->
+            <div class="col-auto pe-3">
+              @if (ticket.pdfUrl) {
+                <a [href]="getDownloadUrl(ticket.id)"
+                   target="_blank"
+                   class="btn btn-download">
+                  <i class="bi bi-download me-1"></i>PDF
+                </a>
+              } @else {
+                <span class="text-muted small">PDF pending</span>
+              }
+            </div>
+
+          </div>
+          <!-- Perforation line -->
+          <div class="ticket-perforation"></div>
+        </div>
+      }
+    }
+
+    <!-- ── CTA Buttons ──────────────────────────────── -->
+    @if (!isLoading) {
+      <div class="text-center mt-5 d-flex justify-content-center gap-3 flex-wrap">
+        <a class="btn btn-primary btn-lg" routerLink="/attendee/my-tickets">
+          <i class="bi bi-ticket-perforated me-2"></i>View All Tickets
+        </a>
+        <a class="btn btn-outline-secondary btn-lg" routerLink="/attendee/home">
+          <i class="bi bi-search me-2"></i>Browse Events
+        </a>
+      </div>
+    }
+
   </div>
 </div>

@@ -1,12 +1,150 @@
 .payment-success-page {
-  max-width: 600px;
+  max-width: 640px;
   margin: 0 auto;
 }
 
+/* ── Success icon ─────────────────────────────────── */
 .success-icon svg {
-  filter: drop-shadow(0 4px 12px rgba(16, 185, 129, 0.3));
+  filter: drop-shadow(0 4px 16px rgba(16, 185, 129, 0.35));
+  animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
 
+@keyframes pop-in {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* ── Booking code badge ───────────────────────────── */
+.booking-code-badge {
+  display: inline-block;
+  background: #ede9fe;
+  color: #5b21b6;
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-size: 0.9rem;
+}
+
+.booking-code-badge span {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* ── Booking summary card ─────────────────────────── */
+.booking-summary-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+}
+
+.qty-badge {
+  display: inline-block;
+  background: #ede9fe;
+  color: #5b21b6;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 3px 12px;
+}
+
+.total-amount {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* ── Section label ────────────────────────────────── */
+.letter-spacing {
+  letter-spacing: 0.06em;
+  font-size: 0.75rem;
+}
+
+/* ── Ticket card ──────────────────────────────────── */
+.ticket-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease;
+}
+
+.ticket-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.ticket-card-inner {
+  padding: 14px 0;
+}
+
+/* ── QR section ───────────────────────────────────── */
+.qr-section {
+  padding: 4px 16px;
+  border-right: 2px dashed #e5e7eb;
+}
+
+.qr-img {
+  border-radius: 6px;
+  display: block;
+}
+
+.qr-placeholder {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+/* ── Ticket info ──────────────────────────────────── */
+.ticket-code {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1f2937;
+  letter-spacing: 0.05em;
+}
+
+.ticket-label {
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+/* ── Perforation line ─────────────────────────────── */
+.ticket-perforation {
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    #6d28d9 0px, #6d28d9 12px,
+    transparent 12px, transparent 20px
+  );
+  opacity: 0.25;
+}
+
+/* ── Download button ──────────────────────────────── */
+.btn-download {
+  background: #f3f0ff;
+  color: #5b21b6;
+  border: 1px solid #c4b5fd;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.btn-download:hover {
+  background: #ede9fe;
+  color: #4c1d95;
+  transform: translateY(-1px);
+}
+
+/* ── Primary CTA ──────────────────────────────────── */
 .btn-primary {
   background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
   border: none;
