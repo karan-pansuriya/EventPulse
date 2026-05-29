@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;  
 using EFCore.NamingConventions;
+using EventPulse.API.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -152,6 +153,9 @@ builder.Services.AddAuthorization(options =>
 // ─── AutoMapper ─────────────────────────────────────────────────────────────
 builder.Services.AddAutoMapper(typeof(EventProfile), typeof(BookingProfile));
 
+// ─── Stripe ──────────────────────────────────────────────────────────────────
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection(StripeSettings.SectionName));
+
 // ─── DI Registrations ────────────────────────────────────────────────────────
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -162,7 +166,8 @@ builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IEventService, EventService>();
-builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<ISeatUpdateNotifier, SignalRSeatUpdateNotifier>();
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<IImageService>(sp =>
 {
