@@ -17,6 +17,12 @@
     }
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .brand-name {
     font-size: 1.1rem;
     font-weight: 700;
@@ -25,7 +31,25 @@
 }
 
 @media (min-width: 576px) {
-    .brand-name {
+.sidebar-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #374151;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.sidebar-toggle-btn:hover {
+    background: #f3f4f6;
+}
+
+.brand-name {
         font-size: 1.25rem;
     }
 }

@@ -17,18 +17,7 @@ public class CreateEventDto
     public string VenueAddress { get; set; } = string.Empty;
 
     [Required]
-    [MaxLength(100)]
-    [RegularExpression(@"^[A-Za-z\s'\-]{2,100}$", ErrorMessage = "City must be 2-100 letters.")]
-    public string VenueCity { get; set; } = string.Empty;
-
-    [MaxLength(100)]
-    [RegularExpression(@"^[A-Za-z\s'\-]{0,100}$", ErrorMessage = "State must be letters only.")]
-    public string? VenueState { get; set; }
-
-    [Required]
-    [MaxLength(100)]
-    [RegularExpression(@"^[A-Za-z\s'\-]{2,100}$", ErrorMessage = "Country must be 2-100 letters.")]
-    public string VenueCountry { get; set; } = string.Empty;
+    public int CityId { get; set; }
 
     [Required]
     [MaxLength(200)]

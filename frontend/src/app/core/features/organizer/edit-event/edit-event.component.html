@@ -1,0 +1,290 @@
+<div class="edit-event-page">
+  <div class="container py-3 py-md-4">
+
+    <a routerLink="/organizer/events" class="btn btn-sm btn-outline-secondary mb-3">
+      <i class="bi bi-arrow-left me-1"></i>Back to Events
+    </a>
+
+    <div class="d-flex align-items-center gap-3 mb-3 mb-md-4">
+      <i class="bi bi-pencil-square fs-4 fs-md-2 text-primary"></i>
+      <h2 class="fw-bold mb-0 fs-5 fs-md-2">Edit Event</h2>
+    </div>
+
+    @if (isLoading) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-2">Loading event details...</p>
+      </div>
+    }
+
+    @if (!isLoading) {
+      <div class="form-wrapper">
+        <form #eventForm="ngForm" (ngSubmit)="onSubmit()" class="row g-3" novalidate>
+
+          <div class="col-12">
+            <div class="card shadow-sm border-0">
+              <div class="card-header bg-white fw-semibold">Basic Information</div>
+              <div class="card-body row g-3">
+
+                <div class="col-12">
+                  <label class="form-label" for="title">Title <span class="text-danger">*</span></label>
+                  <input type="text" id="title" name="title" class="form-control"
+                         [class.is-invalid]="isFieldInvalid('title')"
+                         [(ngModel)]="form.title" required minlength="2" maxlength="200"
+                         placeholder="Event title">
+                  @if (isFieldInvalid('title')) {
+                    <div class="invalid-feedback">Title is required (2-200 characters).</div>
+                  }
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label" for="description">Description</label>
+                  <textarea id="description" name="description" class="form-control"
+                            [class.is-invalid]="isFieldInvalid('description')"
+                            [(ngModel)]="form.description" maxlength="1000" rows="3"
+                            placeholder="Event description"></textarea>
+                  @if (isFieldInvalid('description')) {
+                    <div class="invalid-feedback">Max 1000 characters.</div>
+                  }
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label" for="categoryId">Category</label>
+                  <select id="categoryId" name="categoryId" class="form-select"
+                          [(ngModel)]="form.categoryId">
+                    <option [ngValue]="null">Select category</option>
+                    @for (cat of categories; track cat.id) {
+                      <option [ngValue]="cat.id">{{ cat.name }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label" for="genre">Genre</label>
+                  <input type="text" id="genre" name="genre" class="form-control"
+                         [class.is-invalid]="isFieldInvalid('genre')"
+                         [(ngModel)]="form.genre" maxlength="100"
+                         placeholder="e.g. Rock, Comedy">
+                  @if (isFieldInvalid('genre')) {
+                    <div class="invalid-feedback">Max 100 characters.</div>
+                  }
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label" for="ageRestriction">Age Restriction</label>
+                  <input type="text" id="ageRestriction" name="ageRestriction" class="form-control"
+                         [class.is-invalid]="isFieldInvalid('ageRestriction')"
+                         [(ngModel)]="form.ageRestriction" pattern="[0-9+]*" maxlength="10"
+                         placeholder="e.g. 18+">
+                  @if (isFieldInvalid('ageRestriction')) {
+                    <div class="invalid-feedback">Only numbers and + allowed.</div>
+                  }
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label" for="performers">Performers</label>
+                  <input type="text" id="performers" name="performers" class="form-control"
+                         [class.is-invalid]="isFieldInvalid('performers')"
+                         [(ngModel)]="form.performers" maxlength="200"
+                         placeholder="Performer names">
+                  @if (isFieldInvalid('performers')) {
+                    <div class="invalid-feedback">Max 200 characters.</div>
+                  }
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label" for="durationMins">Duration (mins)</label>
+                  <input type="number" id="durationMins" name="durationMins" class="form-control"
+                         [class.is-invalid]="isFieldInvalid('durationMins')"
+                         [(ngModel)]="form.durationMins" min="1" max="420" step="1"
+                         placeholder="e.g. 120">
+                  @if (isFieldInvalid('durationMins')) {
+                    <div class="invalid-feedback">Between 1 and 420 minutes.</div>
+                  }
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label" for="price">Price ($) <span class="text-danger">*</span></label>
+                  <input type="number" id="price" name="price" class="form-control"
+                         [class.is-invalid]="isFieldInvalid('price')"
+                         [(ngModel)]="form.price" required min="0" max="9999999999" step="0.01"
+                         placeholder="0.00">
+                  @if (isFieldInvalid('price')) {
+                    <div class="invalid-feedback">Price is required (0 or more, max 10 digits).</div>
+                  }
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label" for="totalSeats">Total Seats <span class="text-danger">*</span></label>
+                  <input type="number" id="totalSeats" name="totalSeats" class="form-control"
+                         [class.is-invalid]="isFieldInvalid('totalSeats')"
+                         [(ngModel)]="form.totalSeats" required min="1" max="100000" step="1"
+                         placeholder="Number of seats">
+                  @if (isFieldInvalid('totalSeats')) {
+                    <div class="invalid-feedback">Seats is required (1-100,000).</div>
+                  }
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label" for="eventDate">Event Date <span class="text-danger">*</span></label>
+                  <input type="date" id="eventDate" name="eventDate" class="form-control"
+                         [class.is-invalid]="isFieldInvalid('eventDate')"
+                         [(ngModel)]="form.eventDate" [min]="minDate" required>
+                  @if (isFieldInvalid('eventDate')) {
+                    <div class="invalid-feedback">Event date is required.</div>
+                  }
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label" for="startTime">Start Time <span class="text-danger">*</span></label>
+                  <input type="time" id="startTime" name="startTime" class="form-control"
+                         [class.is-invalid]="isFieldInvalid('startTime')"
+                         [(ngModel)]="form.startTime" [min]="minTime" required>
+                  @if (isFieldInvalid('startTime')) {
+                    <div class="invalid-feedback">Start time is required.</div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card shadow-sm border-0">
+              <div class="card-header bg-white fw-semibold">Venue & Location</div>
+              <div class="card-body row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="venueName">Venue Name <span class="text-danger">*</span></label>
+                  <input type="text" id="venueName" name="venueName" class="form-control"
+                         [class.is-invalid]="isFieldInvalid('venueName')"
+                         [(ngModel)]="form.venueName" required maxlength="150"
+                         placeholder="Venue name">
+                  @if (isFieldInvalid('venueName')) {
+                    <div class="invalid-feedback">Venue name is required (max 150 characters).</div>
+                  }
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label" for="venueAddress">Venue Address <span class="text-danger">*</span></label>
+                  <input type="text" id="venueAddress" name="venueAddress" class="form-control"
+                         [class.is-invalid]="isFieldInvalid('venueAddress')"
+                         [(ngModel)]="form.venueAddress" required maxlength="200"
+                         placeholder="Venue address">
+                  @if (isFieldInvalid('venueAddress')) {
+                    <div class="invalid-feedback">Venue address is required (max 200 characters).</div>
+                  }
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label" for="countryId">Country <span class="text-danger">*</span></label>
+                  <select id="countryId" name="countryId" class="form-select"
+                          [class.is-invalid]="isFieldInvalid('countryId')"
+                          [(ngModel)]="form.countryId" required
+                          (change)="onCountryChange()">
+                    <option [ngValue]="null">Select country</option>
+                    @for (c of countries; track c.id) {
+                      <option [ngValue]="c.id">{{ c.name }}</option>
+                    }
+                  </select>
+                  @if (isFieldInvalid('countryId')) {
+                    <div class="invalid-feedback">Please select a country.</div>
+                  }
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label" for="stateId">State <span class="text-danger">*</span></label>
+                  <select id="stateId" name="stateId" class="form-select"
+                          [class.is-invalid]="isFieldInvalid('stateId')"
+                          [(ngModel)]="form.stateId" required
+                          (change)="onStateChange()"
+                          [disabled]="!form.countryId || isLoadingStates">
+                    <option [ngValue]="null">Select state</option>
+                    @for (s of states; track s.id) {
+                      <option [ngValue]="s.id">{{ s.name }}</option>
+                    }
+                  </select>
+                  @if (isFieldInvalid('stateId')) {
+                    <div class="invalid-feedback">Please select a state.</div>
+                  }
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label" for="cityId">City <span class="text-danger">*</span></label>
+                  <select id="cityId" name="cityId" class="form-select"
+                          [class.is-invalid]="isFieldInvalid('cityId')"
+                          [(ngModel)]="form.cityId" required
+                          [disabled]="!form.stateId || isLoadingCities">
+                    <option [ngValue]="null">Select city</option>
+                    @for (c of cities; track c.id) {
+                      <option [ngValue]="c.id">{{ c.name }}</option>
+                    }
+                  </select>
+                  @if (isFieldInvalid('cityId')) {
+                    <div class="invalid-feedback">Please select a city.</div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card shadow-sm border-0">
+              <div class="card-header bg-white fw-semibold">Posters</div>
+              <div class="card-body">
+
+                @if (currentPosters.length > 0) {
+                  <label class="form-label">Current Posters</label>
+                  <div class="d-flex flex-wrap gap-3 mt-1 mb-3">
+                    @for (url of currentPosters; track url) {
+                      <div class="poster-item">
+                        <img [src]="getPosterUrl(url)" alt="Poster" class="poster-thumb" />
+                        <button type="button" class="poster-remove-btn" (click)="removePoster(url)" title="Remove poster">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+
+                @if (removedPosterUrls.length > 0) {
+                  <label class="form-label text-danger">Removed Posters</label>
+                  <div class="d-flex flex-wrap gap-3 mt-1 mb-3">
+                    @for (url of removedPosterUrls; track url) {
+                      <div class="poster-item removed">
+                        <img [src]="getPosterUrl(url)" alt="Removed poster" class="poster-thumb" />
+                        <button type="button" class="poster-restore-btn" (click)="undoRemovePoster(url)" title="Undo remove">
+                          <i class="bi bi-arrow-counterclockwise"></i>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+
+                <label class="form-label">Add New Posters</label>
+                <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*" multiple />
+                @if (selectedFiles.length > 0) {
+                  <small class="text-muted">{{ selectedFiles.length }} file(s) selected</small>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 mt-4">
+            <button type="submit" class="btn btn-primary px-4" [disabled]="isSaving">
+              @if (isSaving) {
+                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                Saving...
+              } @else {
+                <i class="bi bi-check-lg me-1"></i>
+                Save Changes
+              }
+            </button>
+          </div>
+
+        </form>
+      </div>
+    }
+
+  </div>
+</div>

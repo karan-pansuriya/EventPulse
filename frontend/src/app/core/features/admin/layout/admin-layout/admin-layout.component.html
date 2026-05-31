@@ -1,10 +1,20 @@
 <div class="admin-shell">
-    <app-header />
-    <div class="admin-body">
-        <aside class="sidebar">
+    <app-header mode="admin" (toggleSidebar)="toggleSidebar()" />
+    <div class="admin-body" [class.sidebar-open]="sidebarOpen">
+        @if (sidebarOpen) {
+            <div class="sidebar-backdrop d-md-none" (click)="closeSidebar()"></div>
+        }
+        <aside class="sidebar" [class.open]="sidebarOpen">
+            <div class="sidebar-brand">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2">
+                    <rect x="2" y="2" width="20" height="20" rx="4" />
+                    <polyline points="8 12 11 15 16 9" />
+                </svg>
+                <span>EventPulse</span>
+            </div>
             <nav class="sidebar-nav">
                 <a class="nav-item" routerLink="/admin/dashboard" routerLinkActive="active"
-                    [routerLinkActiveOptions]="{exact: true}">
+                    [routerLinkActiveOptions]="{exact: true}" (click)="closeSidebar()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="7" height="7" />
                         <rect x="14" y="3" width="7" height="7" />
@@ -13,7 +23,21 @@
                     </svg>
                     Dashboard
                 </a>
-                <a class="nav-item" routerLink="/admin/users" routerLinkActive="active">
+                <a class="nav-item" routerLink="/admin/events" routerLinkActive="active" (click)="closeSidebar()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                    Events
+                </a>
+                <a class="nav-item" routerLink="/admin/categories" routerLinkActive="active" (click)="closeSidebar()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16v4H4z" />
+                        <path d="M4 12h16v4H4z" />
+                        <path d="M4 20h8v4H4z" />
+                    </svg>
+                    Categories
+                </a>
+                <a class="nav-item" routerLink="/admin/users" routerLinkActive="active" (click)="closeSidebar()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
@@ -22,29 +46,13 @@
                     </svg>
                     Users
                 </a>
-                <a class="nav-item" routerLink="/admin/categories" routerLinkActive="active">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 4h16v4H4z" />
-                        <path d="M4 12h16v4H4z" />
-                        <path d="M4 20h8v4H4z" />
-                    </svg>
-                    Categories
-                </a>
-                <a class="nav-item" routerLink="/admin/bookings" routerLinkActive="active">
+                <a class="nav-item" routerLink="/admin/bookings" routerLinkActive="active" (click)="closeSidebar()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="4" width="18" height="18" rx="2" />
                         <line x1="3" y1="10" x2="21" y2="10" />
                         <line x1="12" y1="2" x2="12" y2="6" />
                     </svg>
                     Bookings
-                </a>
-                <a class="nav-item" routerLink="/admin/analytics" routerLinkActive="active">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="20" x2="18" y2="10" />
-                        <line x1="12" y1="20" x2="12" y2="4" />
-                        <line x1="6" y1="20" x2="6" y2="14" />
-                    </svg>
-                    Analytics
                 </a>
             </nav>
         </aside>

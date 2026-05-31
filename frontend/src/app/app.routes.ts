@@ -39,6 +39,13 @@ export const routes: Routes = [
           import('./core/features/admin/users/users.component').then((m) => m.UsersComponent),
       },
       {
+        path: APP_ROUTES.ADMIN.EVENTS,
+        loadComponent: () =>
+          import('./core/features/admin/events/admin-events.component').then(
+            (m) => m.AdminEventsComponent,
+          ),
+      },
+      {
         path: APP_ROUTES.ADMIN.CATEGORIES,
         loadComponent: () =>
           import('./core/features/admin/categories/categories.component').then(
@@ -79,17 +86,25 @@ export const routes: Routes = [
           ),
       },
       {
-        path: APP_ROUTES.ORGANIZER.EVENTS,
-        loadComponent: () =>
-          import('./core/features/organizer/events/events.component').then(
-            (m) => m.EventsComponent,
-          ),
-      },
-      {
         path: APP_ROUTES.ORGANIZER.CREATE_EVENT,
         loadComponent: () =>
           import('./core/features/organizer/create-event/create-event.component').then(
             (m) => m.CreateEventComponent,
+          ),
+      },
+      {
+        path: APP_ROUTES.ORGANIZER.EDIT_EVENT,
+        loadComponent: () =>
+          import('./core/features/organizer/edit-event/edit-event.component').then(
+            (m) => m.EditEventComponent,
+          ),
+      },
+      {
+        path: APP_ROUTES.ORGANIZER.EVENTS,
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./core/features/organizer/events/events.component').then(
+            (m) => m.EventsComponent,
           ),
       },
       {

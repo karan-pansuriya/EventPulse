@@ -16,6 +16,9 @@ namespace EventPulse.DAL.Context
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<Event> Events => Set<Event>();
         public DbSet<Venue> Venues => Set<Venue>();
+        public DbSet<Country> Countries => Set<Country>();
+        public DbSet<State> States => Set<State>();
+        public DbSet<City> Cities => Set<City>();
         public DbSet<Booking> Bookings => Set<Booking>();
         public DbSet<EventPoster> EventPosters => Set<EventPoster>();
         public DbSet<Ticket> Tickets => Set<Ticket>();
@@ -127,6 +130,52 @@ namespace EventPulse.DAL.Context
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
 
+            // ── Country ────────────────────────────────────────────────────────
+            modelBuilder.Entity<Country>(entity =>
+            {
+                entity.ToTable("countries");
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Name).HasMaxLength(100).IsRequired();
+                entity.HasIndex(c => c.Name).IsUnique();
+                entity.Property(c => c.CreatedAt).HasDefaultValueSql("now()");
+                entity.Property(c => c.IsDeleted).HasDefaultValue(false);
+                entity.HasQueryFilter(c => !c.IsDeleted);
+            });
+
+            // ── State ───────────────────────────────────────────────────────────
+            modelBuilder.Entity<State>(entity =>
+            {
+                entity.ToTable("states");
+                entity.HasKey(s => s.Id);
+                entity.Property(s => s.Name).HasMaxLength(100).IsRequired();
+                entity.Property(s => s.CreatedAt).HasDefaultValueSql("now()");
+                entity.Property(s => s.IsDeleted).HasDefaultValue(false);
+
+                entity.HasOne(s => s.Country)
+                      .WithMany(c => c.States)
+                      .HasForeignKey(s => s.CountryId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasQueryFilter(s => !s.IsDeleted);
+            });
+
+            // ── City ────────────────────────────────────────────────────────────
+            modelBuilder.Entity<City>(entity =>
+            {
+                entity.ToTable("cities");
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Name).HasMaxLength(100).IsRequired();
+                entity.Property(c => c.CreatedAt).HasDefaultValueSql("now()");
+                entity.Property(c => c.IsDeleted).HasDefaultValue(false);
+
+                entity.HasOne(c => c.State)
+                      .WithMany(s => s.Cities)
+                      .HasForeignKey(c => c.StateId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasQueryFilter(c => !c.IsDeleted);
+            });
+
             // ── Venue ─────────────────────────────────────────────────────────
             modelBuilder.Entity<Venue>(entity =>
             {
@@ -136,6 +185,11 @@ namespace EventPulse.DAL.Context
                 entity.Property(v => v.UpdatedAt).HasDefaultValueSql("now()");
                 entity.Property(v => v.IsActive).HasDefaultValue(true);
                 entity.Property(v => v.IsDeleted).HasDefaultValue(false);
+
+                entity.HasOne(v => v.City)
+                      .WithMany(c => c.Venues)
+                      .HasForeignKey(v => v.CityId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasQueryFilter(v => !v.IsDeleted);
             });

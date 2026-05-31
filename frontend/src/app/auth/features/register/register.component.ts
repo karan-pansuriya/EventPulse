@@ -105,10 +105,8 @@ export class RegisterComponent implements OnInit {
       )
       .subscribe({
         next: () => {
-          const user = this.authService.user();
-          if (user?.roleIds.includes(RoleId.Admin)) this.router.navigate(['/admin/dashboard']);
-          else if (user?.roleIds.includes(RoleId.Organizer)) this.router.navigate(['/organizer/dashboard']);
-          else this.router.navigate(['/attendee/home']);
+          this.toast.success('Account created successfully. Please sign in.', 'Success');
+          this.router.navigate(['/login']);
         },
         error: (err) => {
           const message = (err as { error?: { message?: string } })?.error?.message;

@@ -1,0 +1,58 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1>Categories</h1>
+    <button class="btn btn-primary add-btn" (click)="openAddModal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+      Add Category
+    </button>
+  </div>
+
+  <app-grid
+    [columns]="columns"
+    [data]="categories"
+    [totalRecords]="0"
+    [trackByField]="'id'"
+    [isLoading]="loading"
+    [errorMessage]="error"
+    [actionItems]="getRowActionItems"
+    (edit)="onEdit($event)"
+    (delete)="onDelete($event)"
+  />
+</div>
+
+@if (showModal) {
+  <div class="modal-backdrop fade show" (click)="cancelModal()"></div>
+  <div class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ modalMode === 'add' ? 'Add' : 'Edit' }} Category</h5>
+          <button type="button" class="btn-close" (click)="cancelModal()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Category Name</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="formName"
+              placeholder="Enter category name"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancelModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving || !formName.trim()">
+            @if (saving) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            {{ modalMode === 'add' ? 'Add' : 'Save' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

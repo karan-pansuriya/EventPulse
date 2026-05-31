@@ -15,7 +15,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     {
         return await _context.Events
             .Include(e => e.Category)
-            .Include(e => e.Venue)
+            .Include(e => e.Venue).ThenInclude(v => v!.City).ThenInclude(c => c!.State).ThenInclude(s => s!.Country)
             .Include(e => e.Posters)
             .Include(e => e.Organizer)
             .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
@@ -36,7 +36,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
             query = query.Where(e => e.CategoryId == filter.CategoryId.Value);
 
         if (!string.IsNullOrWhiteSpace(filter.City))
-            query = query.Where(e => e.Venue != null && e.Venue.City.ToLower().Contains(filter.City.ToLower()));
+            query = query.Where(e => e.Venue != null && e.Venue.City != null && e.Venue.City.Name.ToLower().Contains(filter.City.ToLower()));
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
         {
@@ -66,42 +66,59 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
             .Skip((filter.PageNumber - 1) * filter.PageSize)
             .Take(filter.PageSize)
             .Include(e => e.Category)
-            .Include(e => e.Venue)
+            .Include(e => e.Venue).ThenInclude(v => v!.City).ThenInclude(c => c!.State).ThenInclude(s => s!.Country)
             .Include(e => e.Posters)
             .ToListAsync();
 
         return (items, totalCount);
     }
 
-    public async Task<Venue?> ResolveVenueAsync(string? name, string? address, string? city, string? state, string? country)
+    public async Task<Venue?> ResolveVenueAsync(string? name, string? address, int? cityId)
     {
         if (string.IsNullOrWhiteSpace(name))
             return null;
 
         Venue? existing = await _context.Venues
+            .Include(v => v.City).ThenInclude(c => c!.State).ThenInclude(s => s!.Country)
             .FirstOrDefaultAsync(v => v.Name.ToLower() == name.ToLower() && !v.IsDeleted);
 
         if (existing != null)
         {
             existing.Address = address ?? existing.Address;
-            existing.City = city ?? existing.City;
-            existing.State = state ?? existing.State;
-            existing.Country = country ?? existing.Country;
+            if (cityId.HasValue && cityId.Value > 0)
+                existing.CityId = cityId.Value;
             return existing;
         }
+
+        City? city = cityId.HasValue
+            ? await _context.Cities
+                .Include(c => c.State).ThenInclude(s => s!.Country)
+                .FirstOrDefaultAsync(c => c.Id == cityId.Value)
+            : null;
+
+        if (city is null)
+            throw new InvalidOperationException("Selected city not found.");
 
         Venue venue = new Venue
         {
             Name = name,
             Address = address ?? string.Empty,
-            City = city ?? string.Empty,
-            State = state,
-            Country = country ?? string.Empty,
+            CityId = city.Id,
             IsActive = true,
         };
 
         _context.Venues.Add(venue);
         return venue;
+    }
+
+    public async Task<List<Booking>> GetBookingsByOrganizerIdAsync(int organizerId)
+    {
+        return await _context.Bookings
+            .Where(b => !b.IsDeleted && b.Event!.OrganizerId == organizerId)
+            .Include(b => b.User)
+            .Include(b => b.Event)
+            .OrderByDescending(b => b.CreatedAt)
+            .ToListAsync();
     }
 
     public async Task<List<EventPoster>> GetActivePostersByEventIdAsync(int eventId)

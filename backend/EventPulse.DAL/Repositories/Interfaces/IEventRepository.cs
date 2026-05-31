@@ -9,7 +9,8 @@ public interface IEventRepository
 
     Task<(List<Event> Items, int TotalCount)> GetPagedEventsAsync(EventFilterRequest filter);
 
-    Task<Venue?> ResolveVenueAsync(string? name, string? address, string? city, string? state, string? country);
+    Task<Venue?> ResolveVenueAsync(string? name, string? address, int? cityId);
 
     Task<List<EventPoster>> GetActivePostersByEventIdAsync(int eventId);
+    Task<List<Booking>> GetBookingsByOrganizerIdAsync(int organizerId);
 }

@@ -25,4 +25,6 @@ public interface IBookingRepository
     Task<List<Booking>> GetUserBookingsAsync(int userId, int bookingId);
 
     Task<List<Booking>> GetUserAllBookingsAsync(int userId);
+
+    Task<List<Booking>> GetAllBookingsAsync();
 }

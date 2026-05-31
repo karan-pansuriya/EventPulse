@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, inject } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
 import { RoleId } from '../../../auth/models/auth.models';
@@ -15,6 +15,9 @@ export class HeaderComponent {
   private router = inject(Router);
   private elementRef = inject(ElementRef);
 
+  @Input() mode: 'customer' | 'admin' = 'customer';
+  @Output() toggleSidebar = new EventEmitter<void>();
+
   dropdownOpen = false;
 
   get userName(): string {
@@ -29,11 +32,20 @@ export class HeaderComponent {
       : name.substring(0, 2).toUpperCase();
   }
 
+  get isCustomer(): boolean {
+    const roleIds = this.authService.user()?.roleIds || [];
+    return roleIds.includes(RoleId.Customer);
+  }
+
   get profileRoute(): string {
     const roleIds = this.authService.user()?.roleIds || [];
     if (roleIds.includes(RoleId.Admin)) return '/admin/profile';
     if (roleIds.includes(RoleId.Organizer)) return '/organizer/profile';
     return '/attendee/profile';
+  }
+
+  onToggleSidebar(): void {
+    this.toggleSidebar.emit();
   }
 
   toggleDropdown(): void {

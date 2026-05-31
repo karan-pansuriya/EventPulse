@@ -20,6 +20,22 @@ public class EventsController : BaseHelper
         _eventService = eventService;
     }
 
+    [Authorize(Policy = "AdminOnly")]
+    [HttpGet("admin/all")]
+    public async Task<IActionResult> GetAllEventsForAdmin([FromQuery] PageRequest pageRequest)
+    {
+        PagedResult<EventListResponse> result = await _eventService.GetAllEventsAsync(pageRequest);
+        return SuccessResponse(result);
+    }
+
+    [Authorize(Policy = "AdminOnly")]
+    [HttpPut("{id}/verify")]
+    public async Task<IActionResult> ToggleVerification(int id)
+    {
+        await _eventService.ToggleVerificationAsync(id);
+        return SuccessResponse("Event verification status updated.");
+    }
+
     [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetEventById(int id)
@@ -56,6 +72,13 @@ public class EventsController : BaseHelper
     {
         List<(byte[] ImageBytes, string FileName)> files = await ReadFormFilesAsync(posterImages);
         EventResponse result = await _eventService.UpdateAsync(id, dto, files);
+        return SuccessResponse(result);
+    }
+
+    [HttpGet("attendees")]
+    public async Task<IActionResult> GetAttendees()
+    {
+        List<EventAttendeeDto> result = await _eventService.GetAttendeesAsync();
         return SuccessResponse(result);
     }
 

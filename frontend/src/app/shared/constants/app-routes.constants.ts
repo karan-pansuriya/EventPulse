@@ -28,7 +28,7 @@ export const APP_ROUTES = {
       CREATE_EVENT: 'events/create',
       EDIT_EVENT: 'events/edit/:id',
       EVENT_DETAILS: 'events/:id',
-      ATTENDEES: 'attendees/:eventId',
+      ATTENDEES: 'attendees',
       SALES_ANALYTICS: 'analytics',
       CHECK_IN: 'check-in',
       PROFILE: 'profile',

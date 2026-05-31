@@ -1,0 +1,18 @@
+<div class="container my-4">
+  <div class="d-flex align-items-center gap-2 mb-4">
+    <i class="bi bi-people fs-5 fs-md-2"></i>
+    <h4 class="mb-0 fs-5 fs-md-2">Attendees</h4>
+  </div>
+
+  <app-grid
+    [columns]="columns"
+    [data]="gridData"
+    [totalRecords]="totalRecords"
+    [currentPage]="1"
+    [pageSize]="pageSize"
+    [trackByField]="'bookingId'"
+    [isLoading]="isLoading"
+    [errorMessage]="errorMessage"
+    [actionItems]="[]"
+  />
+</div>

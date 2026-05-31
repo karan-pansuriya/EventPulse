@@ -167,6 +167,16 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
             .ToListAsync();
     }
 
+    public async Task<List<Booking>> GetAllBookingsAsync()
+    {
+        return await _context.Bookings
+            .Where(b => b.PaymentStatus == PaymentStatus.Paid && !b.IsDeleted)
+            .Include(b => b.User)
+            .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
+            .OrderByDescending(b => b.CreatedAt)
+            .ToListAsync();
+    }
+
     public async Task<List<Booking>> GetUserAllBookingsAsync(int userId)
     {
         return await _context.Bookings

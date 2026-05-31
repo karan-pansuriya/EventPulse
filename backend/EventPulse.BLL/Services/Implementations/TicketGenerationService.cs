@@ -64,7 +64,7 @@ public class TicketGenerationService : ITicketGenerationService
             ? $"{booking.Event.StartTime.Hours:D2}:{booking.Event.StartTime.Minutes:D2}"
             : "";
         string venueName  = booking.Event?.Venue?.Name ?? "";
-        string venueCity  = booking.Event?.Venue?.City ?? "";
+        string venueCity  = booking.Event?.Venue?.City?.Name ?? "";
         string location   = string.Join(", ",
             new[] { venueName, venueCity }.Where(s => !string.IsNullOrWhiteSpace(s)));
 
