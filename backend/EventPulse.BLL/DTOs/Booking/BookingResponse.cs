@@ -13,6 +13,7 @@ public class BookingResponse
     public string PaymentStatus { get; set; } = string.Empty;
     public string BookingStatus { get; set; } = string.Empty;
     public string? PaymentRef { get; set; }
+    public List<TicketDto> Tickets { get; set; } = [];
     public List<string> TicketCodes { get; set; } = [];
     public int RemainingSeats { get; set; }
     public DateTime CreatedAt { get; set; }

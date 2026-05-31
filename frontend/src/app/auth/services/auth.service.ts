@@ -56,10 +56,6 @@ export class AuthService {
     };
     return this.http.post<ApiResponse<TokenResponse>>(`${this.baseUrl}/register`, body).pipe(
       map((res) => res.data!),
-      tap((tokens) => {
-        this.handleTokens(tokens);
-        this.toast.success('Account created successfully.', 'Success');
-      }),
     );
   }
 

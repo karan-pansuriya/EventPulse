@@ -23,6 +23,9 @@ export interface EventDetailResponse {
   venueName: string | null;
   venueAddress: string | null;
   venueCity: string | null;
+  venueState: string | null;
+  venueCountry: string | null;
+  cityId: number | null;
   title: string;
   description: string | null;
   genre: string | null;

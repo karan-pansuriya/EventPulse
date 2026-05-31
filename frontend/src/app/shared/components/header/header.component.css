@@ -3,7 +3,7 @@
     align-items: center;
     justify-content: space-between;
     height: 60px;
-    padding: 0 24px;
+    padding: 0 16px;
     background: #ffffff;
     border-bottom: 1px solid #e5e7eb;
     position: sticky;
@@ -11,11 +11,47 @@
     z-index: 100;
 }
 
+@media (min-width: 576px) {
+    .app-header {
+        padding: 0 24px;
+    }
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .brand-name {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #7c3aed;
     letter-spacing: -0.02em;
+}
+
+@media (min-width: 576px) {
+.sidebar-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #374151;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.sidebar-toggle-btn:hover {
+    background: #f3f4f6;
+}
+
+.brand-name {
+        font-size: 1.25rem;
+    }
 }
 
 .header-right {

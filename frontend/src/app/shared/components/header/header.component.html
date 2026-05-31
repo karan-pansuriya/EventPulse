@@ -1,17 +1,29 @@
 <header class="app-header">
     <div class="header-left">
+        @if (mode === 'admin') {
+            <button class="sidebar-toggle-btn" (click)="onToggleSidebar()" aria-label="Toggle sidebar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+            </button>
+        }
         <span class="brand-name">EventPulse</span>
     </div>
     <div class="header-right">
         <div class="profile-section" (click)="toggleDropdown()" tabindex="0">
             <div class="avatar">{{ initials }}</div>
-            <span class="user-name">{{ userName }}</span>
+            <span class="user-name d-none d-sm-inline">{{ userName }}</span>
             <svg class="chevron" [class.open]="dropdownOpen" width="14" height="14" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2">
                 <polyline points="6 9 12 15 18 9" />
             </svg>
             <div class="dropdown-menu" [class.open]="dropdownOpen" (click)="$event.stopPropagation()">
                 <a class="dropdown-item" [routerLink]="profileRoute">My Profile</a>
+                @if (isCustomer) {
+                  <a class="dropdown-item" routerLink="/attendee/my-tickets">My Tickets</a>
+                }
                 <div class="dropdown-divider"></div>
                 <button class="dropdown-item logout" (click)="logout()">Logout</button>
             </div>

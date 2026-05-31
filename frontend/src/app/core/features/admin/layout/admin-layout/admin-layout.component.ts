@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { HeaderComponent } from '../../../../../shared/components/header/header.component';
 
@@ -9,4 +9,21 @@ import { HeaderComponent } from '../../../../../shared/components/header/header.
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.css',
 })
-export class AdminLayoutComponent {}
+export class AdminLayoutComponent {
+  sidebarOpen = window.innerWidth >= 768;
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen = false;
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    if (window.innerWidth >= 768) {
+      this.sidebarOpen = false;
+    }
+  }
+}

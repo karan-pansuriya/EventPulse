@@ -29,12 +29,12 @@ const DEFAULT_ACTIONS: GridActionItem[] = [
   templateUrl: './grid.component.html',
   styleUrls: ['./grid.component.css'],
 })
-export class GridComponent<T extends Record<string, unknown>> implements OnInit, OnDestroy {
+export class GridComponent<T> implements OnInit, OnDestroy {
   @Input() columns: GridColumn[] = [];
   @Input() data: T[] = [];
   @Input() totalRecords = 0;
   @Input() currentPage = 1;
-  @Input() trackByField!: keyof T;
+  @Input() trackByField!: string;
   @Input() pageSize: number = 10;
   @Input() actionItems: GridActionItem[] | ((row: T) => GridActionItem[]) = DEFAULT_ACTIONS;
   @Input() actionTemplate?: TemplateRef<{ $implicit: T }>;
@@ -92,7 +92,7 @@ export class GridComponent<T extends Record<string, unknown>> implements OnInit,
   }
 
   trackByFn = (index: number, item: T) => {
-    return this.trackByField ? item[this.trackByField] : index;
+    return this.trackByField ? (item as any)[this.trackByField] : index;
   };
 
   get totalPages(): number {
@@ -145,5 +145,9 @@ export class GridComponent<T extends Record<string, unknown>> implements OnInit,
 
   asDate(value: unknown): string | number | Date | null {
     return value as string | number | Date | null;
+  }
+
+  getFieldValue(row: T, field: string): unknown {
+    return (row as any)[field];
   }
 }

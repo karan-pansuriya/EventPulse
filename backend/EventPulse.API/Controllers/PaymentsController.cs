@@ -21,8 +21,7 @@ public class PaymentsController : BaseHelper
     [HttpPost("create-intent")]
     public async Task<IActionResult> CreatePaymentIntent([FromBody] CreatePaymentIntentRequest request)
     {
-        int userId = GetUserId();
-        PaymentIntentResponse result = await _paymentService.CreatePaymentIntentAsync(request, userId);
+        PaymentIntentResponse result = await _paymentService.CreatePaymentIntentAsync(request);
         return SuccessResponse(result);
     }
 

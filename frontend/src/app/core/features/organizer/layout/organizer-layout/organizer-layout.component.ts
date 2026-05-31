@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { HeaderComponent } from '../../../../../shared/components/header/header.component';
 @Component({
@@ -8,4 +8,21 @@ import { HeaderComponent } from '../../../../../shared/components/header/header.
   templateUrl: './organizer-layout.component.html',
   styleUrl: './organizer-layout.component.css',
 })
-export class OrganizerLayoutComponent {}
+export class OrganizerLayoutComponent {
+  sidebarOpen = window.innerWidth >= 768;
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen = false;
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    if (window.innerWidth >= 768) {
+      this.sidebarOpen = false;
+    }
+  }
+}

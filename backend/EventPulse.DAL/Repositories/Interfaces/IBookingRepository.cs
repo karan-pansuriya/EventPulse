@@ -17,4 +17,14 @@ public interface IBookingRepository
     Task<Booking?> GetByPaymentIntentAsync(string paymentIntentId);
 
     Task<Booking?> GetBookingWithDetailsAsync(int bookingId);
+
+    Task<Booking?> GetBookingByTicketIdAsync(int ticketId);
+
+    Task UpdateTicketPathsAsync(ICollection<DAL.Entities.Ticket> tickets);
+
+    Task<List<Booking>> GetUserBookingsAsync(int userId, int bookingId);
+
+    Task<List<Booking>> GetUserAllBookingsAsync(int userId);
+
+    Task<List<Booking>> GetAllBookingsAsync();
 }

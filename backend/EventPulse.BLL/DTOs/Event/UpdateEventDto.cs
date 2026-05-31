@@ -14,17 +14,7 @@ public class UpdateEventDto
     [RegularExpression(@"^[A-Za-z0-9\s.,#'\-]{5,200}$", ErrorMessage = "Venue address must be 5-200 characters and valid symbols only.")]
     public string? VenueAddress { get; set; }
 
-    [MaxLength(100)]
-    [RegularExpression(@"^[A-Za-z\s'\-]{2,100}$", ErrorMessage = "City must be 2-100 letters.")]
-    public string? VenueCity { get; set; }
-
-    [MaxLength(100)]
-    [RegularExpression(@"^[A-Za-z\s'\-]{0,100}$", ErrorMessage = "State must be letters only.")]
-    public string? VenueState { get; set; }
-
-    [MaxLength(100)]
-    [RegularExpression(@"^[A-Za-z\s'\-]{2,100}$", ErrorMessage = "Country must be 2-100 letters.")]
-    public string? VenueCountry { get; set; }
+    public int? CityId { get; set; }
 
     [Required]
     [MaxLength(200)]
@@ -64,4 +54,6 @@ public class UpdateEventDto
     [Required]
     [Range(1, int.MaxValue)]
     public int TotalSeats { get; set; }
+
+    public List<string> RemovePosterUrls { get; set; } = [];
 }

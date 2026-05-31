@@ -14,16 +14,10 @@ namespace EventPulse.DAL.Entities
         [Required]
         public string Address { get; set; } = string.Empty;
 
-        [Required]
-        [MaxLength(100)]
-        public string City { get; set; } = string.Empty;
+        public int? CityId { get; set; }
 
-        [MaxLength(100)]
-        public string? State { get; set; }
-
-        [Required]
-        [MaxLength(100)]
-        public string Country { get; set; } = string.Empty;
+        [ForeignKey(nameof(CityId))]
+        public virtual City? City { get; set; }
 
         public decimal? Latitude { get; set; }
 
@@ -32,3 +26,4 @@ namespace EventPulse.DAL.Entities
         public virtual ICollection<Event> Events { get; set; } = new List<Event>();
     }
 }
+

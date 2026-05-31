@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using AutoMapper;
 using EventPulse.BLL.Common;
+using Microsoft.AspNetCore.Http;
 using EventPulse.BLL.DTOs.Event;
 using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
@@ -20,6 +22,7 @@ public class EventService : IEventService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IImageService _imageService;
     private readonly IMapper _mapper;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public EventService(
         IGenericRepository<Event> eventRepo,
@@ -27,7 +30,8 @@ public class EventService : IEventService
         IEventRepository eventRepository,
         IUnitOfWork unitOfWork,
         IImageService imageService,
-        IMapper mapper)
+        IMapper mapper,
+        IHttpContextAccessor httpContextAccessor)
     {
         _eventRepo = eventRepo;
         _posterRepo = posterRepo;
@@ -35,15 +39,38 @@ public class EventService : IEventService
         _unitOfWork = unitOfWork;
         _imageService = imageService;
         _mapper = mapper;
+        _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<EventResponse> GetByIdAsync(int id, int? userId = null, int? userRoleId = null)
+    private int GetUserId()
+    {
+        Claim? claim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)
+                 ?? _httpContextAccessor.HttpContext?.User.FindFirst("sub");
+        if (claim == null || !int.TryParse(claim.Value, out int id))
+            throw new UnauthorizedAccessException("User ID not found in token.");
+        return id;
+    }
+
+    private int? GetActiveRoleId()
+    {
+        string? value = _httpContextAccessor.HttpContext?.User.FindFirst("active_role_id")?.Value;
+        if (int.TryParse(value, out int roleId) && roleId > 0)
+            return roleId;
+        return null;
+    }
+
+    public async Task<EventResponse> GetByIdAsync(int id)
     {
         Event eventEntity = await _eventRepository.GetEventWithDetailsAsync(id)
             ?? throw new NotFoundException("Event not found.");
 
-        if (userRoleId == RoleId.Organizer && eventEntity.OrganizerId != userId)
-            throw new ForbiddenException("You are not authorized to view this event.");
+        int? userRoleId = GetActiveRoleId();
+        if (userRoleId == RoleId.Organizer)
+        {
+            int userId = GetUserId();
+            if (eventEntity.OrganizerId != userId)
+                throw new ForbiddenException("You are not authorized to view this event.");
+        }
 
         return _mapper.Map<EventResponse>(eventEntity);
     }
@@ -75,10 +102,11 @@ public class EventService : IEventService
         };
     }
 
-    public async Task<PagedResult<EventListResponse>> GetMyEventsAsync(int organizerId, PageRequest pageRequest)
+    public async Task<PagedResult<EventListResponse>> GetMyEventsAsync(PageRequest pageRequest)
     {
+        int organizerId = GetUserId();
         return await _eventRepo.GetPagedAsync(
-            e => e.OrganizerId == organizerId,
+            e => e.OrganizerId == organizerId && !e.IsDeleted,
             e => new EventListResponse
             {
                 Id = e.Id,
@@ -97,12 +125,69 @@ public class EventService : IEventService
             pageRequest);
     }
 
-    public async Task<EventResponse> CreateAsync(int organizerId, CreateEventDto dto, List<(byte[] ImageBytes, string FileName)>? posterImages)
+    public async Task<PagedResult<EventListResponse>> GetAllEventsAsync(PageRequest pageRequest)
     {
+        return await _eventRepo.GetPagedAsync(
+            e => !e.IsDeleted,
+            e => new EventListResponse
+            {
+                Id = e.Id,
+                Title = e.Title,
+                CategoryName = e.Category != null ? e.Category.Name : null,
+                VenueId = e.VenueId,
+                VenueName = e.Venue != null ? e.Venue.Name : null,
+                EventDate = e.EventDate,
+                StartTime = e.StartTime,
+                Price = e.Price,
+                TotalSeats = e.TotalSeats,
+                IsVerified = e.IsVerified,
+                IsActive = e.IsActive,
+                PosterUrl = e.Posters.Select(p => p.PosterUrl).FirstOrDefault(),
+            },
+            pageRequest);
+    }
+
+    public async Task ToggleVerificationAsync(int id)
+    {
+        Event? eventEntity = await _eventRepo.GetByIdAsync(id)
+            ?? throw new NotFoundException("Event not found.");
+
+        eventEntity.IsVerified = !eventEntity.IsVerified;
+        _eventRepo.Update(eventEntity);
+        await _unitOfWork.SaveAsync();
+    }
+
+    public async Task<List<EventAttendeeDto>> GetAttendeesAsync()
+    {
+        int organizerId = GetUserId();
+
+        List<Booking> bookings = await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId);
+
+        return bookings.Where(b => b.User != null && b.Event != null).Select(b => new EventAttendeeDto
+        {
+            BookingId = b.Id,
+            UserId = b.UserId,
+            CustomerName = b.User.Name,
+            CustomerEmail = b.User.Email,
+            CustomerPhone = b.User.Phone,
+            EventId = b.EventId,
+            EventTitle = b.Event.Title,
+            Quantity = b.Quantity,
+            TotalAmount = b.TotalAmount,
+            PaymentStatus = b.PaymentStatus.ToString(),
+            BookingStatus = b.BookingStatus.ToString(),
+            BookedAt = b.CreatedAt,
+        }).ToList();
+    }
+
+    public async Task<EventResponse> CreateAsync(CreateEventDto dto, List<(byte[] ImageBytes, string FileName)>? posterImages)
+    {
+        int organizerId = GetUserId();
+
         if (posterImages?.Count > MaxPosterImages)
             throw new BadRequestException($"Maximum {MaxPosterImages} poster images allowed.");
 
-        Venue? venue = await _eventRepository.ResolveVenueAsync(dto.VenueName, dto.VenueAddress, dto.VenueCity, dto.VenueState, dto.VenueCountry);
+        Venue? venue = await _eventRepository.ResolveVenueAsync(dto.VenueName, dto.VenueAddress, dto.CityId);
         if (venue != null && venue.Id == 0)
         {
             await _unitOfWork.SaveAsync();
@@ -147,8 +232,11 @@ public class EventService : IEventService
         return await GetByIdAsync(eventEntity.Id);
     }
 
-    public async Task<EventResponse> UpdateAsync(int id, int userId, int userRoleId, UpdateEventDto dto, List<(byte[] ImageBytes, string FileName)>? posterImages)
+    public async Task<EventResponse> UpdateAsync(int id, UpdateEventDto dto, List<(byte[] ImageBytes, string FileName)>? posterImages)
     {
+        int userId = GetUserId();
+        int userRoleId = GetActiveRoleId() ?? throw new UnauthorizedAccessException("Active role not found.");
+
         if (posterImages?.Count > MaxPosterImages)
             throw new BadRequestException($"Maximum {MaxPosterImages} poster images allowed.");
 
@@ -158,7 +246,7 @@ public class EventService : IEventService
         if (userRoleId != RoleId.Admin && eventEntity.OrganizerId != userId)
             throw new ForbiddenException("You are not authorized to update this event.");
 
-        Venue? venue = await _eventRepository.ResolveVenueAsync(dto.VenueName, dto.VenueAddress, dto.VenueCity, dto.VenueState, dto.VenueCountry);
+        Venue? venue = await _eventRepository.ResolveVenueAsync(dto.VenueName, dto.VenueAddress, dto.CityId);
         if (venue != null && venue.Id == 0)
         {
             await _unitOfWork.SaveAsync();
@@ -178,6 +266,18 @@ public class EventService : IEventService
         eventEntity.TotalSeats = dto.TotalSeats;
 
         _eventRepo.Update(eventEntity);
+
+        if (dto.RemovePosterUrls is { Count: > 0 })
+        {
+            List<EventPoster> allPosters = await _eventRepository.GetActivePostersByEventIdAsync(id);
+            List<EventPoster> toRemove = allPosters.Where(p => dto.RemovePosterUrls.Contains(p.PosterUrl)).ToList();
+
+            foreach (EventPoster ep in toRemove)
+            {
+                _imageService.DeleteImage(ep.PosterUrl);
+                _posterRepo.Delete(ep);
+            }
+        }
 
         if (posterImages is { Count: > 0 })
         {
@@ -206,8 +306,11 @@ public class EventService : IEventService
         return await GetByIdAsync(id);
     }
 
-    public async Task DeleteAsync(int id, int userId, int userRoleId)
+    public async Task DeleteAsync(int id)
     {
+        int userId = GetUserId();
+        int userRoleId = GetActiveRoleId() ?? throw new UnauthorizedAccessException("Active role not found.");
+
         Event? eventEntity = await _eventRepo.GetByIdAsync(id)
             ?? throw new NotFoundException("Event not found.");
 

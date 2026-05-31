@@ -11,6 +11,9 @@ public class EventResponse
     public string? VenueName { get; set; }
     public string? VenueAddress { get; set; }
     public string? VenueCity { get; set; }
+    public string? VenueState { get; set; }
+    public string? VenueCountry { get; set; }
+    public int? CityId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string? Genre { get; set; }

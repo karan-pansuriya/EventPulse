@@ -364,6 +364,91 @@ namespace EventPulse.DAL.Migrations
                         });
                 });
 
+            modelBuilder.Entity("EventPulse.DAL.Entities.City", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("StateId")
+                        .HasColumnType("integer")
+                        .HasColumnName("state_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_cities");
+
+                    b.HasIndex("StateId")
+                        .HasDatabaseName("ix_cities_state_id");
+
+                    b.ToTable("cities", (string)null);
+                });
+
+            modelBuilder.Entity("EventPulse.DAL.Entities.Country", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_countries");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_countries_name");
+
+                    b.ToTable("countries", (string)null);
+                });
+
             modelBuilder.Entity("EventPulse.DAL.Entities.Event", b =>
                 {
                     b.Property<int>("Id")
@@ -631,6 +716,50 @@ namespace EventPulse.DAL.Migrations
                         });
                 });
 
+            modelBuilder.Entity("EventPulse.DAL.Entities.State", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CountryId")
+                        .HasColumnType("integer")
+                        .HasColumnName("country_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_states");
+
+                    b.HasIndex("CountryId")
+                        .HasDatabaseName("ix_states_country_id");
+
+                    b.ToTable("states", (string)null);
+                });
+
             modelBuilder.Entity("EventPulse.DAL.Entities.Ticket", b =>
                 {
                     b.Property<int>("Id")
@@ -658,9 +787,17 @@ namespace EventPulse.DAL.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
+                    b.Property<string>("PdfPath")
+                        .HasColumnType("text")
+                        .HasColumnName("pdf_path");
+
                     b.Property<string>("QrCode")
                         .HasColumnType("text")
                         .HasColumnName("qr_code");
+
+                    b.Property<string>("QrCodePath")
+                        .HasColumnType("text")
+                        .HasColumnName("qr_code_path");
 
                     b.Property<string>("TicketCode")
                         .IsRequired()
@@ -784,17 +921,9 @@ namespace EventPulse.DAL.Migrations
                         .HasColumnType("text")
                         .HasColumnName("address");
 
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("city");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("country");
+                    b.Property<int?>("CityId")
+                        .HasColumnType("integer")
+                        .HasColumnName("city_id");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -828,11 +957,6 @@ namespace EventPulse.DAL.Migrations
                         .HasColumnType("character varying(150)")
                         .HasColumnName("name");
 
-                    b.Property<string>("State")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("state");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -841,6 +965,9 @@ namespace EventPulse.DAL.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_venues");
+
+                    b.HasIndex("CityId")
+                        .HasDatabaseName("ix_venues_city_id");
 
                     b.ToTable("venues", (string)null);
                 });
@@ -864,6 +991,18 @@ namespace EventPulse.DAL.Migrations
                     b.Navigation("Event");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EventPulse.DAL.Entities.City", b =>
+                {
+                    b.HasOne("EventPulse.DAL.Entities.State", "State")
+                        .WithMany("Cities")
+                        .HasForeignKey("StateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_cities_states_state_id");
+
+                    b.Navigation("State");
                 });
 
             modelBuilder.Entity("EventPulse.DAL.Entities.Event", b =>
@@ -918,6 +1057,18 @@ namespace EventPulse.DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("EventPulse.DAL.Entities.State", b =>
+                {
+                    b.HasOne("EventPulse.DAL.Entities.Country", "Country")
+                        .WithMany("States")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_states_countries_country_id");
+
+                    b.Navigation("Country");
+                });
+
             modelBuilder.Entity("EventPulse.DAL.Entities.Ticket", b =>
                 {
                     b.HasOne("EventPulse.DAL.Entities.Booking", "Booking")
@@ -951,6 +1102,17 @@ namespace EventPulse.DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("EventPulse.DAL.Entities.Venue", b =>
+                {
+                    b.HasOne("EventPulse.DAL.Entities.City", "City")
+                        .WithMany("Venues")
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_venues_cities_city_id");
+
+                    b.Navigation("City");
+                });
+
             modelBuilder.Entity("EventPulse.DAL.Entities.Booking", b =>
                 {
                     b.Navigation("Tickets");
@@ -959,6 +1121,16 @@ namespace EventPulse.DAL.Migrations
             modelBuilder.Entity("EventPulse.DAL.Entities.Category", b =>
                 {
                     b.Navigation("Events");
+                });
+
+            modelBuilder.Entity("EventPulse.DAL.Entities.City", b =>
+                {
+                    b.Navigation("Venues");
+                });
+
+            modelBuilder.Entity("EventPulse.DAL.Entities.Country", b =>
+                {
+                    b.Navigation("States");
                 });
 
             modelBuilder.Entity("EventPulse.DAL.Entities.Event", b =>
@@ -971,6 +1143,11 @@ namespace EventPulse.DAL.Migrations
             modelBuilder.Entity("EventPulse.DAL.Entities.Role", b =>
                 {
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("EventPulse.DAL.Entities.State", b =>
+                {
+                    b.Navigation("Cities");
                 });
 
             modelBuilder.Entity("EventPulse.DAL.Entities.User", b =>

@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using AutoMapper;
 using EventPulse.BLL.DTOs.Booking;
+using Microsoft.AspNetCore.Http;
 using EventPulse.BLL.DTOs.Payment;
 using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
@@ -18,22 +20,38 @@ public class PaymentService : IPaymentService
     private readonly IMapper _mapper;
     private readonly StripeSettings _stripeSettings;
     private readonly ISeatUpdateNotifier _seatNotifier;
+    private readonly ITicketGenerationService _ticketGenerationService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public PaymentService(
         IBookingRepository bookingRepository,
         IMapper mapper,
         IOptions<StripeSettings> stripeSettings,
-        ISeatUpdateNotifier seatNotifier)
+        ISeatUpdateNotifier seatNotifier,
+        ITicketGenerationService ticketGenerationService,
+        IHttpContextAccessor httpContextAccessor)
     {
         _bookingRepository = bookingRepository;
         _mapper = mapper;
         _stripeSettings = stripeSettings.Value;
         _seatNotifier = seatNotifier;
+        _ticketGenerationService = ticketGenerationService;
+        _httpContextAccessor = httpContextAccessor;
         StripeConfiguration.ApiKey = _stripeSettings.SecretKey;
     }
 
-    public async Task<PaymentIntentResponse> CreatePaymentIntentAsync(CreatePaymentIntentRequest request, int userId)
+    private int GetUserId()
     {
+        Claim? claim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)
+                 ?? _httpContextAccessor.HttpContext?.User.FindFirst("sub");
+        if (claim == null || !int.TryParse(claim.Value, out int id))
+            throw new UnauthorizedAccessException("User ID not found in token.");
+        return id;
+    }
+
+    public async Task<PaymentIntentResponse> CreatePaymentIntentAsync(CreatePaymentIntentRequest request)
+    {
+        int userId = GetUserId();
         if (request.Quantity < 1)
             throw new BadRequestException("Quantity must be at least 1.");
 
@@ -89,6 +107,12 @@ public class PaymentService : IPaymentService
 
         Booking? bookingWithDetails = await _bookingRepository.GetBookingWithDetailsAsync(booking.Id);
 
+        if (bookingWithDetails?.Tickets.Count > 0)
+        {
+            await _ticketGenerationService.GenerateTicketDocumentsAsync(bookingWithDetails);
+            await _bookingRepository.UpdateTicketPathsAsync(bookingWithDetails.Tickets);
+        }
+
         BookingResponse response = _mapper.Map<BookingResponse>(bookingWithDetails);
         response.RemainingSeats = remainingSeats;
         return response;
@@ -108,6 +132,13 @@ public class PaymentService : IPaymentService
                     {
                         (Booking booking, int remainingSeats) = await _bookingRepository.ConfirmPaymentAsync(paymentIntent.Id);
                         await _seatNotifier.NotifySeatUpdated(booking.EventId, remainingSeats);
+
+                        Booking? wd = await _bookingRepository.GetBookingWithDetailsAsync(booking.Id);
+                        if (wd?.Tickets.Count > 0)
+                        {
+                            await _ticketGenerationService.GenerateTicketDocumentsAsync(wd);
+                            await _bookingRepository.UpdateTicketPathsAsync(wd.Tickets);
+                        }
                     }
                     break;
 

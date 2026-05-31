@@ -46,11 +46,11 @@
                 @if (col.type === 'truncate') {
                 <span class="tooltip-container">
                   {{
-                    (row[col.field] ?? '').toString().length > 50
-                      ? ((row[col.field] ?? '').toString() | slice : 0 : 50) + '...'
-                      : row[col.field] ?? ''
+                    (getFieldValue(row, col.field) ?? '').toString().length > 50
+                      ? ((getFieldValue(row, col.field) ?? '').toString() | slice : 0 : 50) + '...'
+                      : getFieldValue(row, col.field) ?? ''
                   }}
-                  <span class="tooltip-text">{{ row[col.field] }}</span>
+                  <span class="tooltip-text">{{ getFieldValue(row, col.field) }}</span>
                 </span>
                 } @else if (col.type === 'toggle') {
                 <div class="form-check form-switch mb-0" (click)="$event.stopPropagation()">
@@ -58,7 +58,7 @@
                     class="form-check-input"
                     type="checkbox"
                     role="switch"
-                    [checked]="!!row[col.field]"
+                    [checked]="!!getFieldValue(row, col.field)"
                     (change)="toggle.emit(row)"
                   />
                 </div>
@@ -75,7 +75,7 @@
                     type="button"
                     (click)="$event.stopPropagation(); toggleDropdown($event, row)"
                   >
-                    <img src="assets/icons/three-dots.svg" width="20" height="20" alt="actions" />
+                    <i class="bi bi-three-dots-vertical fs-5 text-muted"></i>
                   </button>
                   @if (activeDropdownRow === row) {
                   <ul
@@ -89,7 +89,7 @@
                         class="dropdown-item d-flex align-items-center gap-2"
                         (click)="handleAction(action, row)"
                       >
-                        <img [src]="action.icon" width="16" [alt]="action.label" />
+                        <i class="bi" [class.bi-pencil]="action.emit === 'edit'" [class.bi-trash]="action.emit === 'delete'"></i>
                         {{ action.label }}
                       </button>
                     </li>
@@ -98,13 +98,13 @@
                   }
                 </div>
                 } } @else if (col.type === 'currency') {
-                <span>${{ row[col.field] }}</span>
+                <span>${{ getFieldValue(row, col.field) }}</span>
                 } @else if (col.type === 'percent') {
-                <span>{{ row[col.field] }}%</span>
+                <span>{{ getFieldValue(row, col.field) }}%</span>
                 } @else if (col.type === 'date') {
-                <span>{{ asDate(row[col.field]) | date : 'dd MMM yyyy' }}</span>
+                <span>{{ asDate(getFieldValue(row, col.field)) | date : 'dd MMM yyyy' }}</span>
                 } @else {
-                  <span [innerHTML]="col.formatter ? col.formatter(row[col.field]) : row[col.field]"></span>
+                  <span [innerHTML]="col.formatter ? col.formatter(getFieldValue(row, col.field)) : getFieldValue(row, col.field)"></span>
                 }
               </td>
               }
