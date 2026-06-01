@@ -1,6 +1,6 @@
 .btn-outline {
   background-color: transparent;
-  color: #4540e1;
+  color: #be185d;
   border: 2px solid #dde4ee;
   padding: 0.25rem 0.75rem;
   font-size: 0.85rem;
@@ -11,9 +11,9 @@
 }
 
 .btn-outline:hover {
-  border-color: #4540E1;             
-  background-color: #eef2ff;          
-  color: #3730a3; 
+  border-color: #be185d;             
+  background-color: rgba(190, 24, 93, 0.08);          
+  color: #9d174d; 
 }
 
 .btn-icon {

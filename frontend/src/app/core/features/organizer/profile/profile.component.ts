@@ -21,7 +21,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
         </a>
 
         <div class="d-flex align-items-center gap-3 mb-4">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="1.5">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#be185d" stroke-width="1.5">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
@@ -134,7 +134,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
       width: 72px;
       height: 72px;
       border-radius: 50%;
-      background: #7c3aed;
+      background: #be185d;
       color: #fff;
       display: flex;
       align-items: center;
@@ -172,15 +172,15 @@ import { ToastService } from '../../../../shared/services/toast.service';
       font-size: 0.9rem;
     }
     .form-control:focus {
-      border-color: #7c3aed;
-      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+      border-color: #be185d;
+      box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.15);
     }
     .form-control:disabled {
       background: #f9fafb;
       color: #6b7280;
     }
     .btn-primary {
-      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+      background: linear-gradient(135deg, #be185d 0%, #9d174d 100%);
       border: none;
       border-radius: 10px;
       padding: 12px 28px;

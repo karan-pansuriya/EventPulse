@@ -4,7 +4,7 @@
 }
 
 .hero {
-  background: linear-gradient(135deg, #7c3aed 0%, #4540e1 100%);
+  background: linear-gradient(135deg, #be185d 0%, #9d174d 100%);
   border-radius: 16px;
   padding: 48px 32px;
   text-align: center;
@@ -87,12 +87,12 @@
 }
 
 .custom-select-trigger:hover {
-  border-color: #7c3aed;
+  border-color: #be185d;
 }
 
 .custom-select-trigger:focus {
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+  border-color: #be185d;
+  box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.12);
   outline: none;
 }
 
@@ -131,12 +131,12 @@
 }
 
 .custom-select-option:hover {
-  background: #f3f0ff;
+  background: rgba(190, 24, 93, 0.05);
 }
 
 .custom-select-option.selected {
-  background: #ede9fe;
-  color: #7c3aed;
+  background: rgba(190, 24, 93, 0.08);
+  color: #be185d;
   font-weight: 600;
 }
 
@@ -147,8 +147,8 @@
 
 .form-select:focus,
 .form-control:focus {
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+  border-color: #be185d;
+  box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.12);
 }
 
 .results-section {
@@ -187,7 +187,7 @@
   width: 36px;
   height: 36px;
   border: 3px solid #e5e7eb;
-  border-top-color: #7c3aed;
+  border-top-color: #be185d;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   margin-bottom: 12px;
@@ -262,9 +262,9 @@
 }
 
 .page-btn.active {
-  background: #7c3aed;
+  background: #be185d;
   color: #ffffff;
-  border-color: #7c3aed;
+  border-color: #be185d;
 }
 
 .page-btn:disabled {
@@ -306,8 +306,8 @@
 }
 
 .custom-select-search-input:focus {
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+  border-color: #be185d;
+  box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.12);
 }
 
 .custom-select-empty {

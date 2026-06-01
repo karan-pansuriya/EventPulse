@@ -1,30 +1,23 @@
 using EventPulse.API.Helpers;
-using EventPulse.DAL.Context;
+using EventPulse.BLL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventPulse.API.Controllers;
 
 [Route("api/venues")]
 public class VenuesController : BaseHelper
 {
-    private readonly EventPulseDbContext _context;
+    private readonly IVenueService _venueService;
 
-    public VenuesController(EventPulseDbContext context)
+    public VenuesController(IVenueService venueService)
     {
-        _context = context;
+        _venueService = venueService;
     }
 
     [HttpGet("cities")]
     public async Task<IActionResult> GetCities()
     {
-        var cities = await _context.Venues
-            .Where(v => v.City != null)
-            .Select(v => v.City!.Name)
-            .Distinct()
-            .OrderBy(name => name)
-            .ToListAsync();
-
+        List<string> cities = await _venueService.GetCityNamesAsync();
         return SuccessResponse(cities);
     }
 }

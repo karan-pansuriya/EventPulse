@@ -14,7 +14,8 @@ namespace EventPulse.BLL.Services;
 
 public class EventService : IEventService
 {
-    private const int MaxPosterImages = 10;
+    private const int MaxPosterImages = 5;
+    private const long MaxPosterFileSize = 5 * 1024 * 1024; // 5 MB
 
     private readonly IGenericRepository<Event> _eventRepo;
     private readonly IGenericRepository<EventPoster> _posterRepo;
@@ -187,6 +188,12 @@ public class EventService : IEventService
         if (posterImages?.Count > MaxPosterImages)
             throw new BadRequestException($"Maximum {MaxPosterImages} poster images allowed.");
 
+        if (posterImages is { Count: > 0 })
+        {
+            if (posterImages.Any(f => f.ImageBytes.Length > MaxPosterFileSize))
+                throw new BadRequestException($"Each poster image must be 5 MB or less.");
+        }
+
         Venue? venue = await _eventRepository.ResolveVenueAsync(dto.VenueName, dto.VenueAddress, dto.CityId);
         if (venue != null && venue.Id == 0)
         {
@@ -239,6 +246,12 @@ public class EventService : IEventService
 
         if (posterImages?.Count > MaxPosterImages)
             throw new BadRequestException($"Maximum {MaxPosterImages} poster images allowed.");
+
+        if (posterImages is { Count: > 0 })
+        {
+            if (posterImages.Any(f => f.ImageBytes.Length > MaxPosterFileSize))
+                throw new BadRequestException($"Each poster image must be 5 MB or less.");
+        }
 
         Event? eventEntity = await _eventRepo.GetByIdAsync(id)
             ?? throw new NotFoundException("Event not found.");

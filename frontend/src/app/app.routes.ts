@@ -162,13 +162,6 @@ export const routes: Routes = [
           ),
       },
       {
-        path: APP_ROUTES.ATTENDEE.BOOKINGS,
-        loadComponent: () =>
-          import('./core/features/attendee/bookings/bookings.component').then(
-            (m) => m.BookingsComponent,
-          ),
-      },
-      {
         path: APP_ROUTES.ATTENDEE.CHECKOUT,
         loadComponent: () =>
           import('./core/features/attendee/checkout/checkout.component').then(

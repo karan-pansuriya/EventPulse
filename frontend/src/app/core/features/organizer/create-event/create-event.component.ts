@@ -8,6 +8,9 @@ import { LocationService } from '../services/location.service';
 import { Category } from '../../attendee/home/models/category.models';
 import { Country, State, City } from '../models/location.models';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { AuthService } from '../../../../auth/services/auth.service';
+import { RoleId } from '../../../../auth/models/auth.models';
+import { AdminUserService, OrganizerResponse } from '../../admin/services/admin-user.service';
 
 @Component({
   selector: 'app-create-event',
@@ -25,18 +28,23 @@ export class CreateEventComponent implements OnInit {
   private toastService = inject(ToastService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private authService = inject(AuthService);
+  private adminUserService = inject(AdminUserService);
 
   categories: Category[] = [];
   countries: Country[] = [];
   states: State[] = [];
   cities: City[] = [];
+  organizers: OrganizerResponse[] = [];
 
   isSaving = false;
   isLoadingCategories = true;
   isLoadingCountries = true;
+  isLoadingOrganizers = false;
   isLoadingStates = false;
   isLoadingCities = false;
   submitted = false;
+  isAdmin = false;
 
   minDate = new Date().toISOString().slice(0, 10);
 
@@ -63,11 +71,14 @@ export class CreateEventComponent implements OnInit {
     countryId: null as number | null,
     stateId: null as number | null,
     cityId: null as number | null,
+    organizerId: null as number | null,
   };
 
   selectedFiles: File[] = [];
 
   ngOnInit(): void {
+    this.isAdmin = this.authService.user()?.roleIds.includes(RoleId.Admin) ?? false;
+
     this.categoryService.getAll().subscribe({
       next: (res) => {
         if (res.success && res.data) this.categories = res.data;
@@ -85,6 +96,18 @@ export class CreateEventComponent implements OnInit {
       },
       error: () => { this.isLoadingCountries = false; this.cdr.detectChanges(); },
     });
+
+    if (this.isAdmin) {
+      this.isLoadingOrganizers = true;
+      this.adminUserService.getOrganizers().subscribe({
+        next: (res) => {
+          if (res.success && res.data) this.organizers = res.data;
+          this.isLoadingOrganizers = false;
+          this.cdr.detectChanges();
+        },
+        error: () => { this.isLoadingOrganizers = false; this.cdr.detectChanges(); },
+      });
+    }
   }
 
   onCountryChange(): void {
@@ -123,7 +146,24 @@ export class CreateEventComponent implements OnInit {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files) this.selectedFiles = Array.from(input.files);
+    if (!input.files) return;
+
+    const maxFiles = 5;
+    const maxSize = 5 * 1024 * 1024;
+
+    const files = Array.from(input.files);
+    const oversized = files.find(f => f.size > maxSize);
+    if (oversized) {
+      this.toastService.error(`${oversized.name} exceeds the 5 MB limit.`, 'File too large');
+      input.value = '';
+      return;
+    }
+    if (files.length > maxFiles) {
+      this.toastService.error(`Maximum ${maxFiles} poster images allowed.`, 'Too many files');
+      input.value = '';
+      return;
+    }
+    this.selectedFiles = files;
   }
 
   isFieldInvalid(fieldName: string): boolean {
@@ -171,6 +211,7 @@ export class CreateEventComponent implements OnInit {
   }
 
   private validate(): string | null {
+    if (this.isAdmin && !this.form.organizerId) return 'Please select an organizer.';
     if (!this.form.title || this.form.title.length < 2) return 'Title must be at least 2 characters.';
     if (this.form.title.length > 200) return 'Title must not exceed 200 characters.';
     if (this.form.description && this.form.description.length > 1000) return 'Description must not exceed 1000 characters.';
@@ -211,6 +252,7 @@ export class CreateEventComponent implements OnInit {
     if (this.form.performers) fd.append('Performers', this.form.performers);
     if (this.form.durationMins) fd.append('DurationMins', String(this.form.durationMins));
     if (this.form.categoryId) fd.append('CategoryId', String(this.form.categoryId));
+    if (this.form.organizerId) fd.append('OrganizerId', String(this.form.organizerId));
 
     for (const file of this.selectedFiles) fd.append('posterImages', file, file.name);
 

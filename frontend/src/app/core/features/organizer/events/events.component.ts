@@ -43,7 +43,14 @@ export class EventsComponent implements OnInit {
     { header: 'Time', field: 'startTime', formatter: (v) => this.formatTime(v as string) },
     { header: 'Price', field: 'price', type: 'currency' },
     { header: 'Seats', field: 'totalSeats' },
-    { header: 'Status', field: 'isVerified', formatter: (v) => v ? '<span class="badge bg-success">Verified</span>' : '<span class="badge bg-danger">Not Verified</span>' },
+    {
+      header: 'Status',
+      field: 'isVerified',
+      formatter: (v) =>
+        v
+          ? '<span class="badge bg-success">Verified</span>'
+          : '<span class="badge bg-danger">Not Verified</span>',
+    },
     { header: '', field: 'actions', type: 'action', width: '60px' },
   ];
 

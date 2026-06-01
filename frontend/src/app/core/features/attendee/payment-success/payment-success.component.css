@@ -17,8 +17,8 @@
 /* ── Booking code badge ───────────────────────────── */
 .booking-code-badge {
   display: inline-block;
-  background: #ede9fe;
-  color: #5b21b6;
+  background: rgba(190, 24, 93, 0.08);
+  color: #9d174d;
   border-radius: 8px;
   padding: 6px 16px;
   font-size: 0.9rem;
@@ -40,8 +40,8 @@
 
 .qty-badge {
   display: inline-block;
-  background: #ede9fe;
-  color: #5b21b6;
+  background: rgba(190, 24, 93, 0.08);
+  color: #9d174d;
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 600;
@@ -118,7 +118,7 @@
   height: 4px;
   background: repeating-linear-gradient(
     90deg,
-    #6d28d9 0px, #6d28d9 12px,
+    #9d174d 0px, #9d174d 12px,
     transparent 12px, transparent 20px
   );
   opacity: 0.25;
@@ -126,9 +126,9 @@
 
 /* ── Download button ──────────────────────────────── */
 .btn-download {
-  background: #f3f0ff;
-  color: #5b21b6;
-  border: 1px solid #c4b5fd;
+  background: rgba(190, 24, 93, 0.05);
+  color: #9d174d;
+  border: 1px solid rgba(190, 24, 93, 0.25);
   border-radius: 8px;
   padding: 7px 14px;
   font-size: 0.85rem;
@@ -139,14 +139,14 @@
 }
 
 .btn-download:hover {
-  background: #ede9fe;
-  color: #4c1d95;
+  background: rgba(190, 24, 93, 0.08);
+  color: #831843;
   transform: translateY(-1px);
 }
 
 /* ── Primary CTA ──────────────────────────────────── */
 .btn-primary {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, #be185d 0%, #9d174d 100%);
   border: none;
   border-radius: 10px;
   padding: 12px 28px;

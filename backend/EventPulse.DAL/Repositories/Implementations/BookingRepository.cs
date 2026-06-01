@@ -1,3 +1,5 @@
+using EventPulse.Common.Models;
+using EventPulse.Common.Models.Response;
 using EventPulse.DAL.Context;
 using EventPulse.DAL.Entities;
 using EventPulse.DAL.Enums;
@@ -175,6 +177,28 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
             .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
             .OrderByDescending(b => b.CreatedAt)
             .ToListAsync();
+    }
+
+    public async Task<PagedResult<Booking>> GetPagedBookingsAsync(PageRequest pageRequest)
+    {
+        IQueryable<Booking> query = _context.Bookings
+            .Where(b => b.PaymentStatus == PaymentStatus.Paid && !b.IsDeleted)
+            .Include(b => b.User)
+            .Include(b => b.Event)!.ThenInclude(e => e!.Venue);
+
+        int totalCount = await query.CountAsync();
+
+        List<Booking> items = await query
+            .OrderByDescending(b => b.CreatedAt)
+            .Skip((pageRequest.PageNumber - 1) * pageRequest.PageSize)
+            .Take(pageRequest.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<Booking>
+        {
+            Items = items,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<List<Booking>> GetUserAllBookingsAsync(int userId)

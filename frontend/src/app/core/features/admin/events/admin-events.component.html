@@ -1,0 +1,21 @@
+<div class="admin-page">
+    <div class="page-header">
+      <h1>All Events</h1>
+    </div>
+
+    <app-grid
+      [columns]="columns"
+      [data]="events"
+      [totalRecords]="totalRecords"
+      [currentPage]="currentPage"
+      [pageSize]="pageSize"
+      [trackByField]="'id'"
+      [isLoading]="loading"
+      [errorMessage]="error"
+      [actionItems]="getRowActionItems"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+      (toggle)="onToggleVerify($event)"
+      (delete)="onDelete($event)"
+    />
+</div>
