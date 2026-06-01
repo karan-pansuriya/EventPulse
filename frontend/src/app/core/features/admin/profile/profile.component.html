@@ -1,0 +1,109 @@
+<div class="profile-page">
+    <div class="container py-3 py-md-4">
+
+        <a routerLink="/admin/dashboard" class="btn btn-sm btn-outline-secondary mb-3">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                class="me-1">
+                <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Back
+        </a>
+
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#be185d" stroke-width="1.5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+            </svg>
+            <h2 class="fw-bold mb-0">My Profile</h2>
+        </div>
+
+        @if (isLoading) {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted mt-2">Loading profile…</p>
+        </div>
+        }
+
+        @if (!isLoading && profile) {
+        <div class="profile-card">
+
+            <div class="text-center pt-4 pb-3">
+                <div class="profile-avatar mx-auto mb-2">{{ getInitials(profile.name) }}</div>
+                <h4 class="fw-bold mb-0">{{ profile.name }}</h4>
+                <small class="text-muted">{{ profile.email }}</small>
+            </div>
+
+            <hr class="my-0" />
+
+            @if (!isEditing) {
+            <div class="p-4">
+                <div class="info-row">
+                    <span class="info-label">Name</span>
+                    <span class="info-value">{{ profile.name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">{{ profile.email }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Phone</span>
+                    <span class="info-value">{{ profile.phone || 'Not set' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Member since</span>
+                    <span class="info-value">{{ profile.createdAt | date:'longDate' }}</span>
+                </div>
+
+                <button class="btn btn-primary w-100 mt-4" (click)="startEditing()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        class="me-1">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    Edit Profile
+                </button>
+            </div>
+            }
+
+            @if (isEditing) {
+            <div class="p-4">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Name</label>
+                    <input type="text" class="form-control" [(ngModel)]="editForm.name" placeholder="Your name"
+                        required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email</label>
+                    <input type="email" class="form-control" [value]="profile.email" disabled readonly />
+                    <small class="text-muted">Email cannot be changed.</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Phone</label>
+                    <input type="tel" class="form-control" [(ngModel)]="editForm.phone"
+                        placeholder="Phone number (optional)" />
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button class="btn btn-primary flex-fill" (click)="saveProfile()"
+                        [disabled]="isSaving || !editForm.name.trim()">
+                        @if (isSaving) {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" class="me-1">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        Save
+                    </button>
+                    <button class="btn btn-outline-secondary flex-fill" (click)="cancelEditing()">Cancel</button>
+                </div>
+            </div>
+            }
+
+        </div>
+        }
+
+    </div>
+</div>

@@ -265,6 +265,8 @@
                 <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*" multiple />
                 @if (selectedFiles.length > 0) {
                   <small class="text-muted">{{ selectedFiles.length }} file(s) selected</small>
+                } @else {
+                  <small class="text-muted">Upload up to 5 poster images (max 5 MB each).</small>
                 }
               </div>
             </div>

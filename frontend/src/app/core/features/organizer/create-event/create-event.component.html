@@ -10,6 +10,21 @@
         <div class="card shadow-sm border-0">
           <div class="card-header bg-white fw-semibold">Basic Information</div>
           <div class="card-body row g-3">
+            @if (isAdmin) {
+              <div class="col-12">
+                <label class="form-label" for="organizerId">Organizer <span class="text-danger">*</span></label>
+                <select id="organizerId" name="organizerId" class="form-select"
+                        [(ngModel)]="form.organizerId" required>
+                  <option [ngValue]="null" disabled>Select organizer</option>
+                  @for (org of organizers; track org.id) {
+                    <option [ngValue]="org.id">{{ org.name }} ({{ org.email }})</option>
+                  }
+                </select>
+                @if (isFieldInvalid('organizerId')) {
+                  <div class="invalid-feedback">Please select an organizer.</div>
+                }
+              </div>
+            }
             <div class="col-12">
               <label class="form-label" for="title">Title <span class="text-danger">*</span></label>
               <input type="text" id="title" name="title" class="form-control"
@@ -40,7 +55,7 @@
                 @for (cat of categories; track cat.id) {
                   <option [ngValue]="cat.id">{{ cat.name }}</option>
                 }
-              </select>
+              </select> 
             </div>
 
             <div class="col-md-4">
@@ -215,7 +230,7 @@
           <div class="card-header bg-white fw-semibold">Poster Images</div>
           <div class="card-body">
             <input type="file" class="form-control" accept="image/*" multiple (change)="onFileSelected($event)">
-            <div class="form-text">Upload one or more poster images (optional).</div>
+            <div class="form-text">Upload up to 5 poster images (max 5 MB each, optional).</div>
           </div>
         </div>
       </div>

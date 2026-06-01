@@ -8,50 +8,8 @@ import { AdminBookingService, AdminBookingResponse } from '../services/admin-boo
   selector: 'app-admin-bookings',
   standalone: true,
   imports: [CommonModule, GridComponent],
-  template: `
-    <div class="admin-page">
-      <div class="page-header">
-        <h1>All Bookings</h1>
-      </div>
-
-      <app-grid
-        [columns]="columns"
-        [data]="bookings"
-        [totalRecords]="0"
-        [trackByField]="'id'"
-        [isLoading]="loading"
-        [errorMessage]="error"
-      />
-    </div>
-  `,
-  styles: [`
-    .admin-page {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-    .page-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-    }
-    .page-header h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #111827;
-      margin: 0;
-    }
-    @media (max-width: 575.98px) {
-      .page-header {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-      .page-header h1 {
-        font-size: 1.25rem;
-      }
-    }
-  `],
+  templateUrl: './bookings.component.html',
+  styleUrl: './bookings.component.css',
 })
 export class BookingsComponent implements OnInit, OnDestroy {
   private bookingService = inject(AdminBookingService);
@@ -60,6 +18,9 @@ export class BookingsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   bookings: AdminBookingResponse[] = [];
+  totalRecords = 0;
+  currentPage = 1;
+  pageSize = 10;
   loading = false;
   error: string | null = null;
 
@@ -89,12 +50,15 @@ export class BookingsComponent implements OnInit, OnDestroy {
     this.error = null;
 
     this.bookingService
-      .getAllBookings()
+      .getAllBookings(this.currentPage, this.pageSize)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
           this.zone.run(() => {
-            if (res.data) this.bookings = res.data;
+            if (res.data) {
+              this.bookings = res.data.items;
+              this.totalRecords = res.data.totalCount;
+            }
             this.loading = false;
             this.cdr.detectChanges();
           });
@@ -107,5 +71,16 @@ export class BookingsComponent implements OnInit, OnDestroy {
           });
         },
       });
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadBookings();
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 1;
+    this.loadBookings();
   }
 }

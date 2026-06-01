@@ -1,0 +1,12 @@
+using EventPulse.BLL.DTOs.User;
+using EventPulse.Common.Models;
+using EventPulse.Common.Models.Response;
+
+namespace EventPulse.BLL.Interfaces;
+
+public interface IUserService
+{
+    Task<PagedResult<UserListResponse>> GetPagedUsersAsync(PageRequest pageRequest, string? roleName = null);
+    Task<List<OrganizerResponse>> GetOrganizersAsync();
+    Task DeleteUserAsync(int id);
+}

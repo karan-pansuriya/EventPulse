@@ -1,3 +1,5 @@
+using EventPulse.Common.Models.Response;
+using EventPulse.Common.Models;
 using EventPulse.DAL.Entities;
 
 namespace EventPulse.DAL.Repositories.Interfaces;
@@ -27,4 +29,6 @@ public interface IBookingRepository
     Task<List<Booking>> GetUserAllBookingsAsync(int userId);
 
     Task<List<Booking>> GetAllBookingsAsync();
+
+    Task<PagedResult<Booking>> GetPagedBookingsAsync(PageRequest pageRequest);
 }

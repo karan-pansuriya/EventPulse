@@ -98,7 +98,7 @@
                   }
                 </div>
                 } } @else if (col.type === 'currency') {
-                <span>${{ getFieldValue(row, col.field) }}</span>
+                <span>&#8377; {{ getFieldValue(row, col.field) }}</span>
                 } @else if (col.type === 'percent') {
                 <span>{{ getFieldValue(row, col.field) }}%</span>
                 } @else if (col.type === 'date') {

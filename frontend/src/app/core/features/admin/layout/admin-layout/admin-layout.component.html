@@ -5,13 +5,6 @@
             <div class="sidebar-backdrop d-md-none" (click)="closeSidebar()"></div>
         }
         <aside class="sidebar" [class.open]="sidebarOpen">
-            <div class="sidebar-brand">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2">
-                    <rect x="2" y="2" width="20" height="20" rx="4" />
-                    <polyline points="8 12 11 15 16 9" />
-                </svg>
-                <span>EventPulse</span>
-            </div>
             <nav class="sidebar-nav">
                 <a class="nav-item" routerLink="/admin/dashboard" routerLinkActive="active"
                     [routerLinkActiveOptions]="{exact: true}" (click)="closeSidebar()">

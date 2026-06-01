@@ -238,7 +238,24 @@ export class EditEventComponent implements OnInit {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files) this.selectedFiles = Array.from(input.files);
+    if (!input.files) return;
+
+    const maxFiles = 5;
+    const maxSize = 5 * 1024 * 1024;
+
+    const files = Array.from(input.files);
+    const oversized = files.find(f => f.size > maxSize);
+    if (oversized) {
+      this.toastService.error(`${oversized.name} exceeds the 5 MB limit.`, 'File too large');
+      input.value = '';
+      return;
+    }
+    if (files.length > maxFiles) {
+      this.toastService.error(`Maximum ${maxFiles} poster images allowed.`, 'Too many files');
+      input.value = '';
+      return;
+    }
+    this.selectedFiles = files;
   }
 
   isFieldInvalid(fieldName: string): boolean {

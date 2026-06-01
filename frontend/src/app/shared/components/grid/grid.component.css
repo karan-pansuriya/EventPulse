@@ -110,7 +110,7 @@
 }
 .action-dropdown .dropdown-item:active {
   background-color: transparent;
-  color: #4540e1;
+  color: #be185d;
 }
 
 .form-check-input[type='checkbox'] {
@@ -121,12 +121,12 @@
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 .form-check-input[type='checkbox']:checked {
-  background-color: #4540e1;
-  border-color: #4540e1;
+  background-color: #be185d;
+  border-color: #be185d;
 }
 .form-check-input[type='checkbox']:focus {
   box-shadow: 0 0 0 0.2rem rgba(92, 108, 255, 0.25);
-  border-color: #4540e1;
+  border-color: #be185d;
 }
 
 /* ── Spinner & state styles (mirrored from master-data.component.css) ── */
@@ -143,7 +143,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid #e5e7eb;
-  border-top-color: #4540e1;
+  border-top-color: #be185d;
   border-radius: 50%;
   animation: grid-spin 0.7s linear infinite;
 }

@@ -52,6 +52,30 @@ body {
   display: inline-block;
 }
 
+.role-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.role-admin {
+  background: rgba(190, 24, 93, 0.12);
+  color: #9d174d;
+}
+
+.role-organizer {
+  background: rgba(79, 70, 229, 0.12);
+  color: #3730a3;
+}
+
+.role-customer {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+}
+
 .badge-inactive {
   background-color: rgba(190, 10, 4, 0.14) !important;
   color: #8c0703 !important;
@@ -64,7 +88,7 @@ body {
 ::-webkit-datetime-edit-hour-field:focus,
 ::-webkit-datetime-edit-minute-field:focus,
 ::-webkit-datetime-edit-ampm-field:focus {
-  background-color: #4540e1;
+  background-color: #be185d;
   color: #fff;
   border-radius: 3px;
 }
