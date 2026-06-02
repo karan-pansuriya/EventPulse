@@ -57,3 +57,21 @@ hr {
 .btn-primary:disabled {
   opacity: 0.65;
 }
+
+.poster-item {
+  position: relative;
+  width: 120px;
+  height: 160px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.poster-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

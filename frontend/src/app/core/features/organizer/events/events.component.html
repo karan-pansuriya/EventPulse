@@ -40,6 +40,7 @@
         [currentPage]="pageNumber"
         [pageSize]="pageSize"
         [isLoading]="false"
+        [actionItems]="getRowActionItems"
         trackByField="id"
         (pageChange)="onPageChange($event)"
         (pageSizeChange)="onPageSizeChange($event)"

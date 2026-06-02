@@ -103,7 +103,7 @@
             </div>
 
             <div class="col-md-3">
-              <label class="form-label" for="price">Price ($) <span class="text-danger">*</span></label>
+              <label class="form-label" for="price">Price (&#8377;) <span class="text-danger">*</span></label>
               <input type="number" id="price" name="price" class="form-control"
                      [class.is-invalid]="isFieldInvalid('price')"
                      [(ngModel)]="form.price" required min="0" max="9999999999" step="0.01"
@@ -231,6 +231,18 @@
           <div class="card-body">
             <input type="file" class="form-control" accept="image/*" multiple (change)="onFileSelected($event)">
             <div class="form-text">Upload up to 5 poster images (max 5 MB each, optional).</div>
+            @if (selectedFilePreviews.length > 0) {
+              <div class="d-flex flex-wrap gap-3 mt-3">
+                @for (preview of selectedFilePreviews; track preview; let i = $index) {
+                  <div class="poster-item">
+                    <img [src]="preview" alt="Poster preview" class="poster-thumb" />
+                    <button type="button" class="poster-remove-btn" (click)="removeFile(i)" title="Remove image">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
           </div>
         </div>
       </div>

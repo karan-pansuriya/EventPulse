@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -17,7 +17,7 @@ import { environment } from '../../../../../environments/environment';
   templateUrl: './edit-event.component.html',
   styleUrl: './edit-event.component.css',
 })
-export class EditEventComponent implements OnInit {
+export class EditEventComponent implements OnInit, OnDestroy {
   @ViewChild('eventForm') eventForm!: NgForm;
 
   private eventService = inject(OrganizerEventService);
@@ -72,6 +72,7 @@ export class EditEventComponent implements OnInit {
   };
 
   selectedFiles: File[] = [];
+  newFilePreviews: string[] = [];
   existingPosterUrls: string[] = [];
   removedPosterUrls: string[] = [];
 
@@ -244,18 +245,44 @@ export class EditEventComponent implements OnInit {
     const maxSize = 5 * 1024 * 1024;
 
     const files = Array.from(input.files);
+
+    const allowedExtensions = ['jpg', 'jpeg', 'png'];
+    const invalid = files.find(f => {
+      const ext = f.name.split('.').pop()?.toLowerCase();
+      return !ext || !allowedExtensions.includes(ext);
+    });
+    if (invalid) {
+      this.toastService.error(`${invalid.name} has an unsupported file type. Only JPG, JPEG, and PNG are allowed.`, 'Invalid file');
+      input.value = '';
+      return;
+    }
+
     const oversized = files.find(f => f.size > maxSize);
     if (oversized) {
       this.toastService.error(`${oversized.name} exceeds the 5 MB limit.`, 'File too large');
       input.value = '';
       return;
     }
-    if (files.length > maxFiles) {
-      this.toastService.error(`Maximum ${maxFiles} poster images allowed.`, 'Too many files');
+
+    const totalAfterAdd = this.selectedFiles.length + files.length;
+    if (totalAfterAdd > maxFiles) {
+      this.toastService.error(`Maximum ${maxFiles} poster images allowed. You already have ${this.selectedFiles.length}.`, 'Too many files');
       input.value = '';
       return;
     }
-    this.selectedFiles = files;
+
+    this.selectedFiles = [...this.selectedFiles, ...files];
+    this.newFilePreviews = [...this.newFilePreviews, ...files.map(f => URL.createObjectURL(f))];
+  }
+
+  removeNewFile(index: number): void {
+    URL.revokeObjectURL(this.newFilePreviews[index]);
+    this.selectedFiles = this.selectedFiles.filter((_, i) => i !== index);
+    this.newFilePreviews = this.newFilePreviews.filter((_, i) => i !== index);
+  }
+
+  ngOnDestroy(): void {
+    this.newFilePreviews.forEach(u => URL.revokeObjectURL(u));
   }
 
   isFieldInvalid(fieldName: string): boolean {

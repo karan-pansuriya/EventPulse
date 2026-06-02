@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -19,7 +19,7 @@ import { AdminUserService, OrganizerResponse } from '../../admin/services/admin-
   templateUrl: './create-event.component.html',
   styleUrl: './create-event.component.css',
 })
-export class CreateEventComponent implements OnInit {
+export class CreateEventComponent implements OnInit, OnDestroy {
   @ViewChild('eventForm') eventForm!: NgForm;
 
   private eventService = inject(OrganizerEventService);
@@ -75,6 +75,7 @@ export class CreateEventComponent implements OnInit {
   };
 
   selectedFiles: File[] = [];
+  selectedFilePreviews: string[] = [];
 
   ngOnInit(): void {
     this.isAdmin = this.authService.user()?.roleIds.includes(RoleId.Admin) ?? false;
@@ -108,6 +109,10 @@ export class CreateEventComponent implements OnInit {
         error: () => { this.isLoadingOrganizers = false; this.cdr.detectChanges(); },
       });
     }
+  }
+
+  ngOnDestroy(): void {
+    this.selectedFilePreviews.forEach(u => URL.revokeObjectURL(u));
   }
 
   onCountryChange(): void {
@@ -152,6 +157,17 @@ export class CreateEventComponent implements OnInit {
     const maxSize = 5 * 1024 * 1024;
 
     const files = Array.from(input.files);
+
+    const allowedExtensions = ['jpg', 'jpeg', 'png'];
+    const invalid = files.find(f => {
+      const ext = f.name.split('.').pop()?.toLowerCase();
+      return !ext || !allowedExtensions.includes(ext);
+    });
+    if (invalid) {
+      this.toastService.error(`${invalid.name} has an unsupported file type. Only JPG, JPEG, and PNG are allowed.`, 'Invalid file');
+      input.value = '';
+      return;
+    }
     const oversized = files.find(f => f.size > maxSize);
     if (oversized) {
       this.toastService.error(`${oversized.name} exceeds the 5 MB limit.`, 'File too large');
@@ -164,6 +180,13 @@ export class CreateEventComponent implements OnInit {
       return;
     }
     this.selectedFiles = files;
+    this.selectedFilePreviews = files.map(f => URL.createObjectURL(f));
+  }
+
+  removeFile(index: number): void {
+    URL.revokeObjectURL(this.selectedFilePreviews[index]);
+    this.selectedFiles = this.selectedFiles.filter((_, i) => i !== index);
+    this.selectedFilePreviews = this.selectedFilePreviews.filter((_, i) => i !== index);
   }
 
   isFieldInvalid(fieldName: string): boolean {

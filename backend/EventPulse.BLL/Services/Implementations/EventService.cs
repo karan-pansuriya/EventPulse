@@ -194,6 +194,10 @@ public class EventService : IEventService
                 throw new BadRequestException($"Each poster image must be 5 MB or less.");
         }
 
+        Event? duplicate = await _eventRepository.GetEventByTitleDateVenueAsync(dto.Title, dto.EventDate, dto.VenueName);
+        if (duplicate != null)
+            throw new BadRequestException("An event with the same title, date, and venue already exists.");
+
         Venue? venue = await _eventRepository.ResolveVenueAsync(dto.VenueName, dto.VenueAddress, dto.CityId);
         if (venue != null && venue.Id == 0)
         {
@@ -259,11 +263,21 @@ public class EventService : IEventService
         if (userRoleId != RoleId.Admin && eventEntity.OrganizerId != userId)
             throw new ForbiddenException("You are not authorized to update this event.");
 
+        if (userRoleId != RoleId.Admin && eventEntity.IsVerified)
+            throw new ForbiddenException("Verified events cannot be edited.");
+
+        if (eventEntity.EventDate < DateTime.Today)
+            throw new BadRequestException("Past events cannot be edited.");
+
         Venue? venue = await _eventRepository.ResolveVenueAsync(dto.VenueName, dto.VenueAddress, dto.CityId);
         if (venue != null && venue.Id == 0)
         {
             await _unitOfWork.SaveAsync();
         }
+
+        Event? duplicate = await _eventRepository.GetEventByTitleDateVenueAsync(dto.Title, dto.EventDate, dto.VenueName ?? string.Empty);
+        if (duplicate != null && duplicate.Id != id)
+            throw new BadRequestException("An event with the same title, date, and venue already exists.");
 
         eventEntity.CategoryId = dto.CategoryId;
         eventEntity.VenueId = venue?.Id;
@@ -294,14 +308,6 @@ public class EventService : IEventService
 
         if (posterImages is { Count: > 0 })
         {
-            List<EventPoster> existingPosters = await _eventRepository.GetActivePostersByEventIdAsync(id);
-
-            foreach (EventPoster ep in existingPosters)
-            {
-                _imageService.DeleteImage(ep.PosterUrl);
-                _posterRepo.Delete(ep);
-            }
-
             foreach ((byte[] imageBytes, string fileName) in posterImages)
             {
                 string relativePath = await _imageService.SaveImageAsync(imageBytes, fileName, "event_poster");
@@ -329,6 +335,13 @@ public class EventService : IEventService
 
         if (userRoleId != RoleId.Admin && eventEntity.OrganizerId != userId)
             throw new ForbiddenException("You are not authorized to delete this event.");
+
+        if (eventEntity.EventDate < DateTime.Today)
+            throw new BadRequestException("Past events cannot be deleted.");
+
+        int bookedCount = await _eventRepository.GetBookingCountByEventIdAsync(id);
+        if (bookedCount >= 1)
+            throw new BadRequestException("Cannot delete event with booked tickets.");
 
         List<EventPoster> posters = await _eventRepository.GetActivePostersByEventIdAsync(id);
 

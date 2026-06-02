@@ -188,8 +188,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.loadEvents();
   }
 
+  readonly pageSize = 12;
+
+  get currentPageCount(): number {
+    return this.result.items.length;
+  }
+
   get totalPages(): number {
-    return Math.ceil(this.result.totalCount / 12);
+    return Math.ceil(this.result.totalCount / this.pageSize);
   }
 
   get pages(): number[] {
@@ -227,7 +233,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private buildFilters(): EventFilterRequest {
     return {
       pageNumber: this.currentPage,
-      pageSize: 12,
+      pageSize: this.pageSize,
       sortBy: 'eventDate',
       sortDirection: 'asc',
       search: this.searchQuery || undefined,

@@ -69,6 +69,7 @@
                   ></ng-container>
                 </div>
                 } @else {
+                @if (getRowActionItems(row).length > 0) {
                 <div class="dropdown action-dropdown" (click)="$event.stopPropagation()">
                   <button
                     class="btn p-0 border-0 bg-transparent"
@@ -97,6 +98,7 @@
                   </ul>
                   }
                 </div>
+                }
                 } } @else if (col.type === 'currency') {
                 <span>&#8377; {{ getFieldValue(row, col.field) }}</span>
                 } @else if (col.type === 'percent') {

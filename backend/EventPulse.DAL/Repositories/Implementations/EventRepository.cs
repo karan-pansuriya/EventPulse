@@ -127,4 +127,21 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
             .Where(p => p.EventId == eventId && !p.IsDeleted)
             .ToListAsync();
     }
+
+    public async Task<Event?> GetEventByTitleDateVenueAsync(string title, DateTime eventDate, string venueName)
+    {
+        return await _context.Events
+            .Include(e => e.Venue)
+            .FirstOrDefaultAsync(e =>
+                !e.IsDeleted &&
+                e.Title.ToLower() == title.ToLower() &&
+                e.EventDate == eventDate &&
+                e.Venue != null && e.Venue.Name.ToLower() == venueName.ToLower());
+    }
+
+    public async Task<int> GetBookingCountByEventIdAsync(int eventId)
+    {
+        return await _context.Bookings
+            .CountAsync(b => b.EventId == eventId && !b.IsDeleted && b.PaymentStatus == Enums.PaymentStatus.Paid);
+    }
 }
