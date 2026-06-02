@@ -13,8 +13,11 @@ public interface IEventRepository
 
     Task<List<EventPoster>> GetActivePostersByEventIdAsync(int eventId);
     Task<List<Booking>> GetBookingsByOrganizerIdAsync(int organizerId);
+    Task<List<Event>> GetEventsByOrganizerIdAsync(int organizerId);
 
     Task<Event?> GetEventByTitleDateVenueAsync(string title, DateTime eventDate, string venueName);
 
     Task<int> GetBookingCountByEventIdAsync(int eventId);
+
+    Task<List<Event>> GetAllEventsWithDetailsAsync();
 }

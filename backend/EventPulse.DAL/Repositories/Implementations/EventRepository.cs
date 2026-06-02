@@ -116,8 +116,19 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
         return await _context.Bookings
             .Where(b => !b.IsDeleted && b.Event!.OrganizerId == organizerId)
             .Include(b => b.User)
-            .Include(b => b.Event)
+            .Include(b => b.Event).ThenInclude(e => e!.Category)
             .OrderByDescending(b => b.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<List<Event>> GetEventsByOrganizerIdAsync(int organizerId)
+    {
+        return await _context.Events
+            .Where(e => e.OrganizerId == organizerId && !e.IsDeleted)
+            .Include(e => e.Category)
+            .Include(e => e.Posters)
+            .Include(e => e.Organizer)
+            .OrderByDescending(e => e.CreatedAt)
             .ToListAsync();
     }
 
@@ -143,5 +154,17 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     {
         return await _context.Bookings
             .CountAsync(b => b.EventId == eventId && !b.IsDeleted && b.PaymentStatus == Enums.PaymentStatus.Paid);
+    }
+
+    public async Task<List<Event>> GetAllEventsWithDetailsAsync()
+    {
+        return await _context.Events
+            .Where(e => !e.IsDeleted)
+            .Include(e => e.Category)
+            .Include(e => e.Venue).ThenInclude(v => v!.City).ThenInclude(c => c!.State).ThenInclude(s => s!.Country)
+            .Include(e => e.Posters)
+            .Include(e => e.Organizer)
+            .OrderByDescending(e => e.CreatedAt)
+            .ToListAsync();
     }
 }

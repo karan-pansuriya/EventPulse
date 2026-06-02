@@ -19,5 +19,10 @@ public class EventProfile : Profile
             .ForMember(dest => dest.CityId, opt => opt.MapFrom(src => src.Venue != null ? src.Venue.CityId : (int?)null))
             .ForMember(dest => dest.PosterUrl, opt => opt.MapFrom(src => src.Posters.Select(p => p.PosterUrl).FirstOrDefault()))
             .ForMember(dest => dest.PosterUrls, opt => opt.MapFrom(src => src.Posters.Select(p => p.PosterUrl).ToList()));
+
+        CreateMap<Event, EventListResponse>()
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null))
+            .ForMember(dest => dest.VenueName, opt => opt.MapFrom(src => src.Venue != null ? src.Venue.Name : null))
+            .ForMember(dest => dest.PosterUrl, opt => opt.MapFrom(src => src.Posters.Select(p => p.PosterUrl).FirstOrDefault()));
     }
 }

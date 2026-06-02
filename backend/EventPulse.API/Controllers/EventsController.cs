@@ -1,5 +1,6 @@
 using EventPulse.API.Helpers;
 using EventPulse.BLL.Common;
+using EventPulse.BLL.DTOs.Dashboard;
 using EventPulse.BLL.DTOs.Event;
 using EventPulse.BLL.Interfaces;
 using EventPulse.Common.Models;
@@ -72,6 +73,21 @@ public class EventsController : BaseHelper
     {
         List<(byte[] ImageBytes, string FileName)> files = await ReadFormFilesAsync(posterImages);
         EventResponse result = await _eventService.UpdateAsync(id, dto, files);
+        return SuccessResponse(result);
+    }
+
+    [Authorize(Policy = "AdminOnly")]
+    [HttpGet("admin/dashboard")]
+    public async Task<IActionResult> GetAdminDashboard([FromQuery] string? period = "year", [FromQuery] int? organizerId = null)
+    {
+        OrganizerDashboardDto result = await _eventService.GetAdminDashboardDataAsync(period, organizerId);
+        return SuccessResponse(result);
+    }
+
+    [HttpGet("dashboard")]
+    public async Task<IActionResult> GetDashboard([FromQuery] string? period = "year")
+    {
+        OrganizerDashboardDto result = await _eventService.GetDashboardDataAsync(period);
         return SuccessResponse(result);
     }
 
