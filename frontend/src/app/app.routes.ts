@@ -33,11 +33,11 @@ export const routes: Routes = [
             (m) => m.AdminDashboard,
           ),
       },
-      {
-        path: APP_ROUTES.ADMIN.USERS,
-        loadComponent: () =>
-          import('./core/features/admin/users/users.component').then((m) => m.UsersComponent),
-      },
+      // {
+      //   path: APP_ROUTES.ADMIN.USERS,
+      //   loadComponent: () =>
+      //     import('./core/features/admin/users/users.component').then((m) => m.UsersComponent),
+      // },
       {
         path: APP_ROUTES.ADMIN.EVENTS,
         loadComponent: () =>
