@@ -8,11 +8,13 @@
     [columns]="columns"
     [data]="gridData"
     [totalRecords]="totalRecords"
-    [currentPage]="1"
+    [currentPage]="currentPage"
     [pageSize]="pageSize"
     [trackByField]="'bookingId'"
     [isLoading]="isLoading"
     [errorMessage]="errorMessage"
     [actionItems]="[]"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
   />
 </div>

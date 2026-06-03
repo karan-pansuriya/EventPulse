@@ -121,6 +121,24 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
             .ToListAsync();
     }
 
+    public async Task<(List<Booking> Items, int TotalCount)> GetPagedBookingsByOrganizerIdAsync(int organizerId, int pageNumber, int pageSize)
+    {
+        IQueryable<Booking> query = _context.Bookings
+            .Where(b => !b.IsDeleted && b.Event!.OrganizerId == organizerId);
+
+        int totalCount = await query.CountAsync();
+
+        List<Booking> items = await query
+            .Include(b => b.User)
+            .Include(b => b.Event).ThenInclude(e => e!.Category)
+            .OrderByDescending(b => b.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
     public async Task<List<Event>> GetEventsByOrganizerIdAsync(int organizerId)
     {
         return await _context.Events

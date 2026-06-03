@@ -149,14 +149,21 @@ public class EventService : IEventService
         await _unitOfWork.SaveAsync();
     }
 
-    public async Task<List<EventAttendeeDto>> GetAttendeesAsync()
+    public async Task<PagedResult<EventAttendeeDto>> GetAttendeesAsync(int pageNumber = 1, int pageSize = 10)
     {
         int organizerId = GetUserId();
 
-        List<Booking> bookings = await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId);
+        var (bookings, totalCount) = await _eventRepository.GetPagedBookingsByOrganizerIdAsync(organizerId, pageNumber, pageSize);
 
-        return bookings.Where(b => b.User != null && b.Event != null)
+        List<EventAttendeeDto> items = bookings
+            .Where(b => b.User != null && b.Event != null)
             .Select(_mapper.Map<EventAttendeeDto>).ToList();
+
+        return new PagedResult<EventAttendeeDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+        };
     }
 
     public async Task<EventResponse> CreateAsync(CreateEventDto dto, List<(byte[] ImageBytes, string FileName)>? posterImages)

@@ -4,6 +4,7 @@ import { GridComponent, GridColumn } from '../../../../shared/components/grid/gr
 import { OrganizerEventService } from '../services/organizer-event.service';
 import { EventAttendee } from '../models/attendee.models';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { PagedResult } from '../../../../shared/models/paged-result.model';
 
 @Component({
   selector: 'app-organizer-attendees',
@@ -30,6 +31,7 @@ export class AttendeesComponent implements OnInit {
 
   gridData: Record<string, unknown>[] = [];
   totalRecords = 0;
+  currentPage = 1;
   pageSize = 10;
   isLoading = true;
   errorMessage: string | null = null;
@@ -43,13 +45,13 @@ export class AttendeesComponent implements OnInit {
     this.errorMessage = null;
     this.cdr.detectChanges();
 
-    this.eventService.getAttendees().subscribe({
+    this.eventService.getAttendees(this.currentPage, this.pageSize).subscribe({
       next: (res) => {
         if (res.success && res.data) {
-          const data = res.data;
-          this.totalRecords = data.length;
-          this.gridData = data.map((a: EventAttendee, i: number) => ({
-            index: i + 1,
+          const paged = res.data as PagedResult<EventAttendee>;
+          this.totalRecords = paged.totalCount;
+          this.gridData = paged.items.map((a: EventAttendee, i: number) => ({
+            index: (this.currentPage - 1) * this.pageSize + i + 1,
             bookingId: a.bookingId,
             customerName: a.customerName,
             customerEmail: a.customerEmail,
@@ -72,6 +74,17 @@ export class AttendeesComponent implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadAttendees();
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 1;
+    this.loadAttendees();
   }
 
   trackByBookingId(index: number, item: Record<string, unknown>): unknown {

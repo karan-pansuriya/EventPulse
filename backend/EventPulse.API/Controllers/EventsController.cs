@@ -92,9 +92,9 @@ public class EventsController : BaseHelper
     }
 
     [HttpGet("attendees")]
-    public async Task<IActionResult> GetAttendees()
+    public async Task<IActionResult> GetAttendees([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        List<EventAttendeeDto> result = await _eventService.GetAttendeesAsync();
+        PagedResult<EventAttendeeDto> result = await _eventService.GetAttendeesAsync(pageNumber, pageSize);
         return SuccessResponse(result);
     }
 

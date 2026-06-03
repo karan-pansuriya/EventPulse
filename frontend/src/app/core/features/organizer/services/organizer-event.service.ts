@@ -36,8 +36,12 @@ export class OrganizerEventService {
     return this.http.delete<null>(`events/${id}`);
   }
 
-  getAttendees(): Observable<ApiResponse<EventAttendee[]>> {
-    return this.http.get<EventAttendee[]>('events/attendees');
+  getAttendees(pageNumber: number, pageSize: number): Observable<ApiResponse<PagedResult<EventAttendee>>> {
+    const params = new HttpParams()
+      .set('PageNumber', pageNumber)
+      .set('PageSize', pageSize);
+
+    return this.http.get<PagedResult<EventAttendee>>('events/attendees', { params });
   }
 
   checkIn(ticketCode: string): Observable<ApiResponse<CheckInResponse>> {
