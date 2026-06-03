@@ -1,0 +1,111 @@
+<div class="check-in-page">
+  <div class="container-fluid py-3 py-md-4">
+
+    <!-- Page Header -->
+    <div class="d-flex align-items-center gap-3 mb-3 mb-md-4">
+      <i class="bi bi-check-circle fs-4 fs-md-2 text-primary"></i>
+      <h2 class="fw-bold mb-0 fs-5 fs-md-2">Ticket Check-in</h2>
+    </div>
+
+    <!-- Main Card -->
+    <div class="check-in-card">
+      <div class="check-in-card-body">
+
+        <!-- Form State -->
+        @if (state() === 'form' || state() === 'loading') {
+        <div class="mb-3">
+          <label for="ticketCode" class="form-label fw-semibold">
+            Ticket Code
+          </label>
+          <input id="ticketCode" type="text" class="form-control form-control-lg"
+            [class.is-invalid]="submitted && ticketControl.invalid" [class.is-valid]="submitted && ticketControl.valid"
+            [formControl]="ticketControl" placeholder="Enter or scan ticket code..." autocomplete="off" autofocus
+            (keyup.enter)="onSubmit()" [disabled]="state() === 'loading'" />
+          @if (submitted && ticketControl.invalid) {
+          <div class="invalid-feedback">{{ getFieldError() }}</div>
+          }
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="button"
+            class="btn btn-primary btn-lg flex-fill d-flex align-items-center justify-content-center gap-2"
+            (click)="onSubmit()" [disabled]="state() === 'loading'">
+            @if (state() === 'loading') {
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+            <span>Checking in...</span>
+            } @else {
+            <i class="bi bi-check2-circle"></i>
+            <span>Check In</span>
+            }
+          </button>
+        </div>
+        }
+
+        <!-- Loading State (inline message) -->
+        @if (state() === 'loading') {
+        <div class="text-center mt-4">
+          <p class="text-muted small">Verifying ticket, please wait...</p>
+        </div>
+        }
+
+        <!-- Error State -->
+        @if (state() === 'error') {
+        <div class="text-center py-4">
+          <div class="status-icon error mb-3">
+            <i class="bi bi-x-circle"></i>
+          </div>
+          <h5 class="fw-bold text-danger mb-2">Check-in Failed</h5>
+          <p class="text-muted mb-3">{{ errorMessage }}</p>
+          <button type="button" class="btn btn-outline-primary" (click)="reset()">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Try Again
+          </button>
+        </div>
+        }
+
+        <!-- Success State -->
+        @if (state() === 'success' && result) {
+        <div class="text-center py-2">
+          <div class="status-icon success mb-3">
+            <i class="bi bi-check2-circle"></i>
+          </div>
+          <h5 class="fw-bold text-success mb-1">Check-in Successful</h5>
+          <p class="text-muted small mb-4">{{ result.message }}</p>
+
+          <div class="ticket-details-card">
+            <div class="detail-row">
+              <span class="detail-label">Ticket ID</span>
+              <span class="detail-value">#{{ result.ticketId }}</span>
+            </div>
+            <div class="divider"></div>
+            <div class="detail-row">
+              <span class="detail-label">Ticket Code</span>
+              <span class="detail-value mono">{{ result.ticketCode }}</span>
+            </div>
+            <div class="divider"></div>
+            <div class="detail-row">
+              <span class="detail-label">Event</span>
+              <span class="detail-value">{{ result.eventTitle }}</span>
+            </div>
+            <div class="divider"></div>
+            <div class="detail-row">
+              <span class="detail-label">Attendee</span>
+              <span class="detail-value">{{ result.attendeeName || 'N/A' }}</span>
+            </div>
+            <div class="divider"></div>
+            <div class="detail-row">
+              <span class="detail-label">Checked In</span>
+              <span class="detail-value">{{ result.checkedInAt | date:'medium' }}</span>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary mt-4" (click)="reset()">
+            <i class="bi bi-qr-code-scan me-1"></i>Check In Another Ticket
+          </button>
+        </div>
+        }
+
+      </div>
+    </div>
+
+  </div>
+</div>

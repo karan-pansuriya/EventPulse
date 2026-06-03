@@ -132,6 +132,31 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<Ticket?> GetTicketByCodeAsync(string ticketCode)
+    {
+        return await _context.Tickets
+            .Include(t => t.Booking)
+                .ThenInclude(b => b.Event)
+            .Include(t => t.Booking)
+                .ThenInclude(b => b.User)
+            .FirstOrDefaultAsync(t => t.TicketCode == ticketCode && !t.IsDeleted);
+    }
+
+    public async Task MarkTicketAsUsedAsync(Ticket ticket)
+    {
+        Ticket? tracked = _context.ChangeTracker.Entries<Ticket>()
+            .Select(e => e.Entity)
+            .FirstOrDefault(e => e.Id == ticket.Id);
+
+        if (tracked != null)
+        {
+            tracked.IsUsed = ticket.IsUsed;
+            tracked.UsedAt = ticket.UsedAt;
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<Booking?> GetBookingWithDetailsAsync(int bookingId)
     {
         return await _context.Bookings

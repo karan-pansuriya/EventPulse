@@ -22,6 +22,10 @@ public interface IBookingRepository
 
     Task<Booking?> GetBookingByTicketIdAsync(int ticketId);
 
+    Task<Ticket?> GetTicketByCodeAsync(string ticketCode);
+
+    Task MarkTicketAsUsedAsync(Ticket ticket);
+
     Task UpdateTicketPathsAsync(ICollection<DAL.Entities.Ticket> tickets);
 
     Task<List<Booking>> GetUserBookingsAsync(int userId, int bookingId);

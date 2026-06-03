@@ -12,7 +12,6 @@ public class OrganizerDashboardDto
     public List<DashboardRecentAttendeeDto> RecentAttendees { get; set; } = [];
     public List<MonthlyRevenueDto> MonthlyRevenue { get; set; } = [];
     public List<CategoryEventCountDto> EventsByCategory { get; set; } = [];
-    public List<MonthlyEventCountDto> MonthlyEvents { get; set; } = [];
 }
 
 public class WeeklyComparisonDto

@@ -9,7 +9,6 @@ export interface OrganizerDashboardData {
   recentAttendees: RecentAttendeeItem[];
   monthlyRevenue: MonthlyRevenue[];
   eventsByCategory: CategoryEventCount[];
-  monthlyEvents: MonthlyEventCount[];
   attendeeInterests: AttendeeInterestItem[];
 }
 

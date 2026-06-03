@@ -454,16 +454,6 @@ public class EventService : IEventService
             .OfType<TopBookedEventDto>()
             .ToList();
 
-        List<MonthlyEventCountDto> monthlyEvents = events
-            .GroupBy(e => new { e.CreatedAt.Year, e.CreatedAt.Month })
-            .Select(g => new MonthlyEventCountDto
-            {
-                Month = $"{g.Key.Year}-{g.Key.Month:D2}",
-                Count = g.Count(),
-            })
-            .OrderBy(m => m.Month)
-            .ToList();
-
         List<DashboardRecentAttendeeDto> recentAttendees = paidBookings
             .Where(b => b.User != null && b.Event != null)
             .OrderByDescending(b => b.CreatedAt)
@@ -500,7 +490,6 @@ public class EventService : IEventService
             },
             EventsByCategory = eventsByCategory,
             MonthlyRevenue = monthlyRevenue,
-            MonthlyEvents = monthlyEvents,
             RecentAttendees = recentAttendees,
             TopBookedEvents = topBookedEvents,
         };
@@ -629,16 +618,6 @@ public class EventService : IEventService
             .OfType<TopBookedEventDto>()
             .ToList();
 
-        List<MonthlyEventCountDto> monthlyEvents = events
-            .GroupBy(e => new { e.CreatedAt.Year, e.CreatedAt.Month })
-            .Select(g => new MonthlyEventCountDto
-            {
-                Month = $"{g.Key.Year}-{g.Key.Month:D2}",
-                Count = g.Count(),
-            })
-            .OrderBy(m => m.Month)
-            .ToList();
-
         return new OrganizerDashboardDto
         {
             TotalEvents = totalEvents,
@@ -658,7 +637,6 @@ public class EventService : IEventService
             RecentAttendees = [],
             MonthlyRevenue = monthlyRevenue,
             EventsByCategory = eventsByCategory,
-            MonthlyEvents = monthlyEvents,
         };
     }
 

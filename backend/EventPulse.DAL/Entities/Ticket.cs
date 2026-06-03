@@ -13,11 +13,13 @@ namespace EventPulse.DAL.Entities
         [Required]
         public string TicketCode { get; set; } = string.Empty;
 
-        public string? QrCode { get; set; }
-
         public string? QrCodePath { get; set; }
 
         public string? PdfPath { get; set; }
+
+        public bool IsUsed { get; set; }
+
+        public DateTime? UsedAt { get; set; }
 
         [ForeignKey(nameof(BookingId))]
         public virtual Booking Booking { get; set; } = null!;

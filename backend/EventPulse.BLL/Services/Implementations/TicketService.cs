@@ -112,4 +112,40 @@ public class TicketService : ITicketService
 
         return (fullPath, ticket.TicketCode);
     }
+
+    public async Task<CheckInResponse> CheckInAsync(string ticketCode)
+    {
+        Ticket? ticket = await _bookingRepository.GetTicketByCodeAsync(ticketCode);
+        if (ticket == null)
+            throw new NotFoundException("Ticket not found.");
+
+        Booking? booking = ticket.Booking;
+        Event? eventEntity = booking?.Event;
+
+        if (eventEntity == null)
+            throw new BadRequestException("Ticket is not associated with a valid event.");
+
+        int userId = GetUserId();
+        if (eventEntity.OrganizerId != userId)
+            throw new ForbiddenException("This ticket does not belong to an event you manage.");
+
+        if (ticket.IsUsed)
+            throw new BadRequestException("This ticket has already been checked in.");
+
+        ticket.IsUsed = true;
+        ticket.UsedAt = DateTime.UtcNow;
+
+        await _bookingRepository.MarkTicketAsUsedAsync(ticket);
+
+        return new CheckInResponse
+        {
+            Success = true,
+            Message = "Check-in successful.",
+            TicketId = ticket.Id,
+            TicketCode = ticket.TicketCode,
+            EventTitle = eventEntity.Title,
+            AttendeeName = booking?.User?.Name ?? booking?.User?.Email,
+            CheckedInAt = ticket.UsedAt.Value,
+        };
+    }
 }
