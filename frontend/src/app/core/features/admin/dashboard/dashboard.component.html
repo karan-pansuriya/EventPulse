@@ -1,0 +1,225 @@
+<div class="dashboard-page">
+
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="1.5">
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+        </svg>
+        <h2 class="fw-bold mb-0">Admin Dashboard</h2>
+        @if (!isLoading && data) {
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <span class="filter-label">Organizer:</span>
+            <button class="org-pill" [class.active]="!selectedOrganizerId" (click)="filterByOrganizer()">All</button>
+            @for (org of organizers; track org.id) {
+            <button class="org-pill" [class.active]="selectedOrganizerId === org.id"
+                (click)="filterByOrganizer(org.id)">
+                {{ org.name }}
+            </button>
+            }
+        </div>
+        }
+    </div>
+
+    @if (isLoading) {
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-3 mb-4">
+        @for (_ of [1,2,3,4,5]; track _) {
+        <div class="col">
+            <div class="skeleton-card">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-body">
+                    <div class="skeleton-line w-50"></div>
+                    <div class="skeleton-line w-75 mt-1"></div>
+                    <div class="skeleton-line w-40 mt-1"></div>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-lg-6">
+            <div class="skeleton-chart">
+                <div class="skeleton-line w-25 mb-3"></div>
+                <div class="skeleton-chart-area"></div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div class="skeleton-chart">
+                <div class="skeleton-line w-40 mb-3"></div>
+                <div class="skeleton-chart-area rounded-circle"></div>
+            </div>
+        </div>
+    </div>
+    <div class="skeleton-section">
+        <div class="skeleton-line w-25 mb-3"></div>
+        <div class="skeleton-row">
+            <div class="flex-grow-1">
+                <div class="skeleton-line w-50"></div>
+                <div class="skeleton-line w-75 mt-2"></div>
+            </div>
+        </div>
+    </div>
+    }
+
+    @if (!isLoading && data)
+    {
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-3 g-3 mb-4">
+        <div class="col">
+            <div class="metric-card">
+                <div class="metric-icon rose">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                </div>
+                <div class="metric-body">
+                    <span class="metric-value">{{ data.totalEvents }}</span>
+                    <span class="metric-label">Total Events</span>
+                    <span class="week-change" [class.up]="data.weeklyComparison.eventsChange >= 0"
+                        [class.down]="data.weeklyComparison.eventsChange < 0">
+                        {{ data.weeklyComparison.eventsChange >= 0 ? '↑' : '↓' }} {{
+                        abs(data.weeklyComparison.eventsChange) }}% then last week
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="metric-card">
+                <div class="metric-icon amber">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                </div>
+                <div class="metric-body">
+                    <span class="metric-value">{{ data.upcomingEvents }}</span>
+                    <span class="metric-label">Upcoming</span>
+                    <span class="week-change" [class.up]="data.weeklyComparison.upcomingEventsChange >= 0"
+                        [class.down]="data.weeklyComparison.upcomingEventsChange < 0">
+                        {{ data.weeklyComparison.upcomingEventsChange >= 0 ? '↑' : '↓' }} {{
+                        abs(data.weeklyComparison.upcomingEventsChange) }}% then last week
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="metric-card">
+                <div class="metric-icon emerald">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                    </svg>
+                </div>
+                <div class="metric-body">
+                    <span class="metric-value">{{ data.totalAttendees }}</span>
+                    <span class="metric-label">Attendees</span>
+                    <span class="week-change" [class.up]="data.weeklyComparison.attendeesChange >= 0"
+                        [class.down]="data.weeklyComparison.attendeesChange < 0">
+                        {{ data.weeklyComparison.attendeesChange >= 0 ? '↑' : '↓' }} {{
+                        abs(data.weeklyComparison.attendeesChange) }}% then last week
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="metric-card">
+                <div class="metric-icon violet">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="2" width="20" height="20" rx="4" />
+                        <polyline points="8 12 11 15 16 9" />
+                    </svg>
+                </div>
+                <div class="metric-body">
+                    <span class="metric-value">{{ data.totalTicketsSold }}</span>
+                    <span class="metric-label">Tickets Sold</span>
+                    <span class="week-change" [class.up]="data.weeklyComparison.ticketsSoldChange >= 0"
+                        [class.down]="data.weeklyComparison.ticketsSoldChange < 0">
+                        {{ data.weeklyComparison.ticketsSoldChange >= 0 ? '↑' : '↓' }} {{
+                        abs(data.weeklyComparison.ticketsSoldChange) }}% then last week
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="metric-card">
+                <div class="metric-icon cyan">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                        <polyline points="17 6 23 6 23 12" />
+                    </svg>
+                </div>
+                <div class="metric-body">
+                    <span class="metric-value">{{ formatCurrency(data.totalRevenue) }}</span>
+                    <span class="metric-label">Revenue</span>
+                    <span class="week-change" [class.up]="data.weeklyComparison.revenueChange >= 0"
+                        [class.down]="data.weeklyComparison.revenueChange < 0">
+                        {{ data.weeklyComparison.revenueChange >= 0 ? '↑' : '↓' }} {{
+                        abs(data.weeklyComparison.revenueChange) }}% then last week
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-lg-6">
+            <div class="chart-card glow-card">
+                <div class="chart-header">
+                    <h5 class="chart-title mb-0">Revenue Trend</h5>
+                    <div class="period-pills">
+                        <button class="pill" [class.active]="selectedPeriod === 'week'" (click)="setPeriod('week')">This
+                            Week</button>
+                        <button class="pill" [class.active]="selectedPeriod === 'month'"
+                            (click)="setPeriod('month')">This Month</button>
+                        <button class="pill" [class.active]="selectedPeriod === 'year'" (click)="setPeriod('year')">This
+                            Year</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-6">
+            <div class="chart-card">
+                <h5 class="chart-title">Interest Categories</h5>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="section-card">
+                <h5 class="section-title">Top Events</h5>
+                @if (data.topBookedEvents.length > 0) {
+                <div class="top-event-scroll">
+                    @for (ev of data.topBookedEvents; track ev.id; let i = $index) {
+                    <a [routerLink]="['/admin/events']" class="top-event-item">
+                        <span class="top-event-rank">{{ i + 1 }}</span>
+                        <div class="top-event-info">
+                            <span class="top-event-name">{{ ev.title }}</span>
+                            <span class="top-event-sub">{{ ev.eventDate | date:'mediumDate' }} · organized by : {{
+                                ev.organizerName }}</span>
+                        </div>
+                        <div class="top-event-stat">
+                            <span class="stat-value">{{ ev.totalBookings }}</span>
+                            <span class="stat-label">sold</span>
+                        </div>
+                        <div class="top-event-stat">
+                            <span class="stat-value">{{ formatCurrency(ev.revenueGenerated) }}</span>
+                            <span class="stat-label">revenue</span>
+                        </div>
+                    </a>
+                    }
+                </div>
+                } @else {
+                <div class="text-center py-4 text-muted">No events yet.</div>
+                }
+            </div>
+        </div>
+    </div>
+    }
+</div>

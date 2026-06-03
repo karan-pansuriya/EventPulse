@@ -787,13 +787,15 @@ namespace EventPulse.DAL.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
+                    b.Property<bool>("IsUsed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_used");
+
                     b.Property<string>("PdfPath")
                         .HasColumnType("text")
                         .HasColumnName("pdf_path");
-
-                    b.Property<string>("QrCode")
-                        .HasColumnType("text")
-                        .HasColumnName("qr_code");
 
                     b.Property<string>("QrCodePath")
                         .HasColumnType("text")
@@ -807,6 +809,10 @@ namespace EventPulse.DAL.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("used_at");
 
                     b.HasKey("Id")
                         .HasName("pk_tickets");
@@ -942,14 +948,6 @@ namespace EventPulse.DAL.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("is_deleted");
-
-                    b.Property<decimal?>("Latitude")
-                        .HasColumnType("numeric")
-                        .HasColumnName("latitude");
-
-                    b.Property<decimal?>("Longitude")
-                        .HasColumnType("numeric")
-                        .HasColumnName("longitude");
 
                     b.Property<string>("Name")
                         .IsRequired()

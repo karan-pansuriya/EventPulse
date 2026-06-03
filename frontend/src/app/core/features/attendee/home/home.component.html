@@ -99,14 +99,19 @@
 
   <section class="results-section">
     <div class="results-header">
-      <h2 class="results-title">
-        @if (searchQuery || selectedCategory || selectedCity || dateFrom || dateTo) {
-        Search Results
-        } @else {
-        Upcoming Events
-        }
-      </h2>
-      <span class="results-count">{{ result.totalCount }} event{{ result.totalCount !== 1 ? 's' : '' }} found</span>
+      <div>
+        <h2 class="results-title">
+          @if (searchQuery || selectedCategory || selectedCity || dateFrom || dateTo) {
+          Search Results
+          } @else {
+          Upcoming Events
+          }
+        </h2>
+        <span class="results-count">Total Events: {{ result.totalCount }}</span>
+      </div>
+      @if (result.items.length > 0) {
+        <span class="results-count">Showing {{ currentPageCount }} of {{ result.totalCount }} events</span>
+      }
     </div>
 
     @if (loading) {

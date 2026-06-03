@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EventPulse.API.Controllers;
 
-[Authorize(Policy = "CustomerOnly")]
 [Route("api/tickets")]
 public class TicketsController : BaseHelper
 {
@@ -17,6 +16,7 @@ public class TicketsController : BaseHelper
         _ticketService = ticketService;
     }
 
+    [Authorize(Policy = "CustomerOnly")]
     [HttpGet("my-tickets/{bookingId}")]
     public async Task<IActionResult> GetMyTickets(int bookingId)
     {
@@ -24,6 +24,7 @@ public class TicketsController : BaseHelper
         return SuccessResponse(result);
     }
 
+    [Authorize(Policy = "CustomerOnly")]
     [HttpGet("my-tickets")]
     public async Task<IActionResult> GetAllMyTickets()
     {
@@ -31,10 +32,19 @@ public class TicketsController : BaseHelper
         return SuccessResponse(result);
     }
 
+    [Authorize(Policy = "CustomerOnly")]
     [HttpGet("download/{ticketId}")]
     public async Task<IActionResult> DownloadTicket(int ticketId)
     {
         var (fullPath, ticketCode) = await _ticketService.GetTicketDownloadInfoAsync(ticketId);
         return PhysicalFile(fullPath, "application/pdf", $"ticket-{ticketCode}.pdf");
+    }
+
+    [Authorize(Policy = "OrganizerOnly")]
+    [HttpPost("check-in")]
+    public async Task<IActionResult> CheckIn([FromBody] CheckInRequest request)
+    {
+        CheckInResponse result = await _ticketService.CheckInAsync(request.TicketCode);
+        return SuccessResponse(result);
     }
 }

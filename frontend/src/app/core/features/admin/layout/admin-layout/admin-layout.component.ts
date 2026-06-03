@@ -16,10 +16,6 @@ export class AdminLayoutComponent {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
-  closeSidebar(): void {
-    this.sidebarOpen = false;
-  }
-
   @HostListener('window:resize')
   onResize(): void {
     if (window.innerWidth >= 768) {

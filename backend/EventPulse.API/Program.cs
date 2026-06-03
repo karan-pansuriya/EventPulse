@@ -151,7 +151,7 @@ builder.Services.AddAuthorization(options =>
 });
 
 // ─── AutoMapper ─────────────────────────────────────────────────────────────
-builder.Services.AddAutoMapper(typeof(EventProfile), typeof(BookingProfile));
+builder.Services.AddAutoMapper(typeof(EventProfile), typeof(BookingProfile), typeof(DashboardProfile));
 
 // ─── Stripe ──────────────────────────────────────────────────────────────────
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection(StripeSettings.SectionName));

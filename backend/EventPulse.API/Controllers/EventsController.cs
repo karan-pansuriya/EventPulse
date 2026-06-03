@@ -1,5 +1,6 @@
 using EventPulse.API.Helpers;
 using EventPulse.BLL.Common;
+using EventPulse.BLL.DTOs.Dashboard;
 using EventPulse.BLL.DTOs.Event;
 using EventPulse.BLL.Interfaces;
 using EventPulse.Common.Models;
@@ -75,10 +76,25 @@ public class EventsController : BaseHelper
         return SuccessResponse(result);
     }
 
-    [HttpGet("attendees")]
-    public async Task<IActionResult> GetAttendees()
+    [Authorize(Policy = "AdminOnly")]
+    [HttpGet("admin/dashboard")]
+    public async Task<IActionResult> GetAdminDashboard([FromQuery] string? period = "year", [FromQuery] int? organizerId = null)
     {
-        List<EventAttendeeDto> result = await _eventService.GetAttendeesAsync();
+        OrganizerDashboardDto result = await _eventService.GetAdminDashboardDataAsync(period, organizerId);
+        return SuccessResponse(result);
+    }
+
+    [HttpGet("dashboard")]
+    public async Task<IActionResult> GetDashboard([FromQuery] string? period = "year")
+    {
+        OrganizerDashboardDto result = await _eventService.GetDashboardDataAsync(period);
+        return SuccessResponse(result);
+    }
+
+    [HttpGet("attendees")]
+    public async Task<IActionResult> GetAttendees([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        PagedResult<EventAttendeeDto> result = await _eventService.GetAttendeesAsync(pageNumber, pageSize);
         return SuccessResponse(result);
     }
 

@@ -5,7 +5,7 @@ import { BaseHttpService } from '../../../../shared/services/base-http.service';
 import { ApiResponse } from '../../../../shared/models/api-response.model';
 import { PagedResult } from '../../../../shared/models/paged-result.model';
 import { EventListResponse, EventDetailResponse } from '../../attendee/home/models/event.models';
-import { EventAttendee } from '../models/attendee.models';
+import { EventAttendee, CheckInResponse } from '../models/attendee.models';
 import { CreateEventRequest, UpdateEventRequest } from '../models/event.models';
 
 @Injectable({ providedIn: 'root' })
@@ -36,7 +36,15 @@ export class OrganizerEventService {
     return this.http.delete<null>(`events/${id}`);
   }
 
-  getAttendees(): Observable<ApiResponse<EventAttendee[]>> {
-    return this.http.get<EventAttendee[]>('events/attendees');
+  getAttendees(pageNumber: number, pageSize: number): Observable<ApiResponse<PagedResult<EventAttendee>>> {
+    const params = new HttpParams()
+      .set('PageNumber', pageNumber)
+      .set('PageSize', pageSize);
+
+    return this.http.get<PagedResult<EventAttendee>>('events/attendees', { params });
+  }
+
+  checkIn(ticketCode: string): Observable<ApiResponse<CheckInResponse>> {
+    return this.http.post<CheckInResponse>('tickets/check-in', { ticketCode });
   }
 }

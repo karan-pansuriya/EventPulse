@@ -256,14 +256,18 @@ modelBuilder.Entity<Ticket>(entity =>
     entity.Property(t => t.TicketCode)
           .IsRequired();
 
-    entity.Property(t => t.QrCode)
-          .HasColumnName("qr_code");
-
     entity.Property(t => t.QrCodePath)
           .HasColumnName("qr_code_path");
 
     entity.Property(t => t.PdfPath)
           .HasColumnName("pdf_path");
+
+    entity.Property(t => t.IsUsed)
+          .HasColumnName("is_used")
+          .HasDefaultValue(false);
+
+    entity.Property(t => t.UsedAt)
+          .HasColumnName("used_at");
 
     entity.Property(t => t.CreatedAt)
           .HasDefaultValueSql("now()");

@@ -2,19 +2,12 @@
     <app-header mode="admin" (toggleSidebar)="toggleSidebar()" />
     <div class="organizer-body" [class.sidebar-open]="sidebarOpen">
         @if (sidebarOpen) {
-            <div class="sidebar-backdrop d-md-none" (click)="closeSidebar()"></div>
+            <div class="sidebar-backdrop d-md-none"></div>
         }
         <aside class="sidebar" [class.open]="sidebarOpen">
-            <div class="sidebar-brand">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#be185d" stroke-width="2">
-                    <rect x="2" y="2" width="20" height="20" rx="4" />
-                    <polyline points="8 12 11 15 16 9" />
-                </svg>
-                <span>EventPulse</span>
-            </div>
             <nav class="sidebar-nav">
                 <a class="nav-item" routerLink="/organizer/dashboard" routerLinkActive="active"
-                    [routerLinkActiveOptions]="{exact: true}" (click)="closeSidebar()">
+                    [routerLinkActiveOptions]="{exact: true}">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="7" height="7" />
                         <rect x="14" y="3" width="7" height="7" />
@@ -23,27 +16,20 @@
                     </svg>
                     Dashboard
                 </a>
-                <a class="nav-item" routerLink="/organizer/events" routerLinkActive="active" (click)="closeSidebar()">
+                <a class="nav-item" routerLink="/organizer/events" routerLinkActive="active">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                     </svg>
                     My Events
                 </a>
-                <a class="nav-item" routerLink="/organizer/events/create" routerLinkActive="active" (click)="closeSidebar()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                    Create Event
-                </a>
-                <a class="nav-item" routerLink="/organizer/attendees" routerLinkActive="active" (click)="closeSidebar()">
+                <a class="nav-item" routerLink="/organizer/attendees" routerLinkActive="active">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
                     </svg>
                     Attendees
                 </a>
-                <a class="nav-item" routerLink="/organizer/check-in" routerLinkActive="active" (click)="closeSidebar()">
+                <a class="nav-item" routerLink="/organizer/check-in" routerLinkActive="active">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="9 11 12 14 22 4" />
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />

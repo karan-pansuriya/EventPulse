@@ -3,9 +3,10 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { OrganizerEventService } from '../services/organizer-event.service';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
-import { GridComponent, GridColumn } from '../../../../shared/components/grid/grid.component';
+import { GridComponent, GridColumn, GridActionItem } from '../../../../shared/components/grid/grid.component';
 import { EventListResponse } from '../../attendee/home/models/event.models';
 import { environment } from '../../../../../environments/environment';
+import { ToastService } from '../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-organizer-events',
@@ -18,6 +19,7 @@ export class EventsComponent implements OnInit {
   private eventService = inject(OrganizerEventService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private toastService = inject(ToastService);
 
   private imageBaseUrl = environment.apiUrl.replace('/api', '');
 
@@ -53,6 +55,19 @@ export class EventsComponent implements OnInit {
     },
     { header: '', field: 'actions', type: 'action', width: '60px' },
   ];
+
+  getRowActionItems = (row: Record<string, unknown>): GridActionItem[] => {
+    const r = row as unknown as EventListResponse;
+    const isPast = this.isPastEvent(r.eventDate);
+    const items: GridActionItem[] = [];
+    if (!r.isVerified && !isPast) {
+      items.push({ label: 'Edit', icon: 'assets/icons/Edit.svg', emit: 'edit' });
+    }
+    if (!r.isVerified && !isPast) {
+      items.push({ label: 'Delete', icon: 'assets/icons/Delete.svg', emit: 'delete' });
+    }
+    return items;
+  };
 
   ngOnInit(): void {
     this.loadEvents();
@@ -112,9 +127,11 @@ export class EventsComponent implements OnInit {
         }
         this.loadEvents();
       },
-      error: () => {
+      error: (err) => {
         this.showDeleteModal = false;
         this.deletingEvent = null;
+        const message = err?.error?.message || 'Failed to delete event.';
+        this.toastService.error(message);
         this.cdr.detectChanges();
       },
     });
@@ -128,6 +145,11 @@ export class EventsComponent implements OnInit {
   get deleteMessage(): string {
     const title = this.deletingEvent?.title || '';
     return `Are you sure you want to delete "${title}"? This action cannot be undone.`;
+  }
+
+  private isPastEvent(eventDate: string): boolean {
+    const today = new Date().toISOString().slice(0, 10);
+    return eventDate < today;
   }
 
   private formatTime(timeStr: string): string {
