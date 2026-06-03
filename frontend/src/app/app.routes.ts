@@ -88,15 +88,15 @@ export const routes: Routes = [
       {
         path: APP_ROUTES.ORGANIZER.CREATE_EVENT,
         loadComponent: () =>
-          import('./core/features/organizer/create-event/create-event.component').then(
-            (m) => m.CreateEventComponent,
+          import('./core/features/organizer/event-form/event-form.component').then(
+            (m) => m.EventFormComponent,
           ),
       },
       {
         path: APP_ROUTES.ORGANIZER.EDIT_EVENT,
         loadComponent: () =>
-          import('./core/features/organizer/edit-event/edit-event.component').then(
-            (m) => m.EditEventComponent,
+          import('./core/features/organizer/event-form/event-form.component').then(
+            (m) => m.EventFormComponent,
           ),
       },
       {

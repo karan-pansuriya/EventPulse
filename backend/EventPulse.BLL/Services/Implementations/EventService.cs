@@ -241,7 +241,7 @@ public class EventService : IEventService
         if (userRoleId != RoleId.Admin && eventEntity.OrganizerId != userId)
             throw new ForbiddenException("You are not authorized to update this event.");
 
-        if (userRoleId != RoleId.Admin && eventEntity.IsVerified)
+        if (eventEntity.IsVerified)
             throw new ForbiddenException("Verified events cannot be edited.");
 
         if (eventEntity.EventDate < DateTime.Today)
@@ -511,7 +511,7 @@ public class EventService : IEventService
         List<Event> events = organizerId.HasValue
             ? await _eventRepository.GetEventsByOrganizerIdAsync(organizerId.Value)
             : await _eventRepository.GetAllEventsWithDetailsAsync();
-            
+
         List<Booking> bookings = organizerId.HasValue
             ? await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId.Value)
             : await _bookingRepository.GetAllBookingsAsync();

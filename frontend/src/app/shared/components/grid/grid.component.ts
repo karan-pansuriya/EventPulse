@@ -42,7 +42,6 @@ export class GridComponent<T> implements OnInit, OnDestroy {
   /** Show spinner overlay; mirrors master-data's ds.isLoading */
   @Input() isLoading = false;
 
-  /** Show error message when no data is present; mirrors master-data's ds.errorMessage */
   @Input() errorMessage: string | null = null;
 
   getRowActionItems(row: T): GridActionItem[] {

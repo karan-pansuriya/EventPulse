@@ -9,6 +9,5 @@ export interface EventAttendee {
   quantity: number;
   totalAmount: number;
   paymentStatus: string;
-  bookingStatus: string;
   bookedAt: string;
 }
