@@ -34,6 +34,7 @@ export class EventDetailsComponent implements OnInit, OnDestroy {
   error: string | null = null;
   selectedQuantity = 1;
   signalRConnected = false;
+  currentImageIndex = 0;
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -109,5 +110,27 @@ export class EventDetailsComponent implements OnInit, OnDestroy {
     this.router.navigate(['/attendee/checkout', this.event.id], {
       queryParams: { qty: this.selectedQuantity },
     });
+  }
+
+  get images(): string[] {
+    return this.event?.posterUrls ?? [];
+  }
+
+  prevImage(): void {
+    if (this.images.length === 0) return;
+    this.currentImageIndex = this.currentImageIndex === 0
+      ? this.images.length - 1
+      : this.currentImageIndex - 1;
+  }
+
+  nextImage(): void {
+    if (this.images.length === 0) return;
+    this.currentImageIndex = this.currentImageIndex === this.images.length - 1
+      ? 0
+      : this.currentImageIndex + 1;
+  }
+
+  goToImage(index: number): void {
+    this.currentImageIndex = index;
   }
 }
