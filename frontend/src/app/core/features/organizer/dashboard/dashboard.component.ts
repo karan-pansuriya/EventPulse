@@ -239,10 +239,7 @@ export class OrganizerDashboard implements OnInit, AfterViewInit {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { boxWidth: 12, padding: 10, font: { size: 10 } },
-          },
+          legend: { display: false },
         },
         cutout: '55%',
       },
