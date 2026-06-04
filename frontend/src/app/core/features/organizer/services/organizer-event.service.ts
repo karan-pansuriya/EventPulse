@@ -15,7 +15,9 @@ export class OrganizerEventService {
   getMyEvents(pageNumber: number, pageSize: number): Observable<ApiResponse<PagedResult<EventListResponse>>> {
     const params = new HttpParams()
       .set('PageNumber', pageNumber)
-      .set('PageSize', pageSize);
+      .set('PageSize', pageSize)
+      .set('SortBy', 'eventDate')
+      .set('SortDirection', 'desc');
 
     return this.http.get<PagedResult<EventListResponse>>('events/my-events', { params });
   }

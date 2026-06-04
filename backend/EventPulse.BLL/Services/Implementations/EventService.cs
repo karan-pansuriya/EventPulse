@@ -97,6 +97,10 @@ public class EventService : IEventService
     public async Task<PagedResult<EventListResponse>> GetMyEventsAsync(PageRequest pageRequest)
     {
         int organizerId = GetUserId();
+
+        pageRequest.SortBy ??= "EventDate";
+        pageRequest.SortDirection ??= "desc";
+
         return await _eventRepo.GetPagedAsync(
             e => e.OrganizerId == organizerId && !e.IsDeleted,
             e => new EventListResponse
