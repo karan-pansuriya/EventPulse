@@ -60,6 +60,8 @@ public class TicketService : ITicketService
                 TicketCode = t.TicketCode,
                 QrCodeUrl = t.QrCodePath != null ? $"{baseUrl}/{t.QrCodePath}" : null,
                 PdfUrl = t.PdfPath != null ? $"{baseUrl}/{t.PdfPath}" : null,
+                IsUsed = t.IsUsed,
+                UsedAt = t.UsedAt,
             }).ToList()
         }).ToList();
     }
@@ -91,6 +93,8 @@ public class TicketService : ITicketService
                 TicketCode = t.TicketCode,
                 QrCodeUrl = t.QrCodePath != null ? $"{baseUrl}/{t.QrCodePath}" : null,
                 PdfUrl = t.PdfPath != null ? $"{baseUrl}/{t.PdfPath}" : null,
+                IsUsed = t.IsUsed,
+                UsedAt = t.UsedAt,
             }).ToList()
         }).ToList();
     }

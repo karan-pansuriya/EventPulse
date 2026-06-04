@@ -97,7 +97,18 @@
                   <!-- Ticket info -->
                   <div class="flex-grow-1 px-2 px-sm-3 min-width-0">
                     <p class="ticket-code mb-0 text-break">{{ ticket.ticketCode }}</p>
-                    <small class="text-muted">Show this QR at the venue for entry</small>
+                    @if (ticket.isUsed) {
+                      <span class="ticket-status used">
+                        <i class="bi bi-check-circle-fill me-1"></i>Used
+                      </span>
+                      @if (ticket.usedAt) {
+                        <small class="text-muted ms-2">{{ formatDateTime(ticket.usedAt) }}</small>
+                      }
+                    } @else {
+                      <span class="ticket-status unused">
+                        <i class="bi bi-clock me-1"></i>Not Used
+                      </span>
+                    }
                   </div>
                 </div>
 
