@@ -65,7 +65,7 @@ public class EventService : IEventService
         return null;
     }
 
-    public async Task<EventResponse> GetByIdAsync(int id)
+    public async Task<EventResponse> GetEventByIdAsync(int id)
     {
         Event eventEntity = await _eventRepository.GetEventWithDetailsAsync(id)
             ?? throw new NotFoundException("Event not found.");
@@ -81,7 +81,7 @@ public class EventService : IEventService
         return _mapper.Map<EventResponse>(eventEntity);
     }
 
-    public async Task<PagedResult<EventListResponse>> GetPagedAsync(EventFilterRequest filter)
+    public async Task<PagedResult<EventListResponse>> GetPagedEventsAsync(EventFilterRequest filter)
     {
         (List<Event> items, int totalCount) = await _eventRepository.GetPagedEventsAsync(filter);
 
@@ -97,6 +97,10 @@ public class EventService : IEventService
     public async Task<PagedResult<EventListResponse>> GetMyEventsAsync(PageRequest pageRequest)
     {
         int organizerId = GetUserId();
+
+        pageRequest.SortBy ??= "EventDate";
+        pageRequest.SortDirection ??= "desc";
+
         return await _eventRepo.GetPagedAsync(
             e => e.OrganizerId == organizerId && !e.IsDeleted,
             e => new EventListResponse
@@ -166,7 +170,7 @@ public class EventService : IEventService
         };
     }
 
-    public async Task<EventResponse> CreateAsync(CreateEventDto dto, List<(byte[] ImageBytes, string FileName)>? posterImages)
+    public async Task<EventResponse> CreateEventAsync(CreateEventDto dto, List<(byte[] ImageBytes, string FileName)>? posterImages)
     {
         int organizerId = GetUserId();
 
@@ -225,10 +229,10 @@ public class EventService : IEventService
             await _unitOfWork.SaveAsync();
         }
 
-        return await GetByIdAsync(eventEntity.Id);
+        return await GetEventByIdAsync(eventEntity.Id);
     }
 
-    public async Task<EventResponse> UpdateAsync(int id, UpdateEventDto dto, List<(byte[] ImageBytes, string FileName)>? posterImages)
+    public async Task<EventResponse> UpdateEventAsync(int id, UpdateEventDto dto, List<(byte[] ImageBytes, string FileName)>? posterImages)
     {
         int userId = GetUserId();
         int userRoleId = GetActiveRoleId() ?? throw new UnauthorizedAccessException("Active role not found.");
@@ -307,10 +311,10 @@ public class EventService : IEventService
 
         await _unitOfWork.SaveAsync();
 
-        return await GetByIdAsync(id);
+        return await GetEventByIdAsync(id);
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteEventAsync(int id)
     {
         int userId = GetUserId();
         int userRoleId = GetActiveRoleId() ?? throw new UnauthorizedAccessException("Active role not found.");
@@ -340,93 +344,39 @@ public class EventService : IEventService
         await _unitOfWork.SaveAsync();
     }
 
-    public async Task<OrganizerDashboardDto> GetDashboardDataAsync(string? period = "year")
+    public async Task<OrganizerDashboardDto> GetOrganizerDashboardDataAsync()
     {
         int organizerId = GetUserId();
 
-        List<Event> events = await _eventRepository.GetEventsByOrganizerIdAsync(organizerId);
-        List<Booking> bookings = await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId);
+        DateTime now = DateTime.Today;
+        DateTime periodStart = new DateTime(now.Year, 1, 1);
+        DateTime prevPeriodStart = periodStart.AddYears(-1);
 
-        int totalEvents = events.Count;
-        int upcomingEvents = events.Count(e => e.EventDate >= DateTime.Today);
+        List<Event> allEvents = await _eventRepository.GetEventsByOrganizerIdAsync(organizerId);
+        List<Booking> allBookings = await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId);
+        List<Booking> allPaidBookings = allBookings.Where(b => b.PaymentStatus == PaymentStatus.Paid).ToList();
 
-        List<Booking> paidBookings = bookings.Where(b => b.PaymentStatus == PaymentStatus.Paid).ToList();
-        int totalTicketsSold = paidBookings.Sum(b => b.Quantity);
-        decimal totalRevenue = paidBookings.Sum(b => b.TotalAmount);
-        int totalAttendees = paidBookings.Select(b => b.UserId).Distinct().Count();
+        List<Event> periodEvents = allEvents.Where(e => e.CreatedAt >= periodStart).ToList();
+        List<Booking> periodPaidBookings = allPaidBookings.Where(b => b.CreatedAt >= periodStart).ToList();
 
-        // Weekly comparison
-        DateTime weekAgo = DateTime.Today.AddDays(-7);
-        DateTime twoWeeksAgo = DateTime.Today.AddDays(-14);
+        int totalEvents = periodEvents.Count;
+        int upcomingEvents = periodEvents.Count(e => e.EventDate >= DateTime.Today);
+        int totalTicketsSold = periodPaidBookings.Sum(b => b.Quantity);
+        decimal totalRevenue = periodPaidBookings.Sum(b => b.TotalAmount);
+        int totalAttendees = periodPaidBookings.Select(b => b.UserId).Distinct().Count();
 
-        int thisWeekEvents = events.Count(e => e.CreatedAt >= weekAgo);
-        int lastWeekEvents = events.Count(e => e.CreatedAt >= twoWeeksAgo && e.CreatedAt < weekAgo);
+        List<Event> prevPeriodEvents = allEvents.Where(e => e.CreatedAt >= prevPeriodStart && e.CreatedAt < periodStart).ToList();
+        List<Booking> prevPeriodPaidBookings = allPaidBookings.Where(b => b.CreatedAt >= prevPeriodStart && b.CreatedAt < periodStart).ToList();
 
-        int thisWeekUpcoming = events.Count(e => e.EventDate >= DateTime.Today && e.CreatedAt >= weekAgo);
-        int lastWeekUpcoming = events.Count(e => e.EventDate >= DateTime.Today && e.CreatedAt >= twoWeeksAgo && e.CreatedAt < weekAgo);
+        int prevTotalEvents = prevPeriodEvents.Count;
+        int prevUpcomingEvents = prevPeriodEvents.Count(e => e.EventDate >= DateTime.Today);
+        int prevTicketsSold = prevPeriodPaidBookings.Sum(b => b.Quantity);
+        decimal prevRevenue = prevPeriodPaidBookings.Sum(b => b.TotalAmount);
+        int prevAttendees = prevPeriodPaidBookings.Select(b => b.UserId).Distinct().Count();
 
-        List<Booking> thisWeekBookings = paidBookings.Where(b => b.CreatedAt >= weekAgo).ToList();
-        List<Booking> lastWeekBookings = paidBookings.Where(b => b.CreatedAt >= twoWeeksAgo && b.CreatedAt < weekAgo).ToList();
+        List<MonthlyRevenueDto> monthlyRevenue = [];
 
-        int lastWeekTicketsSold = lastWeekBookings.Sum(b => b.Quantity);
-        int thisWeekTicketsSold = thisWeekBookings.Sum(b => b.Quantity);
-
-        decimal lastWeekRevenueAmt = lastWeekBookings.Sum(b => b.TotalAmount);
-        decimal thisWeekRevenueAmt = thisWeekBookings.Sum(b => b.TotalAmount);
-
-        int lastWeekAttendeeCount = lastWeekBookings.Select(b => b.UserId).Distinct().Count();
-        int thisWeekAttendeeCount = thisWeekBookings.Select(b => b.UserId).Distinct().Count();
-
-        // Revenue by period
-        List<MonthlyRevenueDto> monthlyRevenue;
-        string periodKey = period?.ToLower() ?? "year";
-
-        if (periodKey == "week")
-        {
-            string[] dayNames = new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
-            DateTime weekStart = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);
-            monthlyRevenue = paidBookings
-                .Where(b => b.CreatedAt >= weekStart)
-                .GroupBy(b => b.CreatedAt.DayOfWeek)
-                .Select(g => new MonthlyRevenueDto
-                {
-                    Month = dayNames[(int)g.Key],
-                    Revenue = g.Sum(b => b.TotalAmount),
-                    Bookings = g.Sum(b => b.Quantity),
-                })
-                .OrderBy(m => Array.IndexOf(dayNames, m.Month))
-                .ToList();
-        }
-        else if (periodKey == "month")
-        {
-            DateTime now = DateTime.Today;
-            monthlyRevenue = paidBookings
-                .Where(b => b.CreatedAt.Year == now.Year && b.CreatedAt.Month == now.Month)
-                .GroupBy(b => b.CreatedAt.Day)
-                .Select(g => new MonthlyRevenueDto
-                {
-                    Month = $"{now:MMM} {g.Key}",
-                    Revenue = g.Sum(b => b.TotalAmount),
-                    Bookings = g.Sum(b => b.Quantity),
-                })
-                .OrderBy(m => m.Month)
-                .ToList();
-        }
-        else
-        {
-            monthlyRevenue = paidBookings
-                .GroupBy(b => new { b.CreatedAt.Year, b.CreatedAt.Month })
-                .Select(g => new MonthlyRevenueDto
-                {
-                    Month = $"{g.Key.Year}-{g.Key.Month:D2}",
-                    Revenue = g.Sum(b => b.TotalAmount),
-                    Bookings = g.Sum(b => b.Quantity),
-                })
-                .OrderBy(m => m.Month)
-                .ToList();
-        }
-
-        List<CategoryEventCountDto> eventsByCategory = events
+        List<CategoryEventCountDto> eventsByCategory = periodEvents
             .Where(e => e.Category != null)
             .GroupBy(e => e.Category!.Name)
             .Select(g => new CategoryEventCountDto
@@ -437,7 +387,7 @@ public class EventService : IEventService
             .ToList();
 
         // Top booked events
-        var bookingStats = paidBookings
+        var bookingStats = periodPaidBookings
             .GroupBy(b => b.EventId)
             .Select(g => new
             {
@@ -451,7 +401,7 @@ public class EventService : IEventService
         List<TopBookedEventDto> topBookedEvents = bookingStats
             .Select(bs =>
             {
-                Event? ev = events.FirstOrDefault(e => e.Id == bs.EventId);
+                Event? ev = allEvents.FirstOrDefault(e => e.Id == bs.EventId);
                 if (ev == null) return null;
                 TopBookedEventDto dto = _mapper.Map<TopBookedEventDto>(ev);
                 dto.TotalBookings = bs.TotalBookings;
@@ -461,7 +411,7 @@ public class EventService : IEventService
             .OfType<TopBookedEventDto>()
             .ToList();
 
-        List<DashboardRecentAttendeeDto> recentAttendees = paidBookings
+        List<DashboardRecentAttendeeDto> recentAttendees = periodPaidBookings
             .Where(b => b.User != null && b.Event != null)
             .OrderByDescending(b => b.CreatedAt)
             .Take(10)
@@ -489,11 +439,11 @@ public class EventService : IEventService
             TotalAttendees = totalAttendees,
             WeeklyComparison = new WeeklyComparisonDto
             {
-                EventsChange = lastWeekEvents > 0 ? (thisWeekEvents - lastWeekEvents) * 100 / lastWeekEvents : (thisWeekEvents > 0 ? 100 : 0),
-                UpcomingEventsChange = lastWeekUpcoming > 0 ? (thisWeekUpcoming - lastWeekUpcoming) * 100 / lastWeekUpcoming : (thisWeekUpcoming > 0 ? 100 : 0),
-                TicketsSoldChange = lastWeekTicketsSold > 0 ? (thisWeekTicketsSold - lastWeekTicketsSold) * 100 / lastWeekTicketsSold : (thisWeekTicketsSold > 0 ? 100 : 0),
-                RevenueChange = lastWeekRevenueAmt > 0 ? (thisWeekRevenueAmt - lastWeekRevenueAmt) * 100m / lastWeekRevenueAmt : (thisWeekRevenueAmt > 0 ? 100m : 0m),
-                AttendeesChange = lastWeekAttendeeCount > 0 ? (thisWeekAttendeeCount - lastWeekAttendeeCount) * 100 / lastWeekAttendeeCount : (thisWeekAttendeeCount > 0 ? 100 : 0),
+                EventsChange = prevTotalEvents > 0 ? (totalEvents - prevTotalEvents) * 100 / prevTotalEvents : (totalEvents > 0 ? 100 : 0),
+                UpcomingEventsChange = prevUpcomingEvents > 0 ? (upcomingEvents - prevUpcomingEvents) * 100 / prevUpcomingEvents : (upcomingEvents > 0 ? 100 : 0),
+                TicketsSoldChange = prevTicketsSold > 0 ? (totalTicketsSold - prevTicketsSold) * 100 / prevTicketsSold : (totalTicketsSold > 0 ? 100 : 0),
+                RevenueChange = prevRevenue > 0 ? (totalRevenue - prevRevenue) * 100m / prevRevenue : (totalRevenue > 0 ? 100m : 0m),
+                AttendeesChange = prevAttendees > 0 ? (totalAttendees - prevAttendees) * 100 / prevAttendees : (totalAttendees > 0 ? 100 : 0),
             },
             EventsByCategory = eventsByCategory,
             MonthlyRevenue = monthlyRevenue,
@@ -502,97 +452,43 @@ public class EventService : IEventService
         };
     }
 
-    public async Task<OrganizerDashboardDto> GetAdminDashboardDataAsync(string? period = "year", int? organizerId = null)
+    public async Task<OrganizerDashboardDto> GetAdminDashboardDataAsync(int? organizerId = null)
     {
-        List<Event> events = organizerId.HasValue
+        DateTime now = DateTime.Today;
+        DateTime periodStart = new DateTime(now.Year, 1, 1);
+        DateTime prevPeriodStart = periodStart.AddYears(-1);
+
+        List<Event> allEvents = organizerId.HasValue
             ? await _eventRepository.GetEventsByOrganizerIdAsync(organizerId.Value)
             : await _eventRepository.GetAllEventsWithDetailsAsync();
 
-        List<Booking> bookings = organizerId.HasValue
+        List<Booking> allBookings = organizerId.HasValue
             ? await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId.Value)
             : await _bookingRepository.GetAllBookingsAsync();
 
-        int totalEvents = events.Count;
+        List<Booking> allPaidBookings = allBookings.Where(b => b.PaymentStatus == PaymentStatus.Paid).ToList();
 
-        int upcomingEvents = events.Count(e => e.EventDate >= DateTime.Today);
+        List<Event> periodEvents = allEvents.Where(e => e.CreatedAt >= periodStart).ToList();
+        List<Booking> periodPaidBookings = allPaidBookings.Where(b => b.CreatedAt >= periodStart).ToList();
 
-        List<Booking> paidBookings = bookings.Where(b => b.PaymentStatus == PaymentStatus.Paid).ToList();
-        int totalTicketsSold = paidBookings.Sum(b => b.Quantity);
+        int totalEvents = periodEvents.Count;
+        int upcomingEvents = periodEvents.Count(e => e.EventDate >= DateTime.Today);
+        int totalTicketsSold = periodPaidBookings.Sum(b => b.Quantity);
+        decimal totalRevenue = periodPaidBookings.Sum(b => b.TotalAmount);
+        int totalAttendees = periodPaidBookings.Select(b => b.UserId).Distinct().Count();
 
-        decimal totalRevenue = paidBookings.Sum(b => b.TotalAmount);
+        List<Event> prevPeriodEvents = allEvents.Where(e => e.CreatedAt >= prevPeriodStart && e.CreatedAt < periodStart).ToList();
+        List<Booking> prevPeriodPaidBookings = allPaidBookings.Where(b => b.CreatedAt >= prevPeriodStart && b.CreatedAt < periodStart).ToList();
 
-        int totalAttendees = paidBookings.Select(b => b.UserId).Distinct().Count();
+        int prevTotalEvents = prevPeriodEvents.Count;
+        int prevUpcomingEvents = prevPeriodEvents.Count(e => e.EventDate >= DateTime.Today);
+        int prevTicketsSold = prevPeriodPaidBookings.Sum(b => b.Quantity);
+        decimal prevRevenue = prevPeriodPaidBookings.Sum(b => b.TotalAmount);
+        int prevAttendees = prevPeriodPaidBookings.Select(b => b.UserId).Distinct().Count();
 
-        DateTime weekAgo = DateTime.Today.AddDays(-7);
-        DateTime twoWeeksAgo = DateTime.Today.AddDays(-14);
+        List<MonthlyRevenueDto> monthlyRevenue = [];
 
-        int thisWeekEvents = events.Count(e => e.CreatedAt >= weekAgo);
-        int lastWeekEvents = events.Count(e => e.CreatedAt >= twoWeeksAgo && e.CreatedAt < weekAgo);
-
-        int thisWeekUpcoming = events.Count(e => e.EventDate >= DateTime.Today && e.CreatedAt >= weekAgo);
-        int lastWeekUpcoming = events.Count(e => e.EventDate >= DateTime.Today && e.CreatedAt >= twoWeeksAgo && e.CreatedAt < weekAgo);
-
-        List<Booking> thisWeekBookings = paidBookings.Where(b => b.CreatedAt >= weekAgo).ToList();
-        List<Booking> lastWeekBookings = paidBookings.Where(b => b.CreatedAt >= twoWeeksAgo && b.CreatedAt < weekAgo).ToList();
-
-        int lastWeekTicketsSold = lastWeekBookings.Sum(b => b.Quantity);
-        int thisWeekTicketsSold = thisWeekBookings.Sum(b => b.Quantity);
-
-        decimal lastWeekRevenueAmt = lastWeekBookings.Sum(b => b.TotalAmount);
-        decimal thisWeekRevenueAmt = thisWeekBookings.Sum(b => b.TotalAmount);
-
-        int lastWeekAttendeeCount = lastWeekBookings.Select(b => b.UserId).Distinct().Count();
-        int thisWeekAttendeeCount = thisWeekBookings.Select(b => b.UserId).Distinct().Count();
-
-        List<MonthlyRevenueDto> monthlyRevenue;
-        string periodKey = period?.ToLower() ?? "year";
-
-        if (periodKey == "week")
-        {
-            string[] dayNames = new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
-            DateTime weekStart = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);
-            monthlyRevenue = paidBookings
-                .Where(b => b.CreatedAt >= weekStart)
-                .GroupBy(b => b.CreatedAt.DayOfWeek)
-                .Select(g => new MonthlyRevenueDto
-                {
-                    Month = dayNames[(int)g.Key],
-                    Revenue = g.Sum(b => b.TotalAmount),
-                    Bookings = g.Sum(b => b.Quantity),
-                })
-                .OrderBy(m => Array.IndexOf(dayNames, m.Month))
-                .ToList();
-        }
-        else if (periodKey == "month")
-        {
-            DateTime now = DateTime.Today;
-            monthlyRevenue = paidBookings
-                .Where(b => b.CreatedAt.Year == now.Year && b.CreatedAt.Month == now.Month)
-                .GroupBy(b => b.CreatedAt.Day)
-                .Select(g => new MonthlyRevenueDto
-                {
-                    Month = $"{now:MMM} {g.Key}",
-                    Revenue = g.Sum(b => b.TotalAmount),
-                    Bookings = g.Sum(b => b.Quantity),
-                })
-                .OrderBy(m => m.Month)
-                .ToList();
-        }
-        else
-        {
-            monthlyRevenue = paidBookings
-                .GroupBy(b => new { b.CreatedAt.Year, b.CreatedAt.Month })
-                .Select(g => new MonthlyRevenueDto
-                {
-                    Month = $"{g.Key.Year}-{g.Key.Month:D2}",
-                    Revenue = g.Sum(b => b.TotalAmount),
-                    Bookings = g.Sum(b => b.Quantity),
-                })
-                .OrderBy(m => m.Month)
-                .ToList();
-        }
-
-        List<CategoryEventCountDto> eventsByCategory = events
+        List<CategoryEventCountDto> eventsByCategory = periodEvents
             .Where(e => e.Category != null)
             .GroupBy(e => e.Category!.Name)
             .Select(g => new CategoryEventCountDto
@@ -602,8 +498,7 @@ public class EventService : IEventService
             })
             .ToList();
 
-
-        List<TopBookedEventDto> topBookedEvents = paidBookings
+        List<TopBookedEventDto> topBookedEvents = periodPaidBookings
             .GroupBy(b => b.EventId)
             .Select(g => new
             {
@@ -615,7 +510,7 @@ public class EventService : IEventService
             .ToList()
             .Select(bs =>
             {
-                Event? ev = events.FirstOrDefault(e => e.Id == bs.EventId);
+                Event? ev = allEvents.FirstOrDefault(e => e.Id == bs.EventId);
                 if (ev == null) return null;
                 TopBookedEventDto dto = _mapper.Map<TopBookedEventDto>(ev);
                 dto.TotalBookings = bs.TotalBookings;
@@ -634,11 +529,11 @@ public class EventService : IEventService
             TotalAttendees = totalAttendees,
             WeeklyComparison = new WeeklyComparisonDto
             {
-                EventsChange = lastWeekEvents > 0 ? (thisWeekEvents - lastWeekEvents) * 100 / lastWeekEvents : (thisWeekEvents > 0 ? 100 : 0),
-                UpcomingEventsChange = lastWeekUpcoming > 0 ? (thisWeekUpcoming - lastWeekUpcoming) * 100 / lastWeekUpcoming : (thisWeekUpcoming > 0 ? 100 : 0),
-                TicketsSoldChange = lastWeekTicketsSold > 0 ? (thisWeekTicketsSold - lastWeekTicketsSold) * 100 / lastWeekTicketsSold : (thisWeekTicketsSold > 0 ? 100 : 0),
-                RevenueChange = lastWeekRevenueAmt > 0 ? (thisWeekRevenueAmt - lastWeekRevenueAmt) * 100m / lastWeekRevenueAmt : (thisWeekRevenueAmt > 0 ? 100m : 0m),
-                AttendeesChange = lastWeekAttendeeCount > 0 ? (thisWeekAttendeeCount - lastWeekAttendeeCount) * 100 / lastWeekAttendeeCount : (thisWeekAttendeeCount > 0 ? 100 : 0),
+                EventsChange = prevTotalEvents > 0 ? (totalEvents - prevTotalEvents) * 100 / prevTotalEvents : (totalEvents > 0 ? 100 : 0),
+                UpcomingEventsChange = prevUpcomingEvents > 0 ? (upcomingEvents - prevUpcomingEvents) * 100 / prevUpcomingEvents : (upcomingEvents > 0 ? 100 : 0),
+                TicketsSoldChange = prevTicketsSold > 0 ? (totalTicketsSold - prevTicketsSold) * 100 / prevTicketsSold : (totalTicketsSold > 0 ? 100 : 0),
+                RevenueChange = prevRevenue > 0 ? (totalRevenue - prevRevenue) * 100m / prevRevenue : (totalRevenue > 0 ? 100m : 0m),
+                AttendeesChange = prevAttendees > 0 ? (totalAttendees - prevAttendees) * 100 / prevAttendees : (totalAttendees > 0 ? 100 : 0),
             },
             TopBookedEvents = topBookedEvents,
             RecentAttendees = [],
@@ -647,4 +542,69 @@ public class EventService : IEventService
         };
     }
 
+    public async Task<List<MonthlyRevenueDto>> GetOrganizerRevenueTrendAsync(string? period = "year")
+    {
+        int organizerId = GetUserId();
+        List<Booking> bookings = await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId);
+        List<Booking> paidBookings = bookings.Where(b => b.PaymentStatus == PaymentStatus.Paid).ToList();
+        return BuildMonthlyRevenue(paidBookings, period);
+    }
+
+    public async Task<List<MonthlyRevenueDto>> GetAdminRevenueTrendAsync(string? period = "year", int? organizerId = null)
+    {
+        List<Booking> bookings = organizerId.HasValue
+            ? await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId.Value)
+            : await _bookingRepository.GetAllBookingsAsync();
+        List<Booking> paidBookings = bookings.Where(b => b.PaymentStatus == PaymentStatus.Paid).ToList();
+        return BuildMonthlyRevenue(paidBookings, period);
+    }
+
+    private static List<MonthlyRevenueDto> BuildMonthlyRevenue(List<Booking> paidBookings, string? period)
+    {
+        string periodKey = period?.ToLower() ?? "year";
+
+        if (periodKey == "week")
+        {
+            string[] dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            DateTime weekStart = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);
+            return paidBookings
+                .Where(b => b.CreatedAt >= weekStart)
+                .GroupBy(b => b.CreatedAt.DayOfWeek)
+                .Select(g => new MonthlyRevenueDto
+                {
+                    Month = dayNames[(int)g.Key],
+                    Revenue = g.Sum(b => b.TotalAmount),
+                    Bookings = g.Sum(b => b.Quantity),
+                })
+                .OrderBy(m => Array.IndexOf(dayNames, m.Month))
+                .ToList();
+        }
+
+        if (periodKey == "month")
+        {
+            DateTime now = DateTime.Today;
+            return paidBookings
+                .Where(b => b.CreatedAt.Year == now.Year && b.CreatedAt.Month == now.Month)
+                .GroupBy(b => b.CreatedAt.Day)
+                .Select(g => new MonthlyRevenueDto
+                {
+                    Month = $"{now:MMM} {g.Key}",
+                    Revenue = g.Sum(b => b.TotalAmount),
+                    Bookings = g.Sum(b => b.Quantity),
+                })
+                .OrderBy(m => m.Month)
+                .ToList();
+        }
+
+        return paidBookings
+            .GroupBy(b => new { b.CreatedAt.Year, b.CreatedAt.Month })
+            .Select(g => new MonthlyRevenueDto
+            {
+                Month = $"{g.Key.Year}-{g.Key.Month:D2}",
+                Revenue = g.Sum(b => b.TotalAmount),
+                Bookings = g.Sum(b => b.Quantity),
+            })
+            .OrderBy(m => m.Month)
+            .ToList();
+    }
 }

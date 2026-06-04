@@ -17,7 +17,7 @@ public class EventProfile : Profile
             .ForMember(dest => dest.VenueState, opt => opt.MapFrom(src => src.Venue != null && src.Venue.City != null && src.Venue.City.State != null ? src.Venue.City.State.Name : null))
             .ForMember(dest => dest.VenueCountry, opt => opt.MapFrom(src => src.Venue != null && src.Venue.City != null && src.Venue.City.State != null && src.Venue.City.State.Country != null ? src.Venue.City.State.Country.Name : null))
             .ForMember(dest => dest.CityId, opt => opt.MapFrom(src => src.Venue != null ? src.Venue.CityId : (int?)null))
-            .ForMember(dest => dest.PosterUrl, opt => opt.MapFrom(src => src.Posters.Select(p => p.PosterUrl).FirstOrDefault()))
+            // .ForMember(dest => dest.PosterUrl, opt => opt.MapFrom(src => src.Posters.Select(p => p.PosterUrl).FirstOrDefault()))
             .ForMember(dest => dest.PosterUrls, opt => opt.MapFrom(src => src.Posters.Select(p => p.PosterUrl).ToList()));
 
         CreateMap<Event, EventListResponse>()

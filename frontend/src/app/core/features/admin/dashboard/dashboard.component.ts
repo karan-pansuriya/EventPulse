@@ -1,6 +1,7 @@
 import { AfterViewInit, ChangeDetectorRef, Component, inject, NgZone, OnInit, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
 import { AdminDashboardService } from '../services/admin-dashboard.service';
 import { OrganizerDashboardData } from '../../organizer/models/dashboard.models';
@@ -41,9 +42,16 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
   setPeriod(period: 'week' | 'month' | 'year'): void {
     this.selectedPeriod = period;
+    this.destroyRevenueChart();
+    this.loadRevenueTrend(period);
+  }
+
+  onOrganizerChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.selectedOrganizerId = value ? Number(value) : null;
     this.isLoading = true;
     this.destroyCharts();
-    this.loadDashboard(period);
+    this.loadDashboard();
   }
 
   filterByOrganizer(organizerId?: number): void {
@@ -54,9 +62,16 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   }
 
   private loadDashboard(period: string = 'year'): void {
-    this.dashboardService.getDashboard(period, this.selectedOrganizerId ?? undefined).subscribe({
+    const orgId = this.selectedOrganizerId ?? undefined;
+    forkJoin({
+      dashboard: this.dashboardService.getDashboard(orgId),
+      revenue: this.dashboardService.getRevenueTrend(period, orgId),
+    }).subscribe({
       next: (res) => {
-        this.data = res.data ?? null;
+        this.data = res.dashboard.data ?? null;
+        if (this.data && res.revenue.data) {
+          this.data.monthlyRevenue = res.revenue.data;
+        }
         this.isLoading = false;
         this.cdr.detectChanges();
         this.extractOrganizers();
@@ -66,6 +81,22 @@ export class AdminDashboard implements OnInit, AfterViewInit {
         this.isLoading = false;
         this.cdr.detectChanges();
         this.toast.error('Failed to load dashboard data.', 'Error');
+      },
+    });
+  }
+
+  private loadRevenueTrend(period: string = 'year'): void {
+    const orgId = this.selectedOrganizerId ?? undefined;
+    this.dashboardService.getRevenueTrend(period, orgId).subscribe({
+      next: (res) => {
+        if (this.data && res.data) {
+          this.data.monthlyRevenue = res.data;
+        }
+        this.cdr.detectChanges();
+        this.createRevenueChart();
+      },
+      error: () => {
+        this.toast.error('Failed to load revenue trend.', 'Error');
       },
     });
   }
@@ -98,6 +129,11 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     this.categoryChart?.destroy();
     this.revenueChart = null;
     this.categoryChart = null;
+  }
+
+  private destroyRevenueChart(): void {
+    this.revenueChart?.destroy();
+    this.revenueChart = null;
   }
 
   private createRevenueChart(): void {

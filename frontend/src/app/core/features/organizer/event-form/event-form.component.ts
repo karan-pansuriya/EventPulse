@@ -197,6 +197,7 @@ export class EventFormComponent implements OnInit, OnDestroy {
       error: () => {
         this.toastService.error('Failed to load event details.');
         this.isLoading = false;
+        this.router.navigate(['/organizer/events']);
         this.cdr.detectChanges();
       },
     });

@@ -26,7 +26,8 @@ public class EventResponse
     public int TotalSeats { get; set; }
     public bool IsVerified { get; set; }
     public bool IsActive { get; set; }
-    public string? PosterUrl { get; set; }
+    
+    // public string? PosterUrl { get; set; }
     public List<string> PosterUrls { get; set; } = [];
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

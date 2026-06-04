@@ -8,6 +8,7 @@ import {
   PLATFORM_ID,
 } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
 import { OrganizerDashboardService } from '../services/organizer-dashboard.service';
 import { OrganizerDashboardData } from '../models/dashboard.models';
@@ -46,15 +47,20 @@ export class OrganizerDashboard implements OnInit, AfterViewInit {
 
   setPeriod(period: 'week' | 'month' | 'year'): void {
     this.selectedPeriod = period;
-    this.isLoading = true;
-    this.destroyCharts();
-    this.loadDashboard(period);
+    this.destroyRevenueChart();
+    this.loadRevenueTrend(period);
   }
 
   private loadDashboard(period: string = 'year'): void {
-    this.dashboardService.getDashboard(period).subscribe({
+    forkJoin({
+      dashboard: this.dashboardService.getDashboard(),
+      revenue: this.dashboardService.getRevenueTrend(period),
+    }).subscribe({
       next: (res) => {
-        this.data = res.data ?? null;
+        this.data = res.dashboard.data ?? null;
+        if (this.data && res.revenue.data) {
+          this.data.monthlyRevenue = res.revenue.data;
+        }
         this.isLoading = false;
         this.cdr.detectChanges();
         this.renderCharts();
@@ -63,6 +69,21 @@ export class OrganizerDashboard implements OnInit, AfterViewInit {
         this.isLoading = false;
         this.cdr.detectChanges();
         this.toast.error('Failed to load dashboard data.', 'Error');
+      },
+    });
+  }
+
+  private loadRevenueTrend(period: string = 'year'): void {
+    this.dashboardService.getRevenueTrend(period).subscribe({
+      next: (res) => {
+        if (this.data && res.data) {
+          this.data.monthlyRevenue = res.data;
+        }
+        this.cdr.detectChanges();
+        this.createRevenueChart();
+      },
+      error: () => {
+        this.toast.error('Failed to load revenue trend.', 'Error');
       },
     });
   }
@@ -84,6 +105,11 @@ export class OrganizerDashboard implements OnInit, AfterViewInit {
     this.categoryChart?.destroy();
     this.revenueChart = null;
     this.categoryChart = null;
+  }
+
+  private destroyRevenueChart(): void {
+    this.revenueChart?.destroy();
+    this.revenueChart = null;
   }
 
   private createRevenueChart(): void {

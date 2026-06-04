@@ -46,7 +46,8 @@
   } @else if (event) {
 
   <!-- Hero Banner -->
-  <section class="hero-banner" [style.background-image]="'url(' + getPosterUrl(event.posterUrl) + ')'">
+  <section class="hero-banner"
+    [style.background-image]="'url(' + getPosterUrl(images[currentImageIndex] || event.posterUrl) + ')'">
     <div class="hero-overlay">
       <div class="container h-100">
         <div class="row h-100 align-items-end">
@@ -91,6 +92,30 @@
           </div>
         </div>
       </div>
+      @if (images.length > 1) {
+        <button class="hero-btn hero-btn-prev" (click)="prevImage()" aria-label="Previous image">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button class="hero-btn hero-btn-next" (click)="nextImage()" aria-label="Next image">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      }
+      @if (images.length > 1) {
+        <div class="hero-dots">
+          @for (url of images; track url; let i = $index) {
+            <button
+              class="hero-dot"
+              [class.active]="i === currentImageIndex"
+              (click)="goToImage(i)"
+              [attr.aria-label]="'Go to image ' + (i + 1)"
+            ></button>
+          }
+        </div>
+      }
     </div>
   </section>
 
@@ -163,19 +188,6 @@
           </section>
         }
 
-        <!-- Image Gallery -->
-        <!-- @if (event.posterUrls.length > 0) {
-          <section class="detail-card mb-4">
-            <h2 class="section-title">Gallery</h2>
-            <div class="gallery-grid">
-              @for (url of event.posterUrls; track url) {
-                <div class="gallery-item">
-                  <img [src]="getPosterUrl(url)" alt="Event image" class="gallery-img" loading="lazy" />
-                </div>
-              }
-            </div>
-          </section>
-        } -->
 
       </div>
 
