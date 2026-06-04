@@ -41,7 +41,7 @@ public class EventsController : BaseHelper
     [HttpGet("{id}")]
     public async Task<IActionResult> GetEventById(int id)
     {
-        EventResponse result = await _eventService.GetByIdAsync(id);
+        EventResponse result = await _eventService.GetEventByIdAsync(id);
         return SuccessResponse(result);
     }
 
@@ -49,7 +49,7 @@ public class EventsController : BaseHelper
     [HttpGet]
     public async Task<IActionResult> GetAllEvents([FromQuery] EventFilterRequest filter)
     {
-        PagedResult<EventListResponse> result = await _eventService.GetPagedAsync(filter);
+        PagedResult<EventListResponse> result = await _eventService.GetPagedEventsAsync(filter);
         return SuccessResponse(result);
     }
 
@@ -64,7 +64,7 @@ public class EventsController : BaseHelper
     public async Task<IActionResult> CreateEvent([FromForm] CreateEventDto dto, [FromForm] List<IFormFile>? posterImages)
     {
         List<(byte[] ImageBytes, string FileName)> files = await ReadFormFilesAsync(posterImages);
-        EventResponse result = await _eventService.CreateAsync(dto, files);
+        EventResponse result = await _eventService.CreateEventAsync(dto, files);
         return CreatedResponse(result);
     }
 
@@ -72,22 +72,37 @@ public class EventsController : BaseHelper
     public async Task<IActionResult> UpdateEvent(int id, [FromForm] UpdateEventDto dto, [FromForm] List<IFormFile>? posterImages)
     {
         List<(byte[] ImageBytes, string FileName)> files = await ReadFormFilesAsync(posterImages);
-        EventResponse result = await _eventService.UpdateAsync(id, dto, files);
+        EventResponse result = await _eventService.UpdateEventAsync(id, dto, files);
         return SuccessResponse(result);
     }
 
     [Authorize(Policy = "AdminOnly")]
     [HttpGet("admin/dashboard")]
-    public async Task<IActionResult> GetAdminDashboard([FromQuery] string? period = "year", [FromQuery] int? organizerId = null)
+    public async Task<IActionResult> GetAdminDashboard([FromQuery] int? organizerId = null)
     {
-        OrganizerDashboardDto result = await _eventService.GetAdminDashboardDataAsync(period, organizerId);
+        OrganizerDashboardDto result = await _eventService.GetAdminDashboardDataAsync(organizerId);
         return SuccessResponse(result);
     }
 
     [HttpGet("dashboard")]
-    public async Task<IActionResult> GetDashboard([FromQuery] string? period = "year")
+    public async Task<IActionResult> GetOrganizerDashboard()
     {
-        OrganizerDashboardDto result = await _eventService.GetDashboardDataAsync(period);
+        OrganizerDashboardDto result = await _eventService.GetOrganizerDashboardDataAsync();
+        return SuccessResponse(result);
+    }
+
+    [HttpGet("dashboard/revenue-trend")]
+    public async Task<IActionResult> GetOrganizerRevenueTrend([FromQuery] string? period = "year")
+    {
+        List<MonthlyRevenueDto> result = await _eventService.GetOrganizerRevenueTrendAsync(period);
+        return SuccessResponse(result);
+    }
+
+    [Authorize(Policy = "AdminOnly")]
+    [HttpGet("admin/dashboard/revenue-trend")]
+    public async Task<IActionResult> GetAdminRevenueTrend([FromQuery] string? period = "year", [FromQuery] int? organizerId = null)
+    {
+        List<MonthlyRevenueDto> result = await _eventService.GetAdminRevenueTrendAsync(period, organizerId);
         return SuccessResponse(result);
     }
 
@@ -101,7 +116,7 @@ public class EventsController : BaseHelper
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteEvent(int id)
     {
-        await _eventService.DeleteAsync(id);
+        await _eventService.DeleteEventAsync(id);
         return SuccessResponse("Event deleted successfully.");
     }
 

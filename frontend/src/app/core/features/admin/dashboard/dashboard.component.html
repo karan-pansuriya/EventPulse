@@ -11,13 +11,12 @@
         @if (!isLoading && data) {
         <div class="ms-auto d-flex align-items-center gap-2">
             <span class="filter-label">Organizer:</span>
-            <button class="org-pill" [class.active]="!selectedOrganizerId" (click)="filterByOrganizer()">All</button>
-            @for (org of organizers; track org.id) {
-            <button class="org-pill" [class.active]="selectedOrganizerId === org.id"
-                (click)="filterByOrganizer(org.id)">
-                {{ org.name }}
-            </button>
-            }
+            <select class="org-select" (change)="onOrganizerChange($event)">
+                <option value="">All Organizers</option>
+                @for (org of organizers; track org.id) {
+                <option [value]="org.id" [selected]="selectedOrganizerId === org.id">{{ org.name }}</option>
+                }
+            </select>
         </div>
         }
     </div>
