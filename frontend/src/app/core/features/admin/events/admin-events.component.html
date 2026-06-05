@@ -12,10 +12,25 @@
       [trackByField]="'id'"
       [isLoading]="loading"
       [errorMessage]="error"
-      [actionItems]="getRowActionItems"
+      [actionTemplate]="actionTemplate"
       (pageChange)="onPageChange($event)"
       (pageSizeChange)="onPageSizeChange($event)"
       (toggle)="onToggleVerify($event)"
-      (delete)="onDelete($event)"
+    />
+
+    <ng-template #actionTemplate let-row>
+      <button class="btn btn-sm btn-outline-danger border-0 p-1" (click)="promptDelete(row)" title="Delete">
+        <i class="bi bi-trash"></i>
+      </button>
+    </ng-template>
+
+    <app-confirmation-modal
+      [isOpen]="!!confirmEvent"
+      title="Delete Event"
+      [message]="'Delete ' + (confirmEvent?.title || 'event') + '? This action cannot be undone.'"
+      confirmLabel="Delete"
+      confirmButtonClass="btn-danger"
+      (confirmed)="onDeleteConfirmed()"
+      (cancelled)="onDeleteCancelled()"
     />
 </div>

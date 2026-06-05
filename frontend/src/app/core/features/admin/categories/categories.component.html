@@ -23,6 +23,16 @@
   />
 </div>
 
+<app-confirmation-modal
+  [isOpen]="!!confirmCategory"
+  title="Delete Category"
+  [message]="'Delete category ' + (confirmCategory?.name || 'this category') + '? This action cannot be undone.'"
+  confirmLabel="Delete"
+  confirmButtonClass="btn-danger"
+  (confirmed)="onDeleteConfirmed()"
+  (cancelled)="onDeleteCancelled()"
+/>
+
 @if (showModal) {
   <div class="modal-backdrop fade show" (click)="cancelModal()"></div>
   <div class="modal fade show d-block" tabindex="-1">

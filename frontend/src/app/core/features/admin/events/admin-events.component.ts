@@ -7,15 +7,15 @@ import { NgZone } from '@angular/core';
 import {
   GridComponent,
   GridColumn,
-  GridActionItem,
 } from '../../../../shared/components/grid/grid.component';
 import { AdminEventService } from '../layout/admin-layout/services/admin-event.service';
-import { EventListResponse } from '../../attendee/home/models/event.models';
+import { EventListResponse } from '../layout/admin-layout/models/event.models';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-admin-events',
   standalone: true,
-  imports: [CommonModule, FormsModule, GridComponent],
+  imports: [CommonModule, FormsModule, GridComponent, ConfirmationModalComponent],
   templateUrl: './admin-events.component.html',
   styleUrl: './admin-events.component.css',
 })
@@ -32,6 +32,8 @@ export class AdminEventsComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
+  confirmEvent: EventListResponse | null = null;
+
   columns: GridColumn[] = [
     { header: 'ID', field: 'id', width: '60px' },
     { header: 'Title', field: 'title', type: 'truncate', width: '200px' },
@@ -41,10 +43,6 @@ export class AdminEventsComponent implements OnInit {
     { header: 'Price', field: 'price', type: 'currency' },
     { header: 'Verified', field: 'isVerified', type: 'toggle' },
     { header: 'Actions', field: 'id', type: 'action' },
-  ];
-
-  getRowActionItems: (row: EventListResponse) => GridActionItem[] = () => [
-    { label: 'Delete', icon: 'bi-trash', emit: 'delete' },
   ];
 
   ngOnInit(): void {
@@ -102,8 +100,14 @@ export class AdminEventsComponent implements OnInit {
       });
   }
 
-  onDelete(event: EventListResponse): void {
-    if (!confirm('Are you sure you want to delete this event?')) return;
+  promptDelete(event: EventListResponse): void {
+    this.confirmEvent = event;
+  }
+
+  onDeleteConfirmed(): void {
+    if (!this.confirmEvent) return;
+    const event = this.confirmEvent;
+    this.confirmEvent = null;
 
     this.adminEventService
       .deleteEvent(event.id)
@@ -114,5 +118,9 @@ export class AdminEventsComponent implements OnInit {
           this.cdr.detectChanges();
         });
       });
+  }
+
+  onDeleteCancelled(): void {
+    this.confirmEvent = null;
   }
 }

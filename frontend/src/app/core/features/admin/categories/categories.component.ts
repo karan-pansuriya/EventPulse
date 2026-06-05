@@ -9,11 +9,12 @@ import {
 } from '../../../../shared/components/grid/grid.component';
 import { AdminCategoryService } from '../layout/admin-layout/services/admin-category.service';
 import { Category, CreateCategoryRequest, UpdateCategoryRequest } from '../layout/admin-layout/models/category.models';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-admin-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule, GridComponent],
+  imports: [CommonModule, FormsModule, GridComponent, ConfirmationModalComponent],
   templateUrl: './categories.component.html',
   styleUrls: ['./categories.component.css'],
 })
@@ -33,8 +34,10 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   formName = '';
   saving = false;
 
+  confirmCategory: Category | null = null;
+
   columns: GridColumn[] = [
-    { header: 'ID', field: 'id', width: '60px' },
+    // { header: 'ID', field: 'id', width: '60px' },
     { header: 'Name', field: 'name' },
     { header: 'Actions', field: 'id', type: 'action' },
   ];
@@ -96,7 +99,13 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   }
 
   onDelete(cat: Category): void {
-    if (!confirm(`Delete category "${cat.name}"?`)) return;
+    this.confirmCategory = cat;
+  }
+
+  onDeleteConfirmed(): void {
+    if (!this.confirmCategory) return;
+    const cat = this.confirmCategory;
+    this.confirmCategory = null;
 
     this.categoryService
       .delete(cat.id)
@@ -107,6 +116,10 @@ export class CategoriesComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         });
       });
+  }
+
+  onDeleteCancelled(): void {
+    this.confirmCategory = null;
   }
 
   save(): void {
