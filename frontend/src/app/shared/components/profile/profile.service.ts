@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { BaseHttpService } from '../../../../shared/services/base-http.service';
-import { ApiResponse } from '../../../../shared/models/api-response.model';
+import { BaseHttpService } from '../../services/base-http.service';
 
 export interface UserDto {
   id: number;

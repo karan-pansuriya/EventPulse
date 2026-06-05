@@ -1,32 +1,27 @@
 <div class="profile-page">
   <div class="container py-3 py-md-4">
 
-    <!-- Back -->
-    <a routerLink="/attendee/home" class="btn btn-sm btn-outline-secondary mb-3">
+    <a [routerLink]="backLink" class="btn btn-sm btn-outline-secondary mb-3">
       <i class="bi bi-arrow-left me-1"></i>Back
     </a>
 
-    <!-- Header -->
     <div class="d-flex align-items-center gap-3 mb-4">
-      <i class="bi bi-person-circle fs-2 text-primary"></i>
+      <i class="bi bi-person-circle fs-2"></i>
       <h2 class="fw-bold mb-0">My Profile</h2>
     </div>
 
-    <!-- Loading -->
     @if (isLoading) {
       <div class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
+        <div class="spinner-border" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
         <p class="text-muted mt-2">Loading profile…</p>
       </div>
     }
 
-    <!-- Profile card -->
     @if (!isLoading && profile) {
       <div class="profile-card">
 
-        <!-- Avatar row -->
         <div class="text-center pt-4 pb-3">
           <div class="profile-avatar mx-auto mb-2">{{ getInitials(profile.name) }}</div>
           <h4 class="fw-bold mb-0">{{ profile.name }}</h4>
@@ -35,7 +30,6 @@
 
         <hr class="my-0" />
 
-        <!-- View mode -->
         @if (!isEditing) {
           <div class="p-4">
             <div class="info-row">
@@ -61,7 +55,6 @@
           </div>
         }
 
-        <!-- Edit mode -->
         @if (isEditing) {
           <div class="p-4">
             <div class="mb-3">

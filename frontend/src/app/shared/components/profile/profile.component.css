@@ -15,7 +15,6 @@
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: #be185d;
   color: #fff;
   display: flex;
   align-items: center;
@@ -23,6 +22,9 @@
   font-size: 1.5rem;
   font-weight: 700;
 }
+
+:host.pink .profile-avatar { background: #be185d; }
+:host.purple .profile-avatar { background: #7c3aed; }
 
 .info-row {
   display: flex;
@@ -51,6 +53,17 @@
   word-break: break-word;
 }
 
+:host.pink .bi-person-circle { color: #be185d; }
+:host.purple .bi-person-circle { color: #7c3aed; }
+
+.spinner-border {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+:host.pink .spinner-border { color: #be185d; }
+:host.purple .spinner-border { color: #7c3aed; }
+
 .form-control {
   border-radius: 8px;
   border: 1px solid #d1d5db;
@@ -58,9 +71,14 @@
   font-size: 0.9rem;
 }
 
-.form-control:focus {
+:host.pink .form-control:focus {
   border-color: #be185d;
   box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.15);
+}
+
+:host.purple .form-control:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 
 .form-control:disabled {
@@ -69,10 +87,17 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #be185d 0%, #9d174d 100%);
   border: none;
   border-radius: 10px;
   padding: 12px 28px;
+}
+
+:host.pink .btn-primary {
+  background: linear-gradient(135deg, #be185d 0%, #9d174d 100%);
+}
+
+:host.purple .btn-primary {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
 }
 
 .btn-primary:hover:not(:disabled) {
