@@ -1,10 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { map, tap, Observable, throwError, BehaviorSubject, filter, take, catchError } from 'rxjs';
-import { ToastService } from '../../shared/services/toast.service';
 import { environment } from '../../../environments/environment';
-import { ApiResponse } from '../../shared/models/api-response.model';
 import { LoginRequest, RegisterRequest, TokenResponse, UserInfo, RoleResponse } from '../models/auth.models';
+import { BaseHttpService } from '../../shared/services/base-http.service';
 import {
   decodeToken,
   getAccessToken,
@@ -15,9 +13,8 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private http = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/auth`;
-  private toast = inject(ToastService);
+  private http = inject(BaseHttpService);
+  private baseUrl = 'auth';
 
   user = signal<UserInfo | null>(null);
   isAuthenticated = signal(false);
@@ -37,12 +34,9 @@ export class AuthService {
   }
 
   login(request: LoginRequest): Observable<TokenResponse> {
-    return this.http.post<ApiResponse<TokenResponse>>(`${this.baseUrl}/login`, request).pipe(
+    return this.http.post<TokenResponse>(`${this.baseUrl}/login`, request).pipe(
       map((res) => res.data!),
-      tap((tokens) => {
-        this.handleTokens(tokens);
-        this.toast.success('Logged in successfully.', 'Welcome');
-      }),
+      tap((tokens) => this.handleTokens(tokens)),
     );
   }
 
@@ -54,7 +48,7 @@ export class AuthService {
       phone: request.phone,
       roleId: request.roleId,
     };
-    return this.http.post<ApiResponse<TokenResponse>>(`${this.baseUrl}/register`, body).pipe(
+    return this.http.post<TokenResponse>(`${this.baseUrl}/register`, body).pipe(
       map((res) => res.data!),
     );
   }
@@ -77,7 +71,7 @@ export class AuthService {
     }
 
     return this.http
-      .post<ApiResponse<TokenResponse>>(`${this.baseUrl}/refresh`, {
+      .post<TokenResponse>(`${this.baseUrl}/refresh`, {
         accessToken,
         refreshToken,
       })
@@ -99,7 +93,7 @@ export class AuthService {
   }
 
   getRoles(): Observable<RoleResponse[]> {
-    return this.http.get<ApiResponse<RoleResponse[]>>(`${this.baseUrl}/roles`).pipe(
+    return this.http.get<RoleResponse[]>(`${this.baseUrl}/roles`).pipe(
       map((res) => res.data ?? []),
     );
   }
@@ -110,8 +104,7 @@ export class AuthService {
     this.user.set(null);
     this.isAuthenticated.set(false);
 
-    // Call the backend logout API to trigger robust server-side cookie clearance (e.g., Clear-Site-Data)
-    this.http.post(`${this.baseUrl}/logout`, {}).subscribe({
+    this.http.post<void>(`${this.baseUrl}/logout`, {}).subscribe({
       error: (err) => console.error('Failed to clear cookies from backend on logout:', err)
     });
   }

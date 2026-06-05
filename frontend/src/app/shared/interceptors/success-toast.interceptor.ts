@@ -11,7 +11,7 @@ export const successToastInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     tap({
       next: (event) => {
-        if (showSuccess && event instanceof HttpResponse && event.ok) {
+        if (showSuccess && event instanceof HttpResponse && event.ok && req.method !== 'GET') {
           const payload = event.body as { message?: string } | null;
           const message = payload?.message || 'Operation completed successfully.';
           toast.success(message, 'Success');

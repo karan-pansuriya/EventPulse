@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { environment } from '../../../../../environments/environment';
+import { BaseHttpService } from '../../../../shared/services/base-http.service';
 import { ApiResponse } from '../../../../shared/models/api-response.model';
 
 export interface UserDto {
@@ -19,14 +18,14 @@ export interface UpdateUserRequest {
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
-  private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/profile`;
+  private http = inject(BaseHttpService);
+  private apiUrl = 'profile';
 
   getProfile(): Observable<UserDto> {
-    return this.http.get<ApiResponse<UserDto>>(this.apiUrl).pipe(map(res => res.data!));
+    return this.http.get<UserDto>(this.apiUrl).pipe(map(res => res.data!));
   }
 
   updateProfile(request: UpdateUserRequest): Observable<UserDto> {
-    return this.http.put<ApiResponse<UserDto>>(this.apiUrl, request).pipe(map(res => res.data!));
+    return this.http.put<UserDto>(this.apiUrl, request).pipe(map(res => res.data!));
   }
 }

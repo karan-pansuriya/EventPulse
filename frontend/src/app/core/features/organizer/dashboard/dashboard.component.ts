@@ -12,7 +12,6 @@ import { forkJoin } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
 import { OrganizerDashboardService } from '../services/organizer-dashboard.service';
 import { OrganizerDashboardData } from '../models/dashboard.models';
-import { ToastService } from '../../../../shared/services/toast.service';
 
 Chart.register(...registerables);
 
@@ -25,7 +24,6 @@ Chart.register(...registerables);
 })
 export class OrganizerDashboard implements OnInit, AfterViewInit {
   private dashboardService = inject(OrganizerDashboardService);
-  private toast = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
   private platformId = inject(PLATFORM_ID);
@@ -68,7 +66,6 @@ export class OrganizerDashboard implements OnInit, AfterViewInit {
       error: () => {
         this.isLoading = false;
         this.cdr.detectChanges();
-        this.toast.error('Failed to load dashboard data.', 'Error');
       },
     });
   }
@@ -83,7 +80,7 @@ export class OrganizerDashboard implements OnInit, AfterViewInit {
         this.createRevenueChart();
       },
       error: () => {
-        this.toast.error('Failed to load revenue trend.', 'Error');
+        this.cdr.detectChanges();
       },
     });
   }

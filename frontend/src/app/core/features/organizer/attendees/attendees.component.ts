@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { GridComponent, GridColumn } from '../../../../shared/components/grid/grid.component';
 import { OrganizerEventService } from '../services/organizer-event.service';
 import { EventAttendee } from '../models/attendee.models';
-import { ToastService } from '../../../../shared/services/toast.service';
 import { PagedResult } from '../../../../shared/models/paged-result.model';
 
 @Component({
@@ -14,7 +13,6 @@ import { PagedResult } from '../../../../shared/models/paged-result.model';
 })
 export class AttendeesComponent implements OnInit {
   private eventService = inject(OrganizerEventService);
-  private toastService = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
 
   columns: GridColumn[] = [
@@ -69,7 +67,6 @@ export class AttendeesComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.toastService.error('Failed to load attendees.');
         this.isLoading = false;
         this.cdr.detectChanges();
       },

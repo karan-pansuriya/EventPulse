@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ProfileService, UserDto, UpdateUserRequest } from './profile.service';
-import { ToastService } from '../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-attendee-profile',
@@ -14,7 +13,6 @@ import { ToastService } from '../../../../shared/services/toast.service';
 })
 export class ProfileComponent implements OnInit {
   private profileService = inject(ProfileService);
-  private toast = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
 
   profile: UserDto | null = null;
@@ -38,7 +36,6 @@ export class ProfileComponent implements OnInit {
       error: () => {
         this.isLoading = false;
         this.cdr.detectChanges();
-        this.toast.error('Failed to load profile.', 'Error');
       },
     });
   }
@@ -69,12 +66,10 @@ export class ProfileComponent implements OnInit {
         this.isEditing = false;
         this.isSaving = false;
         this.cdr.detectChanges();
-        this.toast.success('Profile updated successfully.', 'Saved');
       },
       error: () => {
         this.isSaving = false;
         this.cdr.detectChanges();
-        this.toast.error('Failed to update profile.', 'Error');
       },
     });
   }
