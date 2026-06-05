@@ -1,8 +1,8 @@
 import { ChangeDetectorRef, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { OrganizerEventService } from '../services/organizer-event.service';
-import { CheckInResponse } from '../models/attendee.models';
+import { OrganizerEventService } from '../layout/services/organizer-event.service';
+import { CheckInResponse } from '../layout/models/attendee.models';
 
 type PageState = 'form' | 'loading' | 'success' | 'error';
 
@@ -18,7 +18,7 @@ export class CheckInComponent {
 
   checkInForm = new FormControl('', {
     nonNullable: true,
-    validators: [Validators.required, Validators.minLength(10),Validators.maxLength(50)],
+    validators: [Validators.required, Validators.minLength(10), Validators.maxLength(50)],
   });
 
   state = signal<PageState>('form');

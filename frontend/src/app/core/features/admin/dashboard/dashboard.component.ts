@@ -1,10 +1,18 @@
-import { AfterViewInit, ChangeDetectorRef, Component, inject, NgZone, OnInit, PLATFORM_ID } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  NgZone,
+  OnInit,
+  PLATFORM_ID,
+} from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
-import { AdminDashboardService } from '../services/admin-dashboard.service';
-import { OrganizerDashboardData } from '../../organizer/models/dashboard.models';
+import { AdminDashboardService } from '../layout/admin-layout/services/admin-dashboard.service';
+import { OrganizerDashboardData } from '../../organizer/layout/models/dashboard.models';
 
 Chart.register(...registerables);
 
@@ -137,16 +145,29 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     const canvas = document.getElementById('revenueChart') as HTMLCanvasElement | null;
     if (!canvas || !this.data) return;
 
-    const months = this.data.monthlyRevenue.map(m => {
+    const months = this.data.monthlyRevenue.map((m) => {
       if (/^\d{4}-\d{2}$/.test(m.month)) {
         const [, month] = m.month.split('-');
-        const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const names = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ];
         return names[parseInt(month) - 1] || m.month;
       }
       return m.month;
     });
-    const revenues = this.data.monthlyRevenue.map(m => Number(m.revenue));
-    const bookings = this.data.monthlyRevenue.map(m => m.bookings);
+    const revenues = this.data.monthlyRevenue.map((m) => Number(m.revenue));
+    const bookings = this.data.monthlyRevenue.map((m) => m.bookings);
 
     this.revenueChart = new Chart(canvas, {
       type: 'bar',
@@ -217,20 +238,31 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     const canvas = document.getElementById('categoryChart') as HTMLCanvasElement | null;
     if (!canvas || !this.data) return;
 
-    const labels = this.data.eventsByCategory.map(c => c.categoryName);
-    const counts = this.data.eventsByCategory.map(c => c.count);
-    const colors = ['#f43f5e','#f59e0b','#10b981','#8b5cf6','#06b6d4','#ec4899','#f97316','#14b8a6'];
+    const labels = this.data.eventsByCategory.map((c) => c.categoryName);
+    const counts = this.data.eventsByCategory.map((c) => c.count);
+    const colors = [
+      '#f43f5e',
+      '#f59e0b',
+      '#10b981',
+      '#8b5cf6',
+      '#06b6d4',
+      '#ec4899',
+      '#f97316',
+      '#14b8a6',
+    ];
 
     this.categoryChart = new Chart(canvas, {
       type: 'doughnut',
       data: {
         labels,
-        datasets: [{
-          data: counts,
-          backgroundColor: colors.slice(0, labels.length),
-          borderWidth: 1,
-          borderColor: '#fff',
-        }],
+        datasets: [
+          {
+            data: counts,
+            backgroundColor: colors.slice(0, labels.length),
+            borderWidth: 1,
+            borderColor: '#fff',
+          },
+        ],
       },
       options: {
         responsive: true,
@@ -248,6 +280,11 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   }
 
   formatCurrency(value: number): string {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
   }
 }

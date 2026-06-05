@@ -2,7 +2,8 @@ import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone } from 
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { GridComponent, GridColumn } from '../../../../shared/components/grid/grid.component';
-import { AdminBookingService, AdminBookingResponse } from '../services/admin-booking.service';
+import { AdminBookingService } from '../layout/admin-layout/services/admin-booking.service';
+import { AdminBookingResponse } from '../layout/admin-layout/models/admin-booking.model';
 
 @Component({
   selector: 'app-admin-bookings',

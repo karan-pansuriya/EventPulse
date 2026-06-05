@@ -14,8 +14,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;  
-using EventPulse.API.Services;
+using Microsoft.OpenApi.Models;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -228,6 +227,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers().RequireRateLimiting("fixed");
-app.MapHub<EventPulse.API.Hubs.SeatHub>("/hubs/seats");
+app.MapHub<EventPulse.BLL.Hubs.SeatHub>("/hubs/seats");
 
 app.Run();

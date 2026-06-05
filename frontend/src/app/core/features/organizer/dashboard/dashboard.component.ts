@@ -10,8 +10,8 @@ import {
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
-import { OrganizerDashboardService } from '../services/organizer-dashboard.service';
-import { OrganizerDashboardData } from '../models/dashboard.models';
+import { OrganizerDashboardService } from '../layout/services/organizer-dashboard.service';
+import { OrganizerDashboardData } from '../layout/models/dashboard.models';
 
 Chart.register(...registerables);
 

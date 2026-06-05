@@ -1,16 +1,25 @@
 import { ChangeDetectorRef, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { OrganizerEventService } from '../services/organizer-event.service';
+import {
+  ReactiveFormsModule,
+  FormGroup,
+  FormControl,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+  ValidatorFn,
+} from '@angular/forms';
+import { OrganizerEventService } from '../layout/services/organizer-event.service';
 import { CategoryService } from '../../attendee/home/services/category.service';
-import { LocationService } from '../services/location.service';
+import { LocationService } from '../layout/services/location.service';
 import { Category } from '../../attendee/home/models/category.models';
-import { Country, State, City } from '../models/location.models';
+import { Country, State, City } from '../layout/models/location.models';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { RoleId } from '../../../../auth/models/auth.models';
-import { AdminUserService, OrganizerResponse } from '../../admin/services/admin-user.service';
+import { AdminUserService } from '../../admin/layout/admin-layout/services/admin-user.service';
+import { OrganizerResponse } from '../../admin/layout/admin-layout/models/adminuser.model';
 import { environment } from '../../../../../environments/environment';
 
 function pastDateValidator(minDate: string): ValidatorFn {
@@ -69,17 +78,32 @@ export class EventFormComponent implements OnInit, OnDestroy {
   }
 
   eventForm = new FormGroup({
-    title: new FormControl('', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]),
+    title: new FormControl('', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(200),
+    ]),
     description: new FormControl('', Validators.maxLength(1000)),
     genre: new FormControl('', Validators.maxLength(100)),
-    ageRestriction: new FormControl('', [Validators.maxLength(10), Validators.pattern(/^[0-9+]{0,10}$/)]),
+    ageRestriction: new FormControl('', [
+      Validators.maxLength(10),
+      Validators.pattern(/^[0-9+]{0,10}$/),
+    ]),
     performers: new FormControl('', Validators.maxLength(200)),
     durationMins: new FormControl<number | null>(null, [Validators.min(1), Validators.max(420)]),
     categoryId: new FormControl<number | null>(null),
     eventDate: new FormControl('', [Validators.required, pastDateValidator(this.minDate)]),
     startTime: new FormControl('', Validators.required),
-    price: new FormControl<number | null>(null, [Validators.required, Validators.min(0), Validators.max(9999999999)]),
-    totalSeats: new FormControl<number | null>(null, [Validators.required, Validators.min(1), Validators.max(100000)]),
+    price: new FormControl<number | null>(null, [
+      Validators.required,
+      Validators.min(0),
+      Validators.max(9999999999),
+    ]),
+    totalSeats: new FormControl<number | null>(null, [
+      Validators.required,
+      Validators.min(1),
+      Validators.max(100000),
+    ]),
     venueName: new FormControl('', [Validators.required, Validators.maxLength(150)]),
     venueAddress: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     countryId: new FormControl<number | null>(null, Validators.required),
@@ -122,7 +146,10 @@ export class EventFormComponent implements OnInit, OnDestroy {
         this.isLoadingCategories = false;
         this.afterInitLoad();
       },
-      error: () => { this.isLoadingCategories = false; this.afterInitLoad(); },
+      error: () => {
+        this.isLoadingCategories = false;
+        this.afterInitLoad();
+      },
     });
 
     if (!this.isEditMode && this.isAdmin) {
@@ -133,7 +160,10 @@ export class EventFormComponent implements OnInit, OnDestroy {
           this.isLoadingOrganizers = false;
           this.cdr.detectChanges();
         },
-        error: () => { this.isLoadingOrganizers = false; this.cdr.detectChanges(); },
+        error: () => {
+          this.isLoadingOrganizers = false;
+          this.cdr.detectChanges();
+        },
       });
     }
   }
@@ -227,7 +257,7 @@ export class EventFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.newFilePreviews.forEach(u => URL.revokeObjectURL(u));
+    this.newFilePreviews.forEach((u) => URL.revokeObjectURL(u));
   }
 
   onCountryChange(): void {
@@ -244,7 +274,10 @@ export class EventFormComponent implements OnInit, OnDestroy {
         this.isLoadingStates = false;
         this.cdr.detectChanges();
       },
-      error: () => { this.isLoadingStates = false; this.cdr.detectChanges(); },
+      error: () => {
+        this.isLoadingStates = false;
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -261,7 +294,10 @@ export class EventFormComponent implements OnInit, OnDestroy {
         this.isLoadingCities = false;
         this.cdr.detectChanges();
       },
-      error: () => { this.isLoadingCities = false; this.cdr.detectChanges(); },
+      error: () => {
+        this.isLoadingCities = false;
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -270,7 +306,7 @@ export class EventFormComponent implements OnInit, OnDestroy {
   }
 
   get currentPosters(): string[] {
-    return this.existingPosterUrls.filter(u => !this.removedPosterUrls.includes(u));
+    return this.existingPosterUrls.filter((u) => !this.removedPosterUrls.includes(u));
   }
 
   removePoster(url: string): void {
@@ -278,7 +314,7 @@ export class EventFormComponent implements OnInit, OnDestroy {
   }
 
   undoRemovePoster(url: string): void {
-    this.removedPosterUrls = this.removedPosterUrls.filter(u => u !== url);
+    this.removedPosterUrls = this.removedPosterUrls.filter((u) => u !== url);
   }
 
   onFileSelected(event: Event): void {
@@ -291,17 +327,20 @@ export class EventFormComponent implements OnInit, OnDestroy {
     const files = Array.from(input.files);
 
     const allowedExtensions = ['jpg', 'jpeg', 'png'];
-    const invalid = files.find(f => {
+    const invalid = files.find((f) => {
       const ext = f.name.split('.').pop()?.toLowerCase();
       return !ext || !allowedExtensions.includes(ext);
     });
     if (invalid) {
-      this.toastService.error(`${invalid.name} has an unsupported file type. Only JPG, JPEG, and PNG are allowed.`, 'Invalid file');
+      this.toastService.error(
+        `${invalid.name} has an unsupported file type. Only JPG, JPEG, and PNG are allowed.`,
+        'Invalid file',
+      );
       input.value = '';
       return;
     }
 
-    const oversized = files.find(f => f.size > maxSize);
+    const oversized = files.find((f) => f.size > maxSize);
     if (oversized) {
       this.toastService.error(`${oversized.name} exceeds the 5 MB limit.`, 'File too large');
       input.value = '';
@@ -310,12 +349,15 @@ export class EventFormComponent implements OnInit, OnDestroy {
 
     const totalAfterAdd = this.selectedFiles.length + files.length;
     if (totalAfterAdd > maxFiles) {
-      this.toastService.error(`Maximum ${maxFiles} poster images allowed. You already have ${this.selectedFiles.length}.`, 'Too many files');
+      this.toastService.error(
+        `Maximum ${maxFiles} poster images allowed. You already have ${this.selectedFiles.length}.`,
+        'Too many files',
+      );
       input.value = '';
       return;
     }
     this.selectedFiles = [...this.selectedFiles, ...files];
-    this.newFilePreviews = [...this.newFilePreviews, ...files.map(f => URL.createObjectURL(f))];
+    this.newFilePreviews = [...this.newFilePreviews, ...files.map((f) => URL.createObjectURL(f))];
   }
 
   removeNewFile(index: number): void {
@@ -331,12 +373,15 @@ export class EventFormComponent implements OnInit, OnDestroy {
 
   getFieldError(fieldName: string): string | null {
     const control = this.eventForm.get(fieldName);
-    if (!control || !control.errors || !(control.touched || control.dirty || this.submitted)) return null;
+    if (!control || !control.errors || !(control.touched || control.dirty || this.submitted))
+      return null;
 
     const errors = control.errors;
     if (errors['required']) return 'This field is required.';
-    if (errors['minlength']) return `Minimum ${errors['minlength'].requiredLength} characters required.`;
-    if (errors['maxlength']) return `Maximum ${errors['maxlength'].requiredLength} characters allowed.`;
+    if (errors['minlength'])
+      return `Minimum ${errors['minlength'].requiredLength} characters required.`;
+    if (errors['maxlength'])
+      return `Maximum ${errors['maxlength'].requiredLength} characters allowed.`;
     if (errors['min']) return `Minimum value is ${errors['min'].min}.`;
     if (errors['max']) return `Maximum value is ${errors['max'].max}.`;
     if (errors['pattern']) return 'Invalid format.';
@@ -348,10 +393,12 @@ export class EventFormComponent implements OnInit, OnDestroy {
     this.submitted = true;
 
     if (this.eventForm.invalid) {
-      Object.keys(this.eventForm.controls).forEach(key => {
+      Object.keys(this.eventForm.controls).forEach((key) => {
         this.eventForm.get(key)?.markAsTouched();
       });
-      const firstError = Object.keys(this.eventForm.controls).find(key => this.eventForm.get(key)?.invalid);
+      const firstError = Object.keys(this.eventForm.controls).find(
+        (key) => this.eventForm.get(key)?.invalid,
+      );
       if (firstError) {
         const msg = this.getFieldError(firstError) || 'Please fix the highlighted errors.';
         this.toastService.error(msg);
@@ -371,14 +418,20 @@ export class EventFormComponent implements OnInit, OnDestroy {
     request$.subscribe({
       next: (res) => {
         if (res.success) {
-          this.toastService.success(this.isEditMode ? 'Event updated successfully!' : 'Event created successfully!');
+          this.toastService.success(
+            this.isEditMode ? 'Event updated successfully!' : 'Event created successfully!',
+          );
           this.router.navigate(['/organizer/events']);
         }
         this.isSaving = false;
         this.cdr.detectChanges();
       },
       error: () => {
-        this.toastService.error(this.isEditMode ? 'Failed to update event. Please try again.' : 'Failed to create event. Please try again.');
+        this.toastService.error(
+          this.isEditMode
+            ? 'Failed to update event. Please try again.'
+            : 'Failed to create event. Please try again.',
+        );
         this.isSaving = false;
         this.cdr.detectChanges();
       },

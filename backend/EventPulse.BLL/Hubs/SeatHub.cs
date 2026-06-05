@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 
-namespace EventPulse.API.Hubs;
+namespace EventPulse.BLL.Hubs;
 
 public class SeatHub : Hub
 {

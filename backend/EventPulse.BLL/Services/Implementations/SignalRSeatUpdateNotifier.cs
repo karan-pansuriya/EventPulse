@@ -1,8 +1,8 @@
-using EventPulse.API.Hubs;
+using EventPulse.BLL.Hubs;
 using EventPulse.BLL.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 
-namespace EventPulse.API.Services;
+namespace EventPulse.BLL.Services;
 
 public class SignalRSeatUpdateNotifier : ISeatUpdateNotifier
 {

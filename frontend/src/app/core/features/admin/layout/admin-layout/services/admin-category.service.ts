@@ -1,18 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { BaseHttpService } from '../../../../shared/services/base-http.service';
-import { ApiResponse } from '../../../../shared/models/api-response.model';
-import { Category } from '../../attendee/home/models/category.models';
-
-export interface CreateCategoryRequest {
-  name: string;
-  imagePath?: string;
-}
-
-export interface UpdateCategoryRequest {
-  name: string;
-  imagePath?: string;
-}
+import { BaseHttpService } from '../../../../../../shared/services/base-http.service';
+import { ApiResponse } from '../../../../../../shared/models/api-response.model';
+import { Category, CreateCategoryRequest, UpdateCategoryRequest } from '../models/category.models';
 
 @Injectable({ providedIn: 'root' })
 export class AdminCategoryService {

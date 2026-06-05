@@ -1,10 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { BaseHttpService } from '../../../../shared/services/base-http.service';
-import { ApiResponse } from '../../../../shared/models/api-response.model';
-import { PagedResult } from '../../../../shared/models/paged-result.model';
-import { EventListResponse, EventDetailResponse } from '../../attendee/home/models/event.models';
+import { BaseHttpService } from '../../../../../shared/services/base-http.service';
+import { ApiResponse } from '../../../../../shared/models/api-response.model';
+import { PagedResult } from '../../../../../shared/models/paged-result.model';
+import { EventListResponse, EventDetailResponse } from '../../../attendee/home/models/event.models';
 import { EventAttendee, CheckInResponse } from '../models/attendee.models';
 import { CreateEventRequest, UpdateEventRequest } from '../models/event.models';
 
@@ -12,7 +12,10 @@ import { CreateEventRequest, UpdateEventRequest } from '../models/event.models';
 export class OrganizerEventService {
   private http = inject(BaseHttpService);
 
-  getMyEvents(pageNumber: number, pageSize: number): Observable<ApiResponse<PagedResult<EventListResponse>>> {
+  getMyEvents(
+    pageNumber: number,
+    pageSize: number,
+  ): Observable<ApiResponse<PagedResult<EventListResponse>>> {
     const params = new HttpParams()
       .set('PageNumber', pageNumber)
       .set('PageSize', pageSize)
@@ -38,10 +41,11 @@ export class OrganizerEventService {
     return this.http.delete<null>(`events/${id}`);
   }
 
-  getAttendees(pageNumber: number, pageSize: number): Observable<ApiResponse<PagedResult<EventAttendee>>> {
-    const params = new HttpParams()
-      .set('PageNumber', pageNumber)
-      .set('PageSize', pageSize);
+  getAttendees(
+    pageNumber: number,
+    pageSize: number,
+  ): Observable<ApiResponse<PagedResult<EventAttendee>>> {
+    const params = new HttpParams().set('PageNumber', pageNumber).set('PageSize', pageSize);
 
     return this.http.get<PagedResult<EventAttendee>>('events/attendees', { params });
   }

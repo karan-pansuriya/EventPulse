@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { BaseHttpService } from '../../../../shared/services/base-http.service';
-import { ApiResponse } from '../../../../shared/models/api-response.model';
+import { BaseHttpService } from '../../../../../shared/services/base-http.service';
+import { ApiResponse } from '../../../../../shared/models/api-response.model';
 import { OrganizerDashboardData, MonthlyRevenue } from '../models/dashboard.models';
 
 @Injectable({ providedIn: 'root' })

@@ -2,9 +2,13 @@ import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone } from 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { GridComponent, GridColumn, GridActionItem } from '../../../../shared/components/grid/grid.component';
-import { AdminCategoryService, CreateCategoryRequest, UpdateCategoryRequest } from '../services/admin-category.service';
-import { Category } from '../../attendee/home/models/category.models';
+import {
+  GridComponent,
+  GridColumn,
+  GridActionItem,
+} from '../../../../shared/components/grid/grid.component';
+import { AdminCategoryService } from '../layout/admin-layout/services/admin-category.service';
+import { Category, CreateCategoryRequest, UpdateCategoryRequest } from '../layout/admin-layout/models/category.models';
 
 @Component({
   selector: 'app-admin-categories',
@@ -111,28 +115,27 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
     this.saving = true;
 
-    const obs$ = this.modalMode === 'add'
-      ? this.categoryService.create({ name } as CreateCategoryRequest)
-      : this.categoryService.update(this.editId!, { name } as UpdateCategoryRequest);
+    const obs$ =
+      this.modalMode === 'add'
+        ? this.categoryService.create({ name } as CreateCategoryRequest)
+        : this.categoryService.update(this.editId!, { name } as UpdateCategoryRequest);
 
-    obs$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.zone.run(() => {
-            this.saving = false;
-            this.showModal = false;
-            this.loadCategories();
-            this.cdr.detectChanges();
-          });
-        },
-        error: () => {
-          this.zone.run(() => {
-            this.saving = false;
-            this.cdr.detectChanges();
-          });
-        },
-      });
+    obs$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.zone.run(() => {
+          this.saving = false;
+          this.showModal = false;
+          this.loadCategories();
+          this.cdr.detectChanges();
+        });
+      },
+      error: () => {
+        this.zone.run(() => {
+          this.saving = false;
+          this.cdr.detectChanges();
+        });
+      },
+    });
   }
 
   cancelModal(): void {

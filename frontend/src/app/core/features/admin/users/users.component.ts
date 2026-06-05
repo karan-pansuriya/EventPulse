@@ -1,8 +1,13 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
-import { GridComponent, GridColumn, GridActionItem } from '../../../../shared/components/grid/grid.component';
-import { AdminUserService, UserListResponse } from '../services/admin-user.service';
+import {
+  GridComponent,
+  GridColumn,
+  GridActionItem,
+} from '../../../../shared/components/grid/grid.component';
+import { AdminUserService } from '../layout/admin-layout/services/admin-user.service';
+import { UserListResponse } from '../layout/admin-layout/models/adminuser.model';
 
 interface RoleTab {
   label: string;
@@ -47,7 +52,9 @@ export class UsersComponent implements OnInit, OnDestroy {
       field: 'roles',
       formatter: (value: unknown) => {
         const roles = value as string[];
-        return roles.map(r => `<span class="role-badge role-${r.toLowerCase()}">${r}</span>`).join(' ');
+        return roles
+          .map((r) => `<span class="role-badge role-${r.toLowerCase()}">${r}</span>`)
+          .join(' ');
       },
     },
     {

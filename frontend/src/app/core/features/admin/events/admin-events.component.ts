@@ -9,7 +9,7 @@ import {
   GridColumn,
   GridActionItem,
 } from '../../../../shared/components/grid/grid.component';
-import { AdminEventService } from '../services/admin-event.service';
+import { AdminEventService } from '../layout/admin-layout/services/admin-event.service';
 import { EventListResponse } from '../../attendee/home/models/event.models';
 
 @Component({

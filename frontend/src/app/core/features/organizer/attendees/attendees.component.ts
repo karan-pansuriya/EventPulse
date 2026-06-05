@@ -1,8 +1,8 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GridComponent, GridColumn } from '../../../../shared/components/grid/grid.component';
-import { OrganizerEventService } from '../services/organizer-event.service';
-import { EventAttendee } from '../models/attendee.models';
+import { OrganizerEventService } from '../layout/services/organizer-event.service';
+import { EventAttendee } from '../layout/models/attendee.models';
 import { PagedResult } from '../../../../shared/models/paged-result.model';
 
 @Component({
