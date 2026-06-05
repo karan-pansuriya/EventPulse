@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Security.Claims;
 using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
 using EventPulse.Common.Entities;
@@ -6,9 +7,23 @@ using EventPulse.DAL.Entities;
 using EventPulse.Common.Models;
 using EventPulse.Common.Models.Response;
 using EventPulse.DAL.Repositories.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace EventPulse.BLL.Services
 {
+    public abstract class BaseService(IHttpContextAccessor httpContextAccessor)
+    {
+        protected IHttpContextAccessor HttpContextAccessor { get; } = httpContextAccessor;
+
+        protected int GetUserId()
+        {
+            Claim? claim = HttpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)
+                     ?? HttpContextAccessor.HttpContext?.User.FindFirst("sub");
+            if (claim == null || !int.TryParse(claim.Value, out int id))
+                throw new UnauthorizedAccessException("User ID not found in token.");
+            return id;
+        }
+    }
     public class GenericService<T>(
         IGenericRepository<T> repository,
         IUnitOfWork unitOfWork) : IGenericService<T> where T : BaseEntity
