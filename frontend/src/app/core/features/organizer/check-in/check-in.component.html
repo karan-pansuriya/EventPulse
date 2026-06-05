@@ -18,10 +18,10 @@
             Ticket Code
           </label>
           <input id="ticketCode" type="text" class="form-control form-control-lg"
-            [class.is-invalid]="submitted && ticketControl.invalid" [class.is-valid]="submitted && ticketControl.valid"
-            [formControl]="ticketControl" placeholder="Enter or scan ticket code..." autocomplete="off" autofocus
+            [class.is-invalid]="submitted && checkInForm.invalid" [class.is-valid]="submitted && checkInForm.valid"
+            [formControl]="checkInForm" placeholder="Enter or scan ticket code..." autocomplete="off" autofocus
             (keyup.enter)="onSubmit()" [disabled]="state() === 'loading'" />
-          @if (submitted && ticketControl.invalid) {
+          @if (submitted && checkInForm.invalid) {
           <div class="invalid-feedback">{{ getFieldError() }}</div>
           }
         </div>

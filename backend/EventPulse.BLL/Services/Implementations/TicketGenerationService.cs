@@ -73,8 +73,6 @@ public class TicketGenerationService : ITicketGenerationService
 
         // Each PDF = 1 ticket, so quantity is always 1 and price is per-ticket
         decimal unitPrice = booking.PricePerTicket;
-        decimal convFee   = 0m;
-        decimal total     = unitPrice + convFee;
 
         // ── Colors ──────────────────────────────────────────────────────────
         string bgGrey    = "#F0F0F0";
