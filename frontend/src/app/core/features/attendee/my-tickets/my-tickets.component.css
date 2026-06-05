@@ -108,6 +108,27 @@
   letter-spacing: 0.04em;
 }
 
+/* ── Ticket status badge ──────────────────────── */
+.ticket-status {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.ticket-status.used {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.ticket-status.unused {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
 /* ── Download button ──────────────────────────── */
 .btn-download {
   background: rgba(190, 24, 93, 0.05);

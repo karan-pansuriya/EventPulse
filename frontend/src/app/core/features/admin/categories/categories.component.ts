@@ -2,14 +2,19 @@ import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone } from 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { GridComponent, GridColumn, GridActionItem } from '../../../../shared/components/grid/grid.component';
-import { AdminCategoryService, CreateCategoryRequest, UpdateCategoryRequest } from '../services/admin-category.service';
-import { Category } from '../../attendee/home/models/category.models';
+import {
+  GridComponent,
+  GridColumn,
+  GridActionItem,
+} from '../../../../shared/components/grid/grid.component';
+import { AdminCategoryService } from '../layout/admin-layout/services/admin-category.service';
+import { Category, CreateCategoryRequest, UpdateCategoryRequest } from '../layout/admin-layout/models/category.models';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-admin-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule, GridComponent],
+  imports: [CommonModule, FormsModule, GridComponent, ConfirmationModalComponent],
   templateUrl: './categories.component.html',
   styleUrls: ['./categories.component.css'],
 })
@@ -29,8 +34,10 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   formName = '';
   saving = false;
 
+  confirmCategory: Category | null = null;
+
   columns: GridColumn[] = [
-    { header: 'ID', field: 'id', width: '60px' },
+    // { header: 'ID', field: 'id', width: '60px' },
     { header: 'Name', field: 'name' },
     { header: 'Actions', field: 'id', type: 'action' },
   ];
@@ -92,7 +99,13 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   }
 
   onDelete(cat: Category): void {
-    if (!confirm(`Delete category "${cat.name}"?`)) return;
+    this.confirmCategory = cat;
+  }
+
+  onDeleteConfirmed(): void {
+    if (!this.confirmCategory) return;
+    const cat = this.confirmCategory;
+    this.confirmCategory = null;
 
     this.categoryService
       .delete(cat.id)
@@ -105,34 +118,37 @@ export class CategoriesComponent implements OnInit, OnDestroy {
       });
   }
 
+  onDeleteCancelled(): void {
+    this.confirmCategory = null;
+  }
+
   save(): void {
     const name = this.formName.trim();
     if (!name) return;
 
     this.saving = true;
 
-    const obs$ = this.modalMode === 'add'
-      ? this.categoryService.create({ name } as CreateCategoryRequest)
-      : this.categoryService.update(this.editId!, { name } as UpdateCategoryRequest);
+    const obs$ =
+      this.modalMode === 'add'
+        ? this.categoryService.create({ name } as CreateCategoryRequest)
+        : this.categoryService.update(this.editId!, { name } as UpdateCategoryRequest);
 
-    obs$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.zone.run(() => {
-            this.saving = false;
-            this.showModal = false;
-            this.loadCategories();
-            this.cdr.detectChanges();
-          });
-        },
-        error: () => {
-          this.zone.run(() => {
-            this.saving = false;
-            this.cdr.detectChanges();
-          });
-        },
-      });
+    obs$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.zone.run(() => {
+          this.saving = false;
+          this.showModal = false;
+          this.loadCategories();
+          this.cdr.detectChanges();
+        });
+      },
+      error: () => {
+        this.zone.run(() => {
+          this.saving = false;
+          this.cdr.detectChanges();
+        });
+      },
+    });
   }
 
   cancelModal(): void {

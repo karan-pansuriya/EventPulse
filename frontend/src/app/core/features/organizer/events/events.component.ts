@@ -1,9 +1,13 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { OrganizerEventService } from '../services/organizer-event.service';
+import { OrganizerEventService } from '../layout/services/organizer-event.service';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
-import { GridComponent, GridColumn, GridActionItem } from '../../../../shared/components/grid/grid.component';
+import {
+  GridComponent,
+  GridColumn,
+  GridActionItem,
+} from '../../../../shared/components/grid/grid.component';
 import { EventListResponse } from '../../attendee/home/models/event.models';
 import { environment } from '../../../../../environments/environment';
 import { ToastService } from '../../../../shared/services/toast.service';

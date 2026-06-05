@@ -2,7 +2,6 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
-using AutoMapper;
 using EventPulse.BLL.Common;
 using EventPulse.BLL.Interfaces;
 using EventPulse.BLL.Mappings;
@@ -12,13 +11,10 @@ using EventPulse.DAL.Context;
 using EventPulse.DAL.Repositories.Implementations;
 using EventPulse.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;  
-using EFCore.NamingConventions;
-using EventPulse.API.Services;
+using Microsoft.OpenApi.Models;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -231,6 +227,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers().RequireRateLimiting("fixed");
-app.MapHub<EventPulse.API.Hubs.SeatHub>("/hubs/seats");
+app.MapHub<EventPulse.BLL.Hubs.SeatHub>("/hubs/seats");
 
 app.Run();

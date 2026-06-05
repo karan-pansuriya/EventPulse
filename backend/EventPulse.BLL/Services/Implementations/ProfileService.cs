@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using EventPulse.BLL.DTOs.User;
 using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
@@ -8,29 +7,19 @@ using Microsoft.AspNetCore.Http;
 
 namespace EventPulse.BLL.Services;
 
-public class ProfileService : IProfileService
+public class ProfileService : BaseService, IProfileService
 {
     private readonly IGenericRepository<User> _userRepo;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public ProfileService(
         IGenericRepository<User> userRepo,
         IUnitOfWork unitOfWork,
         IHttpContextAccessor httpContextAccessor)
+        : base(httpContextAccessor)
     {
         _userRepo = userRepo;
         _unitOfWork = unitOfWork;
-        _httpContextAccessor = httpContextAccessor;
-    }
-
-    private int GetUserId()
-    {
-        Claim? claim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)
-                 ?? _httpContextAccessor.HttpContext?.User.FindFirst("sub");
-        if (claim == null || !int.TryParse(claim.Value, out int id))
-            throw new UnauthorizedAccessException("User ID not found in token.");
-        return id;
     }
 
     public async Task<UserDto> GetProfileAsync()

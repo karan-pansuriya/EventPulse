@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using AutoMapper;
 using EventPulse.BLL.DTOs.Booking;
 using Microsoft.AspNetCore.Http;
@@ -14,14 +13,13 @@ using StripeEvent = Stripe.Event;
 
 namespace EventPulse.BLL.Services;
 
-public class PaymentService : IPaymentService
+public class PaymentService : BaseService, IPaymentService
 {
     private readonly IBookingRepository _bookingRepository;
     private readonly IMapper _mapper;
     private readonly StripeSettings _stripeSettings;
     private readonly ISeatUpdateNotifier _seatNotifier;
     private readonly ITicketGenerationService _ticketGenerationService;
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public PaymentService(
         IBookingRepository bookingRepository,
@@ -30,23 +28,14 @@ public class PaymentService : IPaymentService
         ISeatUpdateNotifier seatNotifier,
         ITicketGenerationService ticketGenerationService,
         IHttpContextAccessor httpContextAccessor)
+        : base(httpContextAccessor)
     {
         _bookingRepository = bookingRepository;
         _mapper = mapper;
         _stripeSettings = stripeSettings.Value;
         _seatNotifier = seatNotifier;
         _ticketGenerationService = ticketGenerationService;
-        _httpContextAccessor = httpContextAccessor;
         StripeConfiguration.ApiKey = _stripeSettings.SecretKey;
-    }
-
-    private int GetUserId()
-    {
-        Claim? claim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)
-                 ?? _httpContextAccessor.HttpContext?.User.FindFirst("sub");
-        if (claim == null || !int.TryParse(claim.Value, out int id))
-            throw new UnauthorizedAccessException("User ID not found in token.");
-        return id;
     }
 
     public async Task<PaymentIntentResponse> CreatePaymentIntentAsync(CreatePaymentIntentRequest request)

@@ -59,7 +59,6 @@ export class RegisterComponent implements OnInit {
       },
       error: () => {
         this.rolesLoading = false;
-        this.toast.error('Failed to load roles.', 'Error');
         this.cdr.markForCheck();
       },
     });
@@ -105,7 +104,6 @@ export class RegisterComponent implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.toast.success('Account created successfully. Please sign in.', 'Success');
           this.router.navigate(['/login']);
         },
         error: (err) => {

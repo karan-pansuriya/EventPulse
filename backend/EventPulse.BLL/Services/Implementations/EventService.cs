@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using AutoMapper;
 using EventPulse.BLL.Common;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +13,7 @@ using EventPulse.DAL.Repositories.Interfaces;
 
 namespace EventPulse.BLL.Services;
 
-public class EventService : IEventService
+public class EventService : BaseService, IEventService
 {
     private const int MaxPosterImages = 5;
     private const long MaxPosterFileSize = 5 * 1024 * 1024; // 5 MB
@@ -26,7 +25,6 @@ public class EventService : IEventService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IImageService _imageService;
     private readonly IMapper _mapper;
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public EventService(
         IGenericRepository<Event> eventRepo,
@@ -37,6 +35,7 @@ public class EventService : IEventService
         IImageService imageService,
         IMapper mapper,
         IHttpContextAccessor httpContextAccessor)
+        : base(httpContextAccessor)
     {
         _eventRepo = eventRepo;
         _posterRepo = posterRepo;
@@ -45,21 +44,11 @@ public class EventService : IEventService
         _unitOfWork = unitOfWork;
         _imageService = imageService;
         _mapper = mapper;
-        _httpContextAccessor = httpContextAccessor;
-    }
-
-    private int GetUserId()
-    {
-        Claim? claim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)
-                 ?? _httpContextAccessor.HttpContext?.User.FindFirst("sub");
-        if (claim == null || !int.TryParse(claim.Value, out int id))
-            throw new UnauthorizedAccessException("User ID not found in token.");
-        return id;
     }
 
     private int? GetActiveRoleId()
     {
-        string? value = _httpContextAccessor.HttpContext?.User.FindFirst("active_role_id")?.Value;
+        string? value = HttpContextAccessor.HttpContext?.User.FindFirst("active_role_id")?.Value;
         if (int.TryParse(value, out int roleId) && roleId > 0)
             return roleId;
         return null;

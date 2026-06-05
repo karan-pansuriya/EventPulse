@@ -200,7 +200,6 @@ export class CheckoutComponent implements OnInit {
               },
               error: () => {
                 this.processing = false;
-                this.toast.error('Failed to finalize booking.', 'Error');
                 this.cdr.detectChanges();
               },
             });
@@ -212,7 +211,6 @@ export class CheckoutComponent implements OnInit {
       },
       error: () => {
         this.processing = false;
-        this.toast.error('Failed to initiate payment.', 'Error');
         this.cdr.detectChanges();
       },
     });

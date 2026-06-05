@@ -7,11 +7,12 @@ import { provideToastr } from 'ngx-toastr';
 import { routes } from './app.routes';
 import { authInterceptor } from './auth/interceptors/auth.interceptor';
 import { errorToastInterceptor } from './shared/interceptors/error-toast.interceptor';
+import { successToastInterceptor } from './shared/interceptors/success-toast.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor, errorToastInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, errorToastInterceptor, successToastInterceptor])),
     provideAnimationsAsync(),
     provideToastr({
       timeOut: 3000,

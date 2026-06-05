@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using EventPulse.BLL.DTOs.Booking;
 using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
@@ -8,29 +7,19 @@ using Microsoft.AspNetCore.Http;
 
 namespace EventPulse.BLL.Services;
 
-public class TicketService : ITicketService
+public class TicketService : BaseService, ITicketService
 {
     private readonly IBookingRepository _bookingRepository;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly string _webRootPath;
 
     public TicketService(
         IBookingRepository bookingRepository,
         IHttpContextAccessor httpContextAccessor,
         string webRootPath)
+        : base(httpContextAccessor)
     {
         _bookingRepository = bookingRepository;
-        _httpContextAccessor = httpContextAccessor;
         _webRootPath = webRootPath;
-    }
-
-    private int GetUserId()
-    {
-        Claim? claim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)
-                 ?? _httpContextAccessor.HttpContext?.User.FindFirst("sub");
-        if (claim == null || !int.TryParse(claim.Value, out int id))
-            throw new UnauthorizedAccessException("User ID not found in token.");
-        return id;
     }
 
     public async Task<List<MyTicketResponse>> GetMyTicketsAsync(int bookingId)
@@ -38,7 +27,7 @@ public class TicketService : ITicketService
         int userId = GetUserId();
         List<Booking> bookings = await _bookingRepository.GetUserBookingsAsync(userId, bookingId);
 
-        HttpRequest? request = _httpContextAccessor.HttpContext?.Request;
+        HttpRequest? request = HttpContextAccessor.HttpContext?.Request;
         string baseUrl = request != null
             ? $"{request.Scheme}://{request.Host}"
             : string.Empty;
@@ -60,6 +49,8 @@ public class TicketService : ITicketService
                 TicketCode = t.TicketCode,
                 QrCodeUrl = t.QrCodePath != null ? $"{baseUrl}/{t.QrCodePath}" : null,
                 PdfUrl = t.PdfPath != null ? $"{baseUrl}/{t.PdfPath}" : null,
+                IsUsed = t.IsUsed,
+                UsedAt = t.UsedAt,
             }).ToList()
         }).ToList();
     }
@@ -69,7 +60,7 @@ public class TicketService : ITicketService
         int userId = GetUserId();
         List<Booking> bookings = await _bookingRepository.GetUserAllBookingsAsync(userId);
 
-        HttpRequest? request = _httpContextAccessor.HttpContext?.Request;
+        HttpRequest? request = HttpContextAccessor.HttpContext?.Request;
         string baseUrl = request != null
             ? $"{request.Scheme}://{request.Host}"
             : string.Empty;
@@ -91,6 +82,8 @@ public class TicketService : ITicketService
                 TicketCode = t.TicketCode,
                 QrCodeUrl = t.QrCodePath != null ? $"{baseUrl}/{t.QrCodePath}" : null,
                 PdfUrl = t.PdfPath != null ? $"{baseUrl}/{t.PdfPath}" : null,
+                IsUsed = t.IsUsed,
+                UsedAt = t.UsedAt,
             }).ToList()
         }).ToList();
     }

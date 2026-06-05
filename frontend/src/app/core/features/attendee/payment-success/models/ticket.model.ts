@@ -3,6 +3,8 @@ export interface TicketDto {
     ticketCode: string;
     qrCodeUrl: string | null;
     pdfUrl: string | null;
+    isUsed: boolean;
+    usedAt: string | null;
   }
   
   export interface MyTicketResponse {
