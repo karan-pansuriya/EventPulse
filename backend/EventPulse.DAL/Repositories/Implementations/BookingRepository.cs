@@ -190,6 +190,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
     public async Task<List<Booking>> GetUserBookingsAsync(int userId, int bookingId)
     {
         return await _context.Bookings
+            .AsNoTracking()
             .Where(b => b.UserId == userId && b.PaymentStatus == PaymentStatus.Paid && b.Id == bookingId)
             .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
             .Include(b => b.Tickets)
@@ -200,6 +201,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
     public async Task<List<Booking>> GetAllBookingsAsync()
     {
         return await _context.Bookings
+            .AsNoTracking()
             .Where(b => b.PaymentStatus == PaymentStatus.Paid && !b.IsDeleted)
             .Include(b => b.User)
             .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
@@ -210,6 +212,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
     public async Task<PagedResult<Booking>> GetPagedBookingsAsync(PageRequest pageRequest)
     {
         IQueryable<Booking> query = _context.Bookings
+            .AsNoTracking()
             .Where(b => b.PaymentStatus == PaymentStatus.Paid && !b.IsDeleted)
             .Include(b => b.User)
             .Include(b => b.Event)!.ThenInclude(e => e!.Venue);
@@ -232,6 +235,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
     public async Task<List<Booking>> GetUserAllBookingsAsync(int userId)
     {
         return await _context.Bookings
+            .AsNoTracking()
             .Where(b => b.UserId == userId && b.PaymentStatus == PaymentStatus.Paid && b.IsDeleted == false)
             .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
             .Include(b => b.Tickets)

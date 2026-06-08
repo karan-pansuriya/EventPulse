@@ -44,9 +44,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
         {
             string search = filter.Search.ToLower();
             query = query.Where(e =>
-                e.Title.ToLower().Contains(search) ||
-                (e.Description != null && e.Description.ToLower().Contains(search)) ||
-                (e.Performers != null && e.Performers.ToLower().Contains(search)));
+                EF.Functions.Like(e.Title, $"%{search}%"));
         }
 
         string sortBy = string.IsNullOrWhiteSpace(filter.SortBy) ? "EventDate" : filter.SortBy;
