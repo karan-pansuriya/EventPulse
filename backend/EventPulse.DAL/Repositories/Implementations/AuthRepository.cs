@@ -11,22 +11,23 @@ public class AuthRepository(EventPulseDbContext context) : IAuthRepository
 
     public async Task<bool> UserEmailExistsAsync(string normalizedEmail)
     {
-        return await _context.Users.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
+        return await _context.Users.AsNoTracking().AnyAsync(u => u.Email.ToLower() == normalizedEmail);
     }
 
     public async Task<Role?> GetRoleByIdAsync(int roleId)
     {
-        return await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId);
+        return await _context.Roles.AsNoTracking().FirstOrDefaultAsync(r => r.Id == roleId);
     }
 
     public async Task<List<Role>> GetRolesAsync()
     {
-        return await _context.Roles.ToListAsync();
+        return await _context.Roles.AsNoTracking().ToListAsync();
     }
 
     public async Task<User?> GetUserWithRolesByEmailAsync(string normalizedEmail)
     {
         return await _context.Users
+            .AsNoTracking()
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
@@ -35,6 +36,7 @@ public class AuthRepository(EventPulseDbContext context) : IAuthRepository
     public async Task<RefreshToken?> GetRefreshTokenWithUserAsync(string token)
     {
         return await _context.RefreshTokens
+            .AsNoTracking()
             .Include(rt => rt.User)
                 .ThenInclude(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
