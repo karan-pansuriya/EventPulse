@@ -10,17 +10,21 @@ import {
   ValidationErrors,
   ValidatorFn,
 } from '@angular/forms';
-import { OrganizerEventService } from '../layout/services/organizer-event.service';
-import { CategoryService } from '../../attendee/home/services/category.service';
-import { LocationService } from '../layout/services/location.service';
-import { Category } from '../../attendee/home/models/category.models';
-import { Country, State, City } from '../layout/models/location.models';
-import { ToastService } from '../../../../shared/services/toast.service';
-import { AuthService } from '../../../../auth/services/auth.service';
-import { RoleId } from '../../../../auth/models/auth.models';
-import { AdminUserService } from '../../admin/layout/admin-layout/services/admin-user.service';
-import { OrganizerResponse } from '../../admin/layout/admin-layout/models/adminuser.model';
-import { environment } from '../../../../../environments/environment';
+import { OrganizerEventService } from '../../../core/features/organizer/layout/services/organizer-event.service';
+import { CategoryService } from '../../../core/features/attendee/home/services/category.service';
+import { LocationService } from '../../../core/features/organizer/layout/services/location.service';
+import { Category } from '../../../core/features/attendee/home/models/category.models';
+import {
+  Country,
+  State,
+  City,
+} from '../../../core/features/organizer/layout/models/location.models';
+import { ToastService } from '../../services/toast.service';
+import { AuthService } from '../../../auth/services/auth.service';
+import { RoleId } from '../../../auth/models/auth.models';
+import { AdminUserService } from '../../../core/features/admin/layout/admin-layout/services/admin-user.service';
+import { OrganizerResponse } from '../../../core/features/admin/layout/admin-layout/models/adminuser.model';
+import { environment } from '../../../../environments/environment';
 
 function pastDateValidator(minDate: string): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -67,6 +71,10 @@ export class EventFormComponent implements OnInit, OnDestroy {
   isLoadingCities = false;
   submitted = false;
   isAdmin = false;
+
+  get backRoute(): string {
+    return this.isAdmin ? '/admin/events' : '/organizer/events';
+  }
 
   minDate = new Date().toISOString().slice(0, 10);
 
@@ -227,7 +235,7 @@ export class EventFormComponent implements OnInit, OnDestroy {
       error: () => {
         this.toastService.error('Failed to load event details.');
         this.isLoading = false;
-        this.router.navigate(['/organizer/events']);
+        this.router.navigate([this.backRoute]);
         this.cdr.detectChanges();
       },
     });
@@ -421,7 +429,7 @@ export class EventFormComponent implements OnInit, OnDestroy {
           this.toastService.success(
             this.isEditMode ? 'Event updated successfully!' : 'Event created successfully!',
           );
-          this.router.navigate(['/organizer/events']);
+          this.router.navigate([this.backRoute]);
         }
         this.isSaving = false;
         this.cdr.detectChanges();

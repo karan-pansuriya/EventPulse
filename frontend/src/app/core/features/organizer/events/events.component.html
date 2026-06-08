@@ -7,7 +7,7 @@
         <i class="bi bi-calendar-event fs-4 fs-md-2 text-primary"></i>
         <h2 class="fw-bold mb-0 fs-5 fs-md-2">My Events</h2>
       </div>
-      <a class="btn btn-primary" routerLink="/organizer/events/create">
+      <a class="btn btn-primary" (click)="createEvent()">
         <i class="bi bi-plus-lg me-1"></i>Create Event
       </a>
     </div>
@@ -25,7 +25,7 @@
       <div class="text-center py-5">
         <i class="bi bi-calendar-plus fs-1 text-muted"></i>
         <p class="text-muted mt-3 mb-3">You haven't created any events yet.</p>
-        <a class="btn btn-primary" routerLink="/organizer/events/create">
+        <a class="btn btn-primary" (click)="createEvent()">
           <i class="bi bi-plus-lg me-1"></i>Create Your First Event
         </a>
       </div>

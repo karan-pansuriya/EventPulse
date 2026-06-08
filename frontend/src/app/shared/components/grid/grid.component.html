@@ -62,6 +62,22 @@
                     (change)="toggle.emit(row)"
                   />
                 </div>
+                } @else if (col.type === 'edit') {
+                <button
+                  class="btn btn-sm btn-outline-primary border-0 p-1"
+                  (click)="$event.stopPropagation(); edit.emit(row)"
+                  title="Edit"
+                >
+                  <i class="bi bi-pencil"></i>
+                </button>
+                } @else if (col.type === 'delete') {
+                <button
+                  class="btn btn-sm btn-outline-danger border-0 p-1"
+                  (click)="$event.stopPropagation(); delete.emit(row)"
+                  title="Delete"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
                 } @else if (col.type === 'action') { @if (actionTemplate) {
                 <div (click)="$event.stopPropagation()">
                   <ng-container

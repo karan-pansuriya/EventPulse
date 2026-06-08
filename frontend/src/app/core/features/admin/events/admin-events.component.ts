@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { NgZone } from '@angular/core';
 import {
@@ -23,6 +23,7 @@ export class AdminEventsComponent implements OnInit {
   private adminEventService = inject(AdminEventService);
   private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
+  private router = inject(Router);
   private destroy$ = new Subject<void>();
 
   events: EventListResponse[] = [];
@@ -42,7 +43,8 @@ export class AdminEventsComponent implements OnInit {
     { header: 'Date', field: 'eventDate', type: 'date' },
     { header: 'Price', field: 'price', type: 'currency' },
     { header: 'Verified', field: 'isVerified', type: 'toggle' },
-    { header: 'Actions', field: 'id', type: 'action' },
+    { header: 'Edit', field: 'id', type: 'edit', width: '40px' },
+    { header: 'Delete', field: 'id', type: 'delete', width: '40px' },
   ];
 
   ngOnInit(): void {
@@ -86,6 +88,14 @@ export class AdminEventsComponent implements OnInit {
     this.pageSize = size;
     this.currentPage = 1;
     this.loadEvents();
+  }
+
+  createEvent(): void {
+    this.router.navigate(['/admin/events/create']);
+  }
+
+  onEdit(event: EventListResponse): void {
+    this.router.navigate(['/admin/events/edit', event.id]);
   }
 
   onToggleVerify(event: EventListResponse): void {

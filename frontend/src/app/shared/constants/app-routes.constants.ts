@@ -38,6 +38,8 @@ export const APP_ROUTES = {
       ROOT: 'admin',
       DASHBOARD: 'dashboard',
       EVENTS: 'events',
+      CREATE_EVENT: 'events/create',
+      EDIT_EVENT: 'events/edit/:id',
       USERS: 'users',
       USER_DETAILS: 'users/:id',
       ORGANIZERS: 'organizers',

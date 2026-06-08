@@ -24,14 +24,16 @@
   margin-bottom: 4px;
 }
 
-.form-control, .form-select {
+.form-control,
+.form-select {
   border-radius: 8px;
   border: 1px solid #d1d5db;
   font-size: 0.9rem;
   padding: 10px 12px;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus,
+.form-select:focus {
   border-color: #be185d;
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
 }

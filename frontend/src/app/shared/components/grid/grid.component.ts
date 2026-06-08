@@ -6,7 +6,7 @@ export interface GridColumn {
   header: string;
   field: string;
   sortable?: boolean;
-  type?: 'text' | 'truncate' | 'action' | 'toggle' | 'currency' | 'percent' | 'date';
+  type?: 'text' | 'truncate' | 'action' | 'toggle' | 'currency' | 'percent' | 'date' | 'edit' | 'delete';
   width?: string;
   formatter?: (value: unknown) => string;
 }

@@ -1,6 +1,9 @@
 <div class="admin-page">
     <div class="page-header">
       <h1>All Events</h1>
+      <a (click)="createEvent()" class="btn btn-primary create-btn">
+        <i class="bi bi-plus-lg"></i> Create Event
+      </a>
     </div>
 
     <app-grid
@@ -12,17 +15,12 @@
       [trackByField]="'id'"
       [isLoading]="loading"
       [errorMessage]="error"
-      [actionTemplate]="actionTemplate"
       (pageChange)="onPageChange($event)"
       (pageSizeChange)="onPageSizeChange($event)"
       (toggle)="onToggleVerify($event)"
+      (edit)="onEdit($event)"
+      (delete)="promptDelete($event)"
     />
-
-    <ng-template #actionTemplate let-row>
-      <button class="btn btn-sm btn-outline-danger border-0 p-1" (click)="promptDelete(row)" title="Delete">
-        <i class="bi bi-trash"></i>
-      </button>
-    </ng-template>
 
     <app-confirmation-modal
       [isOpen]="!!confirmEvent"

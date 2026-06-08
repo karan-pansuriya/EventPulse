@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { OrganizerEventService } from '../layout/services/organizer-event.service';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
@@ -15,7 +15,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
 @Component({
   selector: 'app-organizer-events',
   standalone: true,
-  imports: [RouterLink, CommonModule, GridComponent, ConfirmationModalComponent],
+  imports: [CommonModule, GridComponent, ConfirmationModalComponent],
   templateUrl: './events.component.html',
   styleUrl: './events.component.css',
 })
@@ -107,6 +107,10 @@ export class EventsComponent implements OnInit {
     this.pageSize = size;
     this.pageNumber = 1;
     this.loadEvents();
+  }
+
+  createEvent(): void {
+    this.router.navigate(['/organizer/events/create']);
   }
 
   onEdit(event: Record<string, unknown>): void {
