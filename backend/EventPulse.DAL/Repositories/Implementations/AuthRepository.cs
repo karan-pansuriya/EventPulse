@@ -55,4 +55,5 @@ public class AuthRepository(EventPulseDbContext context) : IAuthRepository
     {
         await _context.RefreshTokens.AddAsync(token);
     }
+    
 }
