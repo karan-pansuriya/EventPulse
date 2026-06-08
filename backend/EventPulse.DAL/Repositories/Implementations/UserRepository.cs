@@ -14,6 +14,7 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
     public async Task<PagedResult<User>> GetPagedUsersAsync(PageRequest pageRequest, string? roleName = null)
     {
         IQueryable<User> query = _context.Users
+            .AsNoTracking()
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .Where(u => !u.IsDeleted);
@@ -41,6 +42,7 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
     public async Task<List<User>> GetOrganizersAsync()
     {
         return await _context.Users
+            .AsNoTracking()
             .Where(u => u.UserRoles.Any(ur => ur.Role.Id == 2) && !u.IsDeleted)
             .ToListAsync();
     }

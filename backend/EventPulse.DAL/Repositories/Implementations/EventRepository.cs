@@ -14,6 +14,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     public async Task<Event?> GetEventWithDetailsAsync(int id)
     {
         return await _context.Events
+            .AsNoTracking()
             .Include(e => e.Category)
             .Include(e => e.Venue).ThenInclude(v => v!.City).ThenInclude(c => c!.State).ThenInclude(s => s!.Country)
             .Include(e => e.Posters)
@@ -24,6 +25,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     public async Task<(List<Event> Items, int TotalCount)> GetPagedEventsAsync(EventFilterRequest filter)
     {
         IQueryable<Event> query = _context.Events
+            .AsNoTracking()
             .Where(e => !e.IsDeleted && e.IsVerified && e.EventDate >= DateTime.Today);
 
         if (filter.DateFrom.HasValue)
@@ -114,6 +116,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     public async Task<List<Booking>> GetBookingsByOrganizerIdAsync(int organizerId)
     {
         return await _context.Bookings
+            .AsNoTracking()
             .Where(b => !b.IsDeleted && b.Event!.OrganizerId == organizerId)
             .Include(b => b.User)
             .Include(b => b.Event).ThenInclude(e => e!.Category)
@@ -124,6 +127,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     public async Task<(List<Booking> Items, int TotalCount)> GetPagedBookingsByOrganizerIdAsync(int organizerId, int pageNumber, int pageSize)
     {
         IQueryable<Booking> query = _context.Bookings
+            .AsNoTracking()
             .Where(b => !b.IsDeleted && b.Event!.OrganizerId == organizerId);
 
         int totalCount = await query.CountAsync();
@@ -142,6 +146,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     public async Task<List<Event>> GetEventsByOrganizerIdAsync(int organizerId)
     {
         return await _context.Events
+            .AsNoTracking()
             .Where(e => e.OrganizerId == organizerId && !e.IsDeleted)
             .Include(e => e.Category)
             .Include(e => e.Posters)
@@ -153,6 +158,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     public async Task<List<EventPoster>> GetActivePostersByEventIdAsync(int eventId)
     {
         return await _context.EventPosters
+            .AsNoTracking()
             .Where(p => p.EventId == eventId && !p.IsDeleted)
             .ToListAsync();
     }
@@ -160,6 +166,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     public async Task<Event?> GetEventByTitleDateVenueAsync(string title, DateTime eventDate, string venueName)
     {
         return await _context.Events
+            .AsNoTracking()
             .Include(e => e.Venue)
             .FirstOrDefaultAsync(e =>
                 !e.IsDeleted &&
@@ -177,6 +184,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     public async Task<List<Event>> GetAllEventsWithDetailsAsync()
     {
         return await _context.Events
+            .AsNoTracking()
             .Where(e => !e.IsDeleted)
             .Include(e => e.Category)
             .Include(e => e.Venue).ThenInclude(v => v!.City).ThenInclude(c => c!.State).ThenInclude(s => s!.Country)

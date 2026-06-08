@@ -12,6 +12,7 @@ public class CategoryRepository(EventPulseDbContext context) : ICategoryReposito
     public async Task<IEnumerable<Category>> GetAllAsync()
     {
         return await _context.Categories
+            .AsNoTracking()
             .Where(c => !c.IsDeleted)
             .OrderBy(c => c.Name)
             .ToListAsync();
@@ -20,6 +21,7 @@ public class CategoryRepository(EventPulseDbContext context) : ICategoryReposito
     public async Task<Category?> GetByIdAsync(int id)
     {
         return await _context.Categories
+            .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
     }
 

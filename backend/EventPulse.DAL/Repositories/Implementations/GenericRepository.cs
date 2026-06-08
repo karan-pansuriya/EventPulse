@@ -15,27 +15,27 @@ public class GenericRepository<T>(EventPulseDbContext context) : IGenericReposit
 
     public async Task<IEnumerable<T>> GetAllAsync()
     {
-        return await _dbSet.Where(e => !e.IsDeleted).ToListAsync();
+        return await _dbSet.Where(e => !e.IsDeleted).AsNoTracking().ToListAsync();
     }
 
     public async Task<T?> GetByIdAsync(int id)
     {
-        return await _dbSet.FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
+        return await _dbSet.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
     }
 
     public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
     {
-        return await _dbSet.FirstOrDefaultAsync(predicate);
+        return await _dbSet.AsNoTracking().FirstOrDefaultAsync(predicate);
     }
 
     public async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate)
     {
-        return await _dbSet.SingleOrDefaultAsync(predicate);
+        return await _dbSet.AsNoTracking().SingleOrDefaultAsync(predicate);
     }
 
     public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
     {
-        return await _dbSet.AnyAsync(predicate);
+        return await _dbSet.AsNoTracking().AnyAsync(predicate);
     }
 
     public async Task AddAsync(T entity)
@@ -62,7 +62,7 @@ public class GenericRepository<T>(EventPulseDbContext context) : IGenericReposit
         Expression<Func<T, TResult>> selector,
         PageRequest pageRequest)
     {
-        IQueryable<T> query = _dbSet.Where(e => !e.IsDeleted);
+        IQueryable<T> query = _dbSet.Where(e => !e.IsDeleted).AsNoTracking();
 
         if (predicate != null)
             query = query.Where(predicate);

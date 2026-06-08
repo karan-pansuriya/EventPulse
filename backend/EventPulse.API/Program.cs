@@ -194,6 +194,7 @@ builder.Services.AddScoped<ITicketService>(sp =>
     return new TicketService(bookingRepository, httpContextAccessor, env.WebRootPath);
 });
 
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 
 // ─── CORS ────────────────────────────────────────────────────────────────────

@@ -16,6 +16,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
     public async Task<Event?> GetEventByIdAsync(int eventId)
     {
         return await _context.Events
+            .AsNoTracking()
             .FirstOrDefaultAsync(e => e.Id == eventId && !e.IsDeleted);
     }
 
@@ -119,6 +120,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
     public async Task<Booking?> GetByPaymentIntentAsync(string paymentIntentId)
     {
         return await _context.Bookings
+            .AsNoTracking()
             .Include(b => b.Event)
             .Include(b => b.Tickets)
             .FirstOrDefaultAsync(b => b.PaymentRef == paymentIntentId);
@@ -127,6 +129,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
     public async Task<Booking?> GetBookingByTicketIdAsync(int ticketId)
     {
         return await _context.Bookings
+            .AsNoTracking()
             .Where(b => b.Tickets.Any(t => t.Id == ticketId))
             .Include(b => b.Tickets)
             .FirstOrDefaultAsync();
@@ -232,7 +235,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
             .Where(b => b.UserId == userId && b.PaymentStatus == PaymentStatus.Paid && b.IsDeleted == false)
             .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
             .Include(b => b.Tickets)
-            .OrderByDescending(b => b.CreatedAt)
+            .OrderBy(b => b.Event!.EventDate)
             .ToListAsync();
     }
 }

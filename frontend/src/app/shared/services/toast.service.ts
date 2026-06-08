@@ -13,11 +13,12 @@ export class ToastService {
     this.toastr.success(message, title);
   }
 
-  info(message: string, title = 'Info'): void {
-    this.toastr.info(message, title);
-  }
+//   info(message: string, title = 'Info'): void {
+//     this.toastr.info(message, title);
+//   }
 
-  warning(message: string, title = 'Warning'): void {
-    this.toastr.warning(message, title);
-  }
+//   warning(message: string, title = 'Warning'): void {
+//     this.toastr.warning(message, title);
+//   }
+// }
 }
