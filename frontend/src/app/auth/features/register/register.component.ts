@@ -19,7 +19,7 @@ const passwordsMatchValidator: ValidatorFn = (control: AbstractControl): Validat
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './register.component.html',
-  styleUrls: ['../../shared/auth-styles.css', './register.component.css'],
+  styleUrls: [ './register.component.css'],
 })
 export class RegisterComponent implements OnInit {
   private fb = inject(FormBuilder);

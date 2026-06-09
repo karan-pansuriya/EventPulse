@@ -1,6 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { map, tap, Observable, throwError, BehaviorSubject, filter, take, catchError } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import { LoginRequest, RegisterRequest, TokenResponse, UserInfo, RoleResponse } from '../models/auth.models';
 import { BaseHttpService } from '../../shared/services/base-http.service';
 import {
