@@ -535,19 +535,56 @@
 
 @media (max-width: 576px) {
   .hero-banner {
-    height: 260px;
+    height: 200px;
+    background-size: contain;
+    background-color: #111;
+  }
+
+  .hero-overlay {
+    background: linear-gradient(180deg, transparent 10%, rgba(0, 0, 0, 0.85) 100%);
   }
 
   .hero-title {
-    font-size: 1.35rem;
+    font-size: 1.15rem;
   }
 
   .hero-meta {
-    gap: 10px;
+    gap: 8px;
   }
 
   .hero-meta-item {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+  }
+
+  .hero-btn {
+    width: 32px;
+    height: 32px;
+    top: auto;
+    bottom: 50%;
+    transform: translateY(50%);
+  }
+
+  .hero-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .hero-btn-prev {
+    left: 8px;
+  }
+
+  .hero-btn-next {
+    right: 8px;
+  }
+
+  .hero-dots {
+    bottom: 8px;
+    gap: 6px;
+  }
+
+  .hero-dot {
+    width: 8px;
+    height: 8px;
   }
 
   .detail-card {
@@ -564,7 +601,7 @@
   }
 
   .skeleton-hero {
-    height: 260px;
+    height: 200px;
     border-radius: 0;
   }
 }

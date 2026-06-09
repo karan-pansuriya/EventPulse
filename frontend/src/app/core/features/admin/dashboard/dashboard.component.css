@@ -324,3 +324,20 @@
   @media (max-width: 992px) {
     .top-event-stat:last-child { display: none; }
   }
+
+  @media (max-width: 576px) {
+    .dashboard-page > .d-flex {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .dashboard-page > .d-flex > .ms-auto {
+      margin-left: 0 !important;
+      width: 100%;
+    }
+
+    .org-select {
+      width: 100%;
+      min-width: unset;
+    }
+  }
