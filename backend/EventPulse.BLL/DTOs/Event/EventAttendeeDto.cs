@@ -12,6 +12,5 @@ public class EventAttendeeDto
     public int Quantity { get; set; }
     public decimal TotalAmount { get; set; }
     public string PaymentStatus { get; set; } = string.Empty;
-    public string BookingStatus { get; set; } = string.Empty;
     public DateTime BookedAt { get; set; }
 }

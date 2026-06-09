@@ -34,7 +34,6 @@ public class BookingService : IBookingService
                 Quantity = b.Quantity,
                 TotalAmount = b.TotalAmount,
                 PaymentStatus = b.PaymentStatus.ToString(),
-                BookingStatus = b.BookingStatus.ToString(),
                 UniqueCode = b.UniqueCode,
                 CreatedAt = b.CreatedAt,
             }),

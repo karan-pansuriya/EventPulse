@@ -11,7 +11,6 @@ public class BookingResponse
     public decimal PricePerTicket { get; set; }
     public decimal TotalAmount { get; set; }
     public string PaymentStatus { get; set; } = string.Empty;
-    public string BookingStatus { get; set; } = string.Empty;
     public string? PaymentRef { get; set; }
     public List<TicketDto> Tickets { get; set; } = [];
     public List<string> TicketCodes { get; set; } = [];

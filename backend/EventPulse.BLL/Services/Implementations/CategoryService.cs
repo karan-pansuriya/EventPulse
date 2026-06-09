@@ -25,7 +25,6 @@ public class CategoryService : ICategoryService
         {
             Id = c.Id,
             Name = c.Name,
-            ImagePath = c.ImagePath,
         });
     }
 
@@ -43,7 +42,6 @@ public class CategoryService : ICategoryService
         Category category = new Category
         {
             Name = dto.Name,
-            ImagePath = dto.ImagePath,
         };
 
         await _categoryRepository.AddCategoryAsync(category);
@@ -53,7 +51,6 @@ public class CategoryService : ICategoryService
         {
             Id = category.Id,
             Name = category.Name,
-            ImagePath = category.ImagePath,
         };
     }
 
@@ -73,7 +70,6 @@ public class CategoryService : ICategoryService
             throw new BadRequestException("A category with this name already exists.");
 
         category.Name = dto.Name;
-        category.ImagePath = dto.ImagePath;
 
         _categoryRepository.UpdateCategory(category);
         await _unitOfWork.SaveAsync();
@@ -82,7 +78,6 @@ public class CategoryService : ICategoryService
         {
             Id = category.Id,
             Name = category.Name,
-            ImagePath = category.ImagePath,
         };
     }
 

@@ -33,7 +33,6 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
             PricePerTicket = pricePerTicket,
             TotalAmount = totalAmount,
             PaymentStatus = PaymentStatus.Pending,
-            BookingStatus = BookingStatus.Confirmed,
             PaymentRef = paymentIntentId,
         };
 
@@ -142,7 +141,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
                 .ThenInclude(b => b.Event)
             .Include(t => t.Booking)
                 .ThenInclude(b => b.User)
-            .FirstOrDefaultAsync(t => t.TicketCode == ticketCode && !t.IsDeleted);
+            .FirstOrDefaultAsync(t => t.TicketCode == ticketCode);
     }
 
     public async Task MarkTicketAsUsedAsync(Ticket ticket)

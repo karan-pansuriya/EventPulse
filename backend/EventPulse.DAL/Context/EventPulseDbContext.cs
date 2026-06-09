@@ -227,10 +227,6 @@ namespace EventPulse.DAL.Context
                       .HasConversion<string>()
                       .HasDefaultValue(Enums.PaymentStatus.Pending);
 
-                entity.Property(b => b.BookingStatus)
-                      .HasConversion<string>()
-                      .HasDefaultValue(Enums.BookingStatus.Confirmed);
-
                 entity.HasOne(b => b.User)
                       .WithMany(u => u.Bookings)
                       .HasForeignKey(b => b.UserId)
@@ -293,28 +289,28 @@ modelBuilder.Entity<Ticket>(entity =>
             );
 
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1, Name = "Concerts & Music", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 2, Name = "Sports", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 3, Name = "Tech", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 4, Name = "Comedy", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 5, Name = "Movies & Screenings", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 6, Name = "Theatre & Drama", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 7, Name = "Workshops", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 8, Name = "Conferences", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 9, Name = "Festivals", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 10, Name = "Food & Drink", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 11, Name = "Arts & Exhibitions", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 12, Name = "Gaming & Esports", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 13, Name = "Education", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 14, Name = "Health & Wellness", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 15, Name = "Networking", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 16, Name = "Travel & Adventure", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 17, Name = "Business", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 18, Name = "Fashion", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 19, Name = "Cultural Events", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 20, Name = "Expos & Trade Shows", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 21, Name = "Webinars", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true },
-                new Category { Id = 22, Name = "Career & Jobs", ImagePath = "/categories/category_image.png", CreatedAt = now, IsActive = true }
+                new Category { Id = 1, Name = "Concerts & Music", CreatedAt = now },
+                new Category { Id = 2, Name = "Sports", CreatedAt = now },
+                new Category { Id = 3, Name = "Tech", CreatedAt = now },
+                new Category { Id = 4, Name = "Comedy", CreatedAt = now },
+                new Category { Id = 5, Name = "Movies & Screenings", CreatedAt = now },
+                new Category { Id = 6, Name = "Theatre & Drama", CreatedAt = now },
+                new Category { Id = 7, Name = "Workshops", CreatedAt = now },
+                new Category { Id = 8, Name = "Conferences", CreatedAt = now },
+                new Category { Id = 9, Name = "Festivals", CreatedAt = now },
+                new Category { Id = 10, Name = "Food & Drink", CreatedAt = now },
+                new Category { Id = 11, Name = "Arts & Exhibitions", CreatedAt = now },
+                new Category { Id = 12, Name = "Gaming & Esports", CreatedAt = now },
+                new Category { Id = 13, Name = "Education", CreatedAt = now },
+                new Category { Id = 14, Name = "Health & Wellness", CreatedAt = now },
+                new Category { Id = 15, Name = "Networking", CreatedAt = now },
+                new Category { Id = 16, Name = "Travel & Adventure", CreatedAt = now },
+                new Category { Id = 17, Name = "Business", CreatedAt = now },
+                new Category { Id = 18, Name = "Fashion", CreatedAt = now },
+                new Category { Id = 19, Name = "Cultural Events", CreatedAt = now },
+                new Category { Id = 20, Name = "Expos & Trade Shows", CreatedAt = now },
+                new Category { Id = 21, Name = "Webinars", CreatedAt = now },
+                new Category { Id = 22, Name = "Career & Jobs", CreatedAt = now }
             );
         }
 
