@@ -56,7 +56,7 @@ export class AdminEventsComponent implements OnInit {
     this.error = null;
 
     this.adminEventService
-      .getAllEvents(this.currentPage, this.pageSize)
+      .getAllEvents(this.currentPage, this.pageSize, 'EventDate', 'desc')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {

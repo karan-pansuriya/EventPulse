@@ -13,8 +13,13 @@ export class AdminEventService {
   getAllEvents(
     pageNumber: number,
     pageSize: number,
+    sortBy?: string,
+    sortDirection?: string,
   ): Observable<ApiResponse<PagedResult<EventListResponse>>> {
-    const params = new HttpParams().set('PageNumber', pageNumber).set('PageSize', pageSize);
+    let params = new HttpParams().set('PageNumber', pageNumber).set('PageSize', pageSize);
+
+    if (sortBy) params = params.set('SortBy', sortBy);
+    if (sortDirection) params = params.set('SortDirection', sortDirection);
 
     return this.http.get<PagedResult<EventListResponse>>('events/admin/all', { params });
   }
