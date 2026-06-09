@@ -39,4 +39,11 @@ public class UsersController : BaseHelper
         await _userService.DeleteUserAsync(id);
         return SuccessResponse("User deleted successfully.");
     }
+
+    [HttpPut("{id}/remove-roles")]
+    public async Task<IActionResult> RemoveUserRoles(int id, [FromBody] RemoveUserRolesRequest request)
+    {
+        await _userService.RemoveUserRolesAsync(id, request.RoleIds);
+        return SuccessResponse("Roles removed successfully.");
+    }
 }

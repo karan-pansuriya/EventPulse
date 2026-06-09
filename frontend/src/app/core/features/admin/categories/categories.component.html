@@ -44,18 +44,36 @@
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Category Name</label>
+            <label class="form-label" for="catName">Category Name</label>
             <input
+              #nameInput="ngModel"
+              id="catName"
               type="text"
               class="form-control"
+              [class.is-invalid]="formSubmitted && (nameInput.invalid || formName.length > 100)"
               [(ngModel)]="formName"
+              name="catName"
               placeholder="Enter category name"
+              required
+              minlength="1"
             />
+            @if (formSubmitted && nameInput.invalid) {
+              <div class="invalid-feedback">
+                @if (nameInput.errors?.['required'] || nameInput.errors?.['minlength']) {
+                  Category name is required.
+                }
+              </div>
+            }
+            @if (formSubmitted && formName.length > 100) {
+              <div class="invalid-feedback d-block">
+                Category name must be at most 100 characters.
+              </div>
+            }
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="cancelModal()">Cancel</button>
-          <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving || !formName.trim()">
+          <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving">
             @if (saving) {
               <span class="spinner-border spinner-border-sm me-1"></span>
             }

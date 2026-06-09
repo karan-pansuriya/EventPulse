@@ -58,7 +58,9 @@ export class GridComponent<T> implements OnInit, OnDestroy {
 
   @HostListener('document:click')
   onDocumentClick(): void {
-    this.activeDropdownRow = null;
+    if (this.activeDropdownRow !== null) {
+      this.activeDropdownRow = null;
+    }
   }
 
   private scrollHandler = () => {

@@ -9,4 +9,5 @@ public interface IUserRepository
     Task<PagedResult<User>> GetPagedUsersAsync(PageRequest pageRequest, string? roleName = null);
     Task<List<User>> GetOrganizersAsync();
     Task DeleteUserAsync(int id);
+    Task RemoveUserRolesAsync(int userId, List<int> roleIds);
 }

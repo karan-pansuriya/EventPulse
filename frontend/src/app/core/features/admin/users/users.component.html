@@ -3,16 +3,17 @@
       <h1>User Management</h1>
     </div>
 
-    <div class="role-tabs">
-      @for (tab of roleTabs; track tab.value) {
-        <button
-          class="role-tab"
-          [class.active]="activeTab === tab.value"
-          (click)="selectTab(tab)"
-        >
-          {{ tab.label }}
-        </button>
-      }
+    <div class="role-filter">
+      <select
+        class="form-select"
+        [(ngModel)]="selectedRole"
+        (ngModelChange)="onRoleFilterChange()"
+      >
+        <option value="">All Roles</option>
+        <option value="Admin">Admin</option>
+        <option value="Organizer">Organizer</option>
+        <option value="Customer">Customer</option>
+      </select>
     </div>
 
     <app-grid
@@ -24,9 +25,67 @@
       [trackByField]="'id'"
       [isLoading]="loading"
       [errorMessage]="error"
-      [actionItems]="getRowActionItems"
       (pageChange)="onPageChange($event)"
       (pageSizeChange)="onPageSizeChange($event)"
       (delete)="onDelete($event)"
     />
 </div>
+
+<!-- Role-selection modal -->
+@if (selectedUser) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Remove Roles</h2>
+        <button class="btn-close" (click)="closeModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="user-name">{{ selectedUser.name }}</p>
+        <p class="user-email">{{ selectedUser.email }}</p>
+
+        <div class="select-actions">
+          <button class="btn btn-sm btn-link p-0" (click)="selectAllRoles()">Select All</button>
+          <span class="separator">|</span>
+          <button class="btn btn-sm btn-link p-0" (click)="deselectAllRoles()">Deselect All</button>
+        </div>
+
+        <div class="role-list">
+          @for (role of roleCheckboxes; track role.id) {
+            <label class="role-item" [class.disabled]="isRemoving">
+              <input
+                type="checkbox"
+                [checked]="role.checked"
+                [disabled]="isRemoving"
+                (change)="toggleRole(role.id)"
+              />
+              <span class="role-name">{{ role.name }}</span>
+            </label>
+          }
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <p class="soft-delete-note" [class.visible]="willSoftDelete">
+          All roles will be removed — user will be soft-deleted.
+        </p>
+        <div class="footer-actions">
+          <button class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="isRemoving">
+            Cancel
+          </button>
+          <button
+            class="btn btn-danger"
+            (click)="confirmRemoveRoles()"
+            [disabled]="isRemoving || selectedCount === 0"
+          >
+            @if (isRemoving) {
+              Removing...
+            } @else {
+              Remove {{ selectedCount }} Role{{ selectedCount !== 1 ? 's' : '' }}
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

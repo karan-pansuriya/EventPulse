@@ -8,5 +8,6 @@ public class UserListResponse
     public string? Phone { get; set; }
     public bool IsActive { get; set; }
     public List<string> Roles { get; set; } = new();
+    public List<int> RoleIds { get; set; } = new();
     public DateTime CreatedAt { get; set; }
 }

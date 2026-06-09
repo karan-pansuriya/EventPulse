@@ -17,9 +17,9 @@ public class CategoryService : ICategoryService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<CategoryResponse>> GetAllAsync()
+    public async Task<IEnumerable<CategoryResponse>> GetAllCategorysAsync()
     {
-        IEnumerable<Category> categories = await _categoryRepository.GetAllAsync();
+        IEnumerable<Category> categories = await _categoryRepository.GetAllCategorysAsync();
 
         return categories.Select(c => new CategoryResponse
         {
@@ -29,15 +29,24 @@ public class CategoryService : ICategoryService
         });
     }
 
-    public async Task<CategoryResponse> CreateAsync(CreateCategoryDto dto)
+    public async Task<CategoryResponse> CreateCategoryAsync(CreateCategoryDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.Name))
+            throw new BadRequestException("Category name is required.");
+
+        if (dto.Name.Length > 100)
+            throw new BadRequestException("Category name must be at most 100 characters.");
+
+        if (await _categoryRepository.CategoryNameExistsAsync(dto.Name))
+            throw new BadRequestException("A category with this name already exists.");
+
         Category category = new Category
         {
             Name = dto.Name,
             ImagePath = dto.ImagePath,
         };
 
-        await _categoryRepository.AddAsync(category);
+        await _categoryRepository.AddCategoryAsync(category);
         await _unitOfWork.SaveAsync();
 
         return new CategoryResponse
@@ -48,15 +57,25 @@ public class CategoryService : ICategoryService
         };
     }
 
-    public async Task<CategoryResponse> UpdateAsync(int id, UpdateCategoryDto dto)
+    public async Task<CategoryResponse> UpdateCategoryAsync(int id, UpdateCategoryDto dto)
     {
-        Category? category = await _categoryRepository.GetByIdAsync(id)
+        if (string.IsNullOrWhiteSpace(dto.Name))
+            throw new BadRequestException("Category name is required.");
+
+        if (dto.Name.Length > 100)
+            throw new BadRequestException("Category name must be at most 100 characters.");
+
+        Category? category = await _categoryRepository.GetCategoryByIdAsync(id)
             ?? throw new NotFoundException("Category not found.");
+
+        if (!string.Equals(category.Name, dto.Name, StringComparison.OrdinalIgnoreCase)
+            && await _categoryRepository.CategoryNameExistsAsync(dto.Name))
+            throw new BadRequestException("A category with this name already exists.");
 
         category.Name = dto.Name;
         category.ImagePath = dto.ImagePath;
 
-        _categoryRepository.Update(category);
+        _categoryRepository.UpdateCategory(category);
         await _unitOfWork.SaveAsync();
 
         return new CategoryResponse
@@ -67,12 +86,12 @@ public class CategoryService : ICategoryService
         };
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteCategoryAsync(int id)
     {
-        Category? category = await _categoryRepository.GetByIdAsync(id)
+        Category? category = await _categoryRepository.GetCategoryByIdAsync(id)
             ?? throw new NotFoundException("Category not found.");
 
-        _categoryRepository.Delete(category);
+        _categoryRepository.DeleteCategory(category);
         await _unitOfWork.SaveAsync();
     }
 }

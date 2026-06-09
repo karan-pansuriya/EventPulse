@@ -30,6 +30,7 @@ public class UserService : IUserService
                 Phone = u.Phone,
                 IsActive = u.IsActive,
                 Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                RoleIds = u.UserRoles.Select(ur => ur.Role.Id).ToList(),
                 CreatedAt = u.CreatedAt,
             }),
             TotalCount = paged.TotalCount,
@@ -53,5 +54,10 @@ public class UserService : IUserService
     public async Task DeleteUserAsync(int id)
     {
         await _userRepository.DeleteUserAsync(id);
+    }
+
+    public async Task RemoveUserRolesAsync(int userId, List<int> roleIds)
+    {
+        await _userRepository.RemoveUserRolesAsync(userId, roleIds);
     }
 }

@@ -11,5 +11,6 @@ export interface OrganizerResponse {
     phone: string | null;
     isActive: boolean;
     roles: string[];
+    roleIds: number[];
     createdAt: string;
   }

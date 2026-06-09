@@ -17,43 +17,219 @@
     margin: 0;
 }
 
-.role-tabs {
-    display: flex;
-    gap: 8px;
+.role-filter {
     margin-bottom: 24px;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 0;
+    max-width: 200px;
 }
 
-.role-tab {
-    padding: 10px 20px;
-    border: none;
-    background: none;
+.role-filter .form-select {
+    padding: 8px 12px;
     font-size: 0.875rem;
-    font-weight: 500;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    color: #374151;
+    background: #fff;
+    cursor: pointer;
+}
+
+.role-filter .form-select:focus {
+    border-color: #be185d;
+    box-shadow: 0 0 0 2px rgba(190, 24, 93, 0.15);
+    outline: none;
+}
+
+.role-filter .form-select {
+    appearance: auto;
+    -webkit-appearance: auto;
+    -moz-appearance: auto;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 12px;
+    width: 420px;
+    max-width: 90vw;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 0;
+}
+
+.modal-header h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
     color: #6b7280;
     cursor: pointer;
-    position: relative;
-    transition: color 0.15s;
+    line-height: 1;
+    padding: 0;
 }
 
-.role-tab:hover {
+.btn-close:hover {
+    color: #111827;
+}
+
+.modal-body {
+    padding: 16px 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.user-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 2px;
+}
+
+.user-email {
+    font-size: 0.8125rem;
+    color: #6b7280;
+    margin: 0 0 16px;
+}
+
+.select-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.select-actions .btn-link {
+    font-size: 0.8125rem;
     color: #be185d;
+    text-decoration: none;
 }
 
-.role-tab.active {
-    color: #be185d;
+.select-actions .btn-link:hover {
+    text-decoration: underline;
 }
 
-.role-tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: #be185d;
-    border-radius: 1px 1px 0 0;
+.select-actions .separator {
+    color: #d1d5db;
+    font-size: 0.8125rem;
+}
+
+.role-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.role-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.role-item:hover {
+    background: #f9fafb;
+}
+
+.role-item.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.role-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #be185d;
+}
+
+.role-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.modal-footer {
+    padding: 12px 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.soft-delete-note {
+    font-size: 0.75rem;
+    color: #dc2626;
+    margin: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.soft-delete-note.visible {
+    opacity: 1;
+}
+
+.footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.footer-actions .btn-outline-secondary {
+    border: 1px solid #d1d5db;
+    color: #374151;
+    background: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.footer-actions .btn-outline-secondary:hover {
+    background: #f3f4f6;
+}
+
+.footer-actions .btn-danger {
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.footer-actions .btn-danger:hover:not(:disabled) {
+    background: #b91c1c;
+}
+
+.footer-actions .btn-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 @media (max-width: 575.98px) {
@@ -61,12 +237,7 @@
         font-size: 1.25rem;
     }
 
-    .role-tabs {
-        gap: 4px;
-    }
-
-    .role-tab {
-        padding: 8px 14px;
-        font-size: 0.8125rem;
+    .role-filter {
+        max-width: 100%;
     }
 }

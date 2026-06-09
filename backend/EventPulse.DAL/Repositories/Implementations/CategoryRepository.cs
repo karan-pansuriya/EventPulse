@@ -9,7 +9,7 @@ public class CategoryRepository(EventPulseDbContext context) : ICategoryReposito
 {
     private readonly EventPulseDbContext _context = context;
 
-    public async Task<IEnumerable<Category>> GetAllAsync()
+    public async Task<IEnumerable<Category>> GetAllCategorysAsync()
     {
         return await _context.Categories
             .AsNoTracking()
@@ -18,26 +18,32 @@ public class CategoryRepository(EventPulseDbContext context) : ICategoryReposito
             .ToListAsync();
     }
 
-    public async Task<Category?> GetByIdAsync(int id)
+    public async Task<Category?> GetCategoryByIdAsync(int id)
     {
         return await _context.Categories
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
     }
 
-    public async Task AddAsync(Category category)
+    public async Task<bool> CategoryNameExistsAsync(string name)
+    {
+        return await _context.Categories
+            .AnyAsync(c => c.Name.ToLower() == name.ToLower() && !c.IsDeleted);
+    }
+
+    public async Task AddCategoryAsync(Category category)
     {
         category.CreatedAt = DateTime.UtcNow;
         await _context.Categories.AddAsync(category);
     }
 
-    public void Update(Category category)
+    public void UpdateCategory(Category category)
     {
         category.UpdatedAt = DateTime.UtcNow;
         _context.Categories.Update(category);
     }
 
-    public void Delete(Category category)
+    public void DeleteCategory(Category category)
     {
         category.IsDeleted = true;
         category.UpdatedAt = DateTime.UtcNow;

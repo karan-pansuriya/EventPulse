@@ -55,5 +55,16 @@ public class AuthRepository(EventPulseDbContext context) : IAuthRepository
     {
         await _context.RefreshTokens.AddAsync(token);
     }
-    
+
+    public async Task DeleteUserRefreshTokensAsync(int userId)
+    {
+        List<RefreshToken> tokens = await _context.RefreshTokens
+            .Where(rt => rt.UserId == userId && !rt.IsRevoked && rt.ExpiresAt > DateTime.UtcNow)
+            .ToListAsync();
+
+        if (tokens.Count > 0)
+        {
+            _context.RefreshTokens.RemoveRange(tokens);
+        }
+    }
 }

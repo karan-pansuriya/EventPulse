@@ -53,8 +53,11 @@ public class EventService : BaseService, IEventService
         _cache = cache;
     }
 
-    private string EventsCacheKey<T>(T key) =>
-        $"events_v{_eventsCacheVersion}_{JsonSerializer.Serialize(key)}";
+    private string EventsCacheKey<T>(T key)
+    {
+        int? roleId = GetActiveRoleId();
+        return $"events_v{_eventsCacheVersion}_role{roleId ?? 0}_{JsonSerializer.Serialize(key)}";
+    }
 
     private void InvalidateEventsCache()
     {

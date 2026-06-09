@@ -31,4 +31,8 @@ export class AdminUserService {
   deleteUser(id: number): Observable<ApiResponse<null>> {
     return this.http.delete<null>(`users/${id}`);
   }
+
+  removeUserRoles(userId: number, roleIds: number[]): Observable<ApiResponse<null>> {
+    return this.http.put<null>(`users/${userId}/remove-roles`, { roleIds });
+  }
 }

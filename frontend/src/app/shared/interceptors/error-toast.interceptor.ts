@@ -11,16 +11,16 @@ const extractErrorMessage = (err: HttpErrorResponse): string => {
     const message = (payload as { message?: string }).message;
     if (message) return message;
 
-    const errors = (payload as { errors?: Record<string, string[] | string> }).errors;
-    if (errors) {
-      const firstKey = Object.keys(errors)[0];
-      const firstValue = errors[firstKey];
-      if (Array.isArray(firstValue) && firstValue.length > 0) return firstValue[0];
-      if (typeof firstValue === 'string') return firstValue;
-    }
+    // const errors = (payload as { errors?: Record<string, string[] | string> }).errors;
+    // if (errors) {
+    //   const firstKey = Object.keys(errors)[0];
+    //   const firstValue = errors[firstKey];
+    //   if (Array.isArray(firstValue) && firstValue.length > 0) return firstValue[0];
+    //   if (typeof firstValue === 'string') return firstValue;
+    // }
 
-    const title = (payload as { title?: string }).title;
-    if (title) return title;
+    // const title = (payload as { title?: string }).title;
+    // if (title) return title;
   }
 
   if (typeof payload === 'string' && payload.trim()) return payload;

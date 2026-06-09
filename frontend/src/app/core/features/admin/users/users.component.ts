@@ -1,40 +1,26 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import {
-  GridComponent,
-  GridColumn,
-  GridActionItem,
-} from '../../../../shared/components/grid/grid.component';
+import { GridComponent, GridColumn } from '../../../../shared/components/grid/grid.component';
 import { AdminUserService } from '../layout/admin-layout/services/admin-user.service';
 import { UserListResponse } from '../layout/admin-layout/models/adminuser.model';
-
-interface RoleTab {
-  label: string;
-  value: string | null;
-}
+import { RoleCheckbox } from '../layout/admin-layout/models/roles-tab.models';
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule, GridComponent],
+  imports: [CommonModule, FormsModule, GridComponent],
   templateUrl: './users.component.html',
   styleUrl: './users.component.css',
 })
 export class UsersComponent implements OnInit, OnDestroy {
   private adminUserService = inject(AdminUserService);
+  private destroy$ = new Subject<void>();
   private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
-  private destroy$ = new Subject<void>();
 
-  roleTabs: RoleTab[] = [
-    { label: 'All', value: null },
-    { label: 'Admin', value: 'Admin' },
-    { label: 'Organizer', value: 'Organizer' },
-    { label: 'Customer', value: 'Customer' },
-  ];
-
-  activeTab: string | null = null;
+  selectedRole: string = '';
   users: UserListResponse[] = [];
   totalRecords = 0;
   currentPage = 1;
@@ -57,23 +43,14 @@ export class UsersComponent implements OnInit, OnDestroy {
           .join(' ');
       },
     },
-    {
-      header: 'Status',
-      field: 'isActive',
-      formatter: (value: unknown) => {
-        const active = value as boolean;
-        return active
-          ? '<span class="badge badge-active">Active</span>'
-          : '<span class="badge badge-inactive">Inactive</span>';
-      },
-    },
     { header: 'Joined', field: 'createdAt', type: 'date' },
-    { header: 'Actions', field: 'id', type: 'action' },
+    { header: 'Delete', field: 'id', type: 'delete', width: '40px' },
   ];
 
-  getRowActionItems: (row: UserListResponse) => GridActionItem[] = () => [
-    { label: 'Delete', icon: 'bi-trash', emit: 'delete' },
-  ];
+  /* --- Role-selection modal --- */
+  selectedUser: UserListResponse | null = null;
+  roleCheckboxes: RoleCheckbox[] = [];
+  isRemoving = false;
 
   ngOnInit(): void {
     this.loadUsers();
@@ -84,8 +61,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  selectTab(tab: RoleTab): void {
-    this.activeTab = tab.value;
+  onRoleFilterChange(): void {
     this.currentPage = 1;
     this.loadUsers();
   }
@@ -95,7 +71,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.error = null;
 
     this.adminUserService
-      .getAllUsers(this.currentPage, this.pageSize, this.activeTab ?? undefined)
+      .getAllUsers(this.currentPage, this.pageSize, this.selectedRole || undefined)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
@@ -130,16 +106,62 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   onDelete(user: UserListResponse): void {
-    if (!confirm(`Delete user "${user.name}"? This action cannot be undone.`)) return;
+    this.selectedUser = user;
+    this.roleCheckboxes = user.roleIds.map((id, i) => ({
+      id,
+      name: user.roles[i] || `Role ${id}`,
+      checked: true,
+    }));
+    this.isRemoving = false;
+  }
+
+  toggleRole(id: number): void {
+    const cb = this.roleCheckboxes.find((r) => r.id === id);
+    if (cb) cb.checked = !cb.checked;
+  }
+
+  selectAllRoles(): void {
+    this.roleCheckboxes.forEach((r) => (r.checked = true));
+  }
+
+  deselectAllRoles(): void {
+    this.roleCheckboxes.forEach((r) => (r.checked = false));
+  }
+
+  closeModal(): void {
+    this.selectedUser = null;
+    this.roleCheckboxes = [];
+  }
+
+  confirmRemoveRoles(): void {
+    if (!this.selectedUser) return;
+
+    const toRemove = this.roleCheckboxes.filter((r) => r.checked).map((r) => r.id);
+    if (toRemove.length === 0) return;
+
+    this.isRemoving = true;
 
     this.adminUserService
-      .deleteUser(user.id)
+      .removeUserRoles(this.selectedUser.id, toRemove)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.zone.run(() => {
+      .subscribe({
+        next: () => {
+          this.closeModal();
           this.loadUsers();
           this.cdr.detectChanges();
-        });
+        },
+        error: () => {
+          this.isRemoving = false;
+          this.cdr.detectChanges();
+        },
       });
+  }
+
+  get selectedCount(): number {
+    return this.roleCheckboxes.filter((r) => r.checked).length;
+  }
+
+  get willSoftDelete(): boolean {
+    return this.selectedCount >= this.roleCheckboxes.length;
   }
 }

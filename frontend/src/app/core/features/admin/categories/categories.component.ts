@@ -32,6 +32,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   modalMode: 'add' | 'edit' = 'add';
   editId: number | null = null;
   formName = '';
+  formSubmitted = false;
   saving = false;
 
   confirmCategory: Category | null = null;
@@ -86,6 +87,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
       this.modalMode = 'edit';
       this.editId = cat.id;
       this.formName = cat.name;
+      this.formSubmitted = false;
       this.showModal = true;
       this.cdr.detectChanges();
     });
@@ -95,6 +97,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     this.modalMode = 'add';
     this.editId = null;
     this.formName = '';
+    this.formSubmitted = false;
     this.showModal = true;
   }
 
@@ -123,8 +126,9 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   }
 
   save(): void {
+    this.formSubmitted = true;
     const name = this.formName.trim();
-    if (!name) return;
+    if (!name || name.length > 100) return;
 
     this.saving = true;
 

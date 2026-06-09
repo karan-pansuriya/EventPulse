@@ -69,6 +69,8 @@ namespace EventPulse.BLL.Services
             string refreshToken = jwtService.GenerateRefreshToken();
             int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roleIds);
 
+            await authRepository.DeleteUserRefreshTokensAsync(user.Id);
+
             await authRepository.AddRefreshTokenAsync(new RefreshToken
             {
                 UserId = user.Id,
@@ -109,6 +111,8 @@ namespace EventPulse.BLL.Services
             string accessToken = jwtService.GenerateAccessToken(user, roleIds);
             string refreshToken = jwtService.GenerateRefreshToken();
             int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roleIds);
+
+            await authRepository.DeleteUserRefreshTokensAsync(user.Id);
 
             await authRepository.AddRefreshTokenAsync(new RefreshToken
             {
@@ -172,6 +176,8 @@ namespace EventPulse.BLL.Services
             string newAccessToken = jwtService.GenerateAccessToken(user, roleIds);
             string newRefreshToken = jwtService.GenerateRefreshToken();
             int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roleIds);
+
+            await authRepository.DeleteUserRefreshTokensAsync(user.Id);
 
             await authRepository.AddRefreshTokenAsync(new RefreshToken
             {

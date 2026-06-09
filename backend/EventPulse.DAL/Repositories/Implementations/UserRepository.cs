@@ -56,4 +56,26 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
         user.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
     }
+
+    public async Task RemoveUserRolesAsync(int userId, List<int> roleIds)
+    {
+        User? user = await _context.Users
+            .Include(u => u.UserRoles)
+            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+
+        if (user is null) return;
+
+        List<UserRole> toRemove = user.UserRoles.Where(ur => roleIds.Contains(ur.RoleId)).ToList();
+        if (toRemove.Count == 0) return;
+
+        _context.UserRoles.RemoveRange(toRemove);
+
+        if (user.UserRoles.Count == toRemove.Count)
+        {
+            user.IsDeleted = true;
+            user.UpdatedAt = DateTime.UtcNow;
+        }
+
+        await _context.SaveChangesAsync();
+    }
 }

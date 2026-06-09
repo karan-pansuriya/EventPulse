@@ -4,8 +4,8 @@ namespace EventPulse.BLL.Interfaces;
 
 public interface ICategoryService
 {
-    Task<IEnumerable<CategoryResponse>> GetAllAsync();
-    Task<CategoryResponse> CreateAsync(CreateCategoryDto dto);
-    Task<CategoryResponse> UpdateAsync(int id, UpdateCategoryDto dto);
-    Task DeleteAsync(int id);
+    Task<IEnumerable<CategoryResponse>> GetAllCategorysAsync();
+    Task<CategoryResponse> CreateCategoryAsync(CreateCategoryDto dto);
+    Task<CategoryResponse> UpdateCategoryAsync(int id, UpdateCategoryDto dto);
+    Task DeleteCategoryAsync(int id);
 }
