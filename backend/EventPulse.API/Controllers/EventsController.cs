@@ -25,7 +25,7 @@ public class EventsController : BaseHelper
     [HttpGet("admin/all")]
     public async Task<IActionResult> GetAllEventsForAdmin([FromQuery] PageRequest pageRequest)
     {
-        PagedResult<EventListResponse> result = await _eventService.GetAllEventsAsync(pageRequest);
+        PagedResult<EventListResponse> result = await _eventService.GetAllEventsForAdminAsync(pageRequest);
         return SuccessResponse(result);
     }
 
@@ -49,14 +49,14 @@ public class EventsController : BaseHelper
     [HttpGet]
     public async Task<IActionResult> GetAllEvents([FromQuery] EventFilterRequest filter)
     {
-        PagedResult<EventListResponse> result = await _eventService.GetPagedEventsAsync(filter);
+        PagedResult<EventListResponse> result = await _eventService.GetCustomerPagedEventsAsync(filter);
         return SuccessResponse(result);
     }
 
     [HttpGet("my-events")]
     public async Task<IActionResult> GetMyEvents([FromQuery] PageRequest pageRequest)
     {
-        PagedResult<EventListResponse> result = await _eventService.GetMyEventsAsync(pageRequest);
+        PagedResult<EventListResponse> result = await _eventService.GetMyEventsForOrganizerAsync(pageRequest);
         return SuccessResponse(result);
     }
 

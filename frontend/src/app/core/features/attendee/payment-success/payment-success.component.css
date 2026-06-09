@@ -1,6 +1,8 @@
 .payment-success-page {
   max-width: 640px;
   margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 /* ── Success icon ─────────────────────────────────── */
@@ -160,4 +162,46 @@
 .btn-outline-secondary {
   border-radius: 10px;
   padding: 12px 28px;
+}
+
+@media (max-width: 576px) {
+  .ticket-card-inner {
+    flex-direction: column;
+    align-items: center !important;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .qr-section {
+    border-right: none;
+    border-bottom: 2px dashed #e5e7eb;
+    padding-bottom: 12px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .ticket-card-inner > .col {
+    padding: 0 16px;
+  }
+
+  .ticket-card-inner > .col-auto.pe-3 {
+    padding-right: 0 !important;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .booking-summary-card .row {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .booking-summary-card .col-auto {
+    margin-top: 8px;
+  }
+
+  .btn-lg {
+    width: 100%;
+  }
 }

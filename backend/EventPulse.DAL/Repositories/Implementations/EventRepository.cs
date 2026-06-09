@@ -22,7 +22,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
             .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
     }
 
-    public async Task<(List<Event> Items, int TotalCount)> GetPagedEventsAsync(EventFilterRequest filter)
+    public async Task<(List<Event> Items, int TotalCount)> GetCustomerPagedEventsAsync(EventFilterRequest filter)
     {
         IQueryable<Event> query = _context.Events
             .AsNoTracking()

@@ -56,7 +56,7 @@ public class EventService : BaseService, IEventService
     private string EventsCacheKey<T>(T key)
     {
         int? roleId = GetActiveRoleId();
-        return $"events_v{_eventsCacheVersion}_role{roleId ?? 0}_{JsonSerializer.Serialize(key)}";
+        return $"events_v{_eventsCacheVersion}_{JsonSerializer.Serialize(key)}";
     }
 
     private void InvalidateEventsCache()
@@ -88,14 +88,14 @@ public class EventService : BaseService, IEventService
         return _mapper.Map<EventResponse>(eventEntity);
     }
 
-    public async Task<PagedResult<EventListResponse>> GetPagedEventsAsync(EventFilterRequest filter)
+    public async Task<PagedResult<EventListResponse>> GetCustomerPagedEventsAsync(EventFilterRequest filter)
     {
         string cacheKey = EventsCacheKey(filter);
 
         if (_cache.TryGetValue<PagedResult<EventListResponse>>(cacheKey, out var cached))
             return cached!;
 
-        (List<Event> items, int totalCount) = await _eventRepository.GetPagedEventsAsync(filter);
+        (List<Event> items, int totalCount) = await _eventRepository.GetCustomerPagedEventsAsync(filter);
 
         List<EventListResponse> responseItems = _mapper.Map<List<EventListResponse>>(items);
 
@@ -109,7 +109,7 @@ public class EventService : BaseService, IEventService
         return result;
     }
 
-    public async Task<PagedResult<EventListResponse>> GetMyEventsAsync(PageRequest pageRequest)
+    public async Task<PagedResult<EventListResponse>> GetMyEventsForOrganizerAsync(PageRequest pageRequest)
     {
         int organizerId = GetUserId();
 
@@ -144,7 +144,7 @@ public class EventService : BaseService, IEventService
         return result;
     }
 
-    public async Task<PagedResult<EventListResponse>> GetAllEventsAsync(PageRequest pageRequest)
+    public async Task<PagedResult<EventListResponse>> GetAllEventsForAdminAsync(PageRequest pageRequest)
     {
         string cacheKey = EventsCacheKey(pageRequest);
 

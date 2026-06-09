@@ -78,9 +78,9 @@ export class AdminDashboard implements OnInit, AfterViewInit {
         if (this.data && res.revenue.data) {
           this.data.monthlyRevenue = res.revenue.data;
         }
+        this.extractOrganizers();
         this.isLoading = false;
         this.cdr.detectChanges();
-        this.extractOrganizers();
         this.renderCharts();
       },
       error: () => {

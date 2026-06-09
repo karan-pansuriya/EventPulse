@@ -87,7 +87,6 @@ namespace EventPulse.API.Controllers
 
             Response.Cookies.Delete("access_token", cookieOptions);
             Response.Cookies.Delete("refresh_token", cookieOptions);
-            Response.Headers.Append("Clear-Site-Data", "\"cookies\"");
         }
     }
 }
