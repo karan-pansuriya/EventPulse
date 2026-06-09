@@ -34,6 +34,7 @@ export class AdminEventsComponent implements OnInit {
   error: string | null = null;
 
   confirmEvent: EventListResponse | null = null;
+  confirmToggleEvent: EventListResponse | null = null;
 
   columns: GridColumn[] = [
     { header: 'ID', field: 'id', width: '60px' },
@@ -43,8 +44,7 @@ export class AdminEventsComponent implements OnInit {
     { header: 'Date', field: 'eventDate', type: 'date' },
     { header: 'Price', field: 'price', type: 'currency' },
     { header: 'Verified', field: 'isVerified', type: 'toggle' },
-    { header: 'Edit', field: 'id', type: 'edit', width: '40px' },
-    { header: 'Delete', field: 'id', type: 'delete', width: '40px' },
+    { header: 'Actions', field: 'id', type: 'action', width: '80px' },
   ];
 
   ngOnInit(): void {
@@ -98,7 +98,15 @@ export class AdminEventsComponent implements OnInit {
     this.router.navigate(['/admin/events/edit', event.id]);
   }
 
-  onToggleVerify(event: EventListResponse): void {
+  promptToggleVerify(event: EventListResponse): void {
+    this.confirmToggleEvent = event;
+  }
+
+  onToggleConfirmed(): void {
+    if (!this.confirmToggleEvent) return;
+    const event = this.confirmToggleEvent;
+    this.confirmToggleEvent = null;
+
     this.adminEventService
       .toggleVerification(event.id)
       .pipe(takeUntil(this.destroy$))
@@ -108,6 +116,10 @@ export class AdminEventsComponent implements OnInit {
           this.cdr.detectChanges();
         });
       });
+  }
+
+  onToggleCancelled(): void {
+    this.confirmToggleEvent = null;
   }
 
   promptDelete(event: EventListResponse): void {

@@ -59,7 +59,7 @@
                     type="checkbox"
                     role="switch"
                     [checked]="!!getFieldValue(row, col.field)"
-                    (change)="toggle.emit(row)"
+                    (click)="$event.preventDefault(); toggle.emit(row)"
                   />
                 </div>
                 } @else if (col.type === 'edit') {
