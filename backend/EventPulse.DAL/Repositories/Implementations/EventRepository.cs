@@ -38,13 +38,11 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
             query = query.Where(e => e.CategoryId == filter.CategoryId.Value);
 
         if (!string.IsNullOrWhiteSpace(filter.City))
-            query = query.Where(e => e.Venue != null && e.Venue.City != null && e.Venue.City.Name.ToLower().Contains(filter.City.ToLower()));
+            query = query.Where(e => e.Venue != null && e.Venue.City != null && EF.Functions.ILike(e.Venue.City.Name, $"%{filter.City}%"));
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
         {
-            string search = filter.Search.ToLower();
-            query = query.Where(e =>
-                EF.Functions.Like(e.Title, $"%{search}%"));
+            query = query.Where(e => EF.Functions.ILike(e.Title, $"%{filter.Search}%"));
         }
 
         string sortBy = string.IsNullOrWhiteSpace(filter.SortBy) ? "EventDate" : filter.SortBy;

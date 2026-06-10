@@ -37,7 +37,6 @@ export class AdminEventsComponent implements OnInit {
   confirmToggleEvent: EventListResponse | null = null;
 
   columns: GridColumn[] = [
-    { header: 'ID', field: 'id', width: '60px' },
     { header: 'Title', field: 'title', type: 'truncate', width: '200px' },
     { header: 'Category', field: 'categoryName' },
     { header: 'Venue', field: 'venueName', type: 'truncate' },
@@ -56,7 +55,7 @@ export class AdminEventsComponent implements OnInit {
     this.error = null;
 
     this.adminEventService
-      .getAllEvents(this.currentPage, this.pageSize, 'EventDate', 'desc')
+      .getAllEvents(this.currentPage, this.pageSize, 'EventDate', 'asc')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {

@@ -54,6 +54,51 @@ public class EventService : BaseService, IEventService
 
     private static string EventCacheKey(int eventId) => $"event_{eventId}";
 
+    // Tracker keys — each holds a HashSet<string> of registered cache keys for that group
+    private const string CustomerCacheTrackerKey  = "tracker_events_customer";
+    private const string AdminCacheTrackerKey     = "tracker_events_admin";
+    private const string OrganizerCacheTrackerKey = "tracker_events_organizer";
+
+    // Registers a cache key into the named tracker so it can be bulk-invalidated later.
+    private void TrackCacheKey(string trackerKey, string cacheKey)
+    {
+        var keys = _cache.GetOrCreate(trackerKey, entry =>
+        {
+            entry.Priority = CacheItemPriority.NeverRemove;
+            return new HashSet<string>();
+        })!;
+        keys.Add(cacheKey);
+    }
+
+    // Removes every cache entry registered under the given tracker, then clears the tracker.
+    private void InvalidateTrackedKeys(string trackerKey)
+    {
+        if (_cache.TryGetValue<HashSet<string>>(trackerKey, out var keys) && keys != null)
+        {
+            foreach (string key in keys)
+                _cache.Remove(key);
+            keys.Clear();
+        }
+    }
+
+    // Invalidates all event-list caches after any mutating operation.
+    // Removes customer list, admin list, and the affected organizer's list.
+    private void InvalidateListCaches(int? organizerId = null)
+    {
+        InvalidateTrackedKeys(CustomerCacheTrackerKey);
+        InvalidateTrackedKeys(AdminCacheTrackerKey);
+        if (organizerId.HasValue)
+        {
+            // Tracker key is per-organizer so we can scope removals precisely
+            InvalidateTrackedKeys($"{OrganizerCacheTrackerKey}_{organizerId.Value}");
+        }
+        else
+        {
+            // Fallback: wipe all organizer list caches
+            InvalidateTrackedKeys(OrganizerCacheTrackerKey);
+        }
+    }
+
     private int? GetActiveRoleId()
     {
         string? value = HttpContextAccessor.HttpContext?.User.FindFirst("active_role_id")?.Value;
@@ -102,6 +147,7 @@ public class EventService : BaseService, IEventService
             TotalCount = totalCount
         };
 
+        TrackCacheKey(CustomerCacheTrackerKey, cacheKey);
         _cache.Set(cacheKey, result, CacheDuration);
         return result;
     }
@@ -111,7 +157,7 @@ public class EventService : BaseService, IEventService
         int organizerId = GetUserId();
 
         pageRequest.SortBy ??= "EventDate";
-        pageRequest.SortDirection ??= "desc";
+        pageRequest.SortDirection ??= "asc";
 
         string cacheKey = $"events_organizer_{organizerId}_{JsonSerializer.Serialize(pageRequest)}";
 
@@ -137,6 +183,7 @@ public class EventService : BaseService, IEventService
             },
             pageRequest);
 
+        TrackCacheKey($"{OrganizerCacheTrackerKey}_{organizerId}", cacheKey);
         _cache.Set(cacheKey, result, CacheDuration);
         return result;
     }
@@ -167,6 +214,7 @@ public class EventService : BaseService, IEventService
             },
             pageRequest);
 
+        TrackCacheKey(AdminCacheTrackerKey, cacheKey);
         _cache.Set(cacheKey, result, CacheDuration);
         return result;
     }
@@ -180,6 +228,7 @@ public class EventService : BaseService, IEventService
         _eventRepo.Update(eventEntity);
         await _unitOfWork.SaveAsync();
         _cache.Remove(EventCacheKey(id));
+        InvalidateListCaches(eventEntity.OrganizerId);
     }
 
     public async Task<PagedResult<EventAttendeeDto>> GetAttendeesAsync(int pageNumber = 1, int pageSize = 10)
@@ -264,6 +313,7 @@ public class EventService : BaseService, IEventService
             await _unitOfWork.SaveAsync();
         }
 
+        InvalidateListCaches(organizerId);
         return await GetEventByIdAsync(eventEntity.Id);
     }
 
@@ -349,6 +399,7 @@ public class EventService : BaseService, IEventService
 
         await _unitOfWork.SaveAsync();
         _cache.Remove(EventCacheKey(id));
+        InvalidateListCaches(eventEntity.OrganizerId);
 
         return await GetEventByIdAsync(id);
     }
@@ -382,6 +433,7 @@ public class EventService : BaseService, IEventService
         _eventRepo.Delete(eventEntity);
         await _unitOfWork.SaveAsync();
         _cache.Remove(EventCacheKey(id));
+        InvalidateListCaches(eventEntity.OrganizerId);
     }
 
     public async Task<OrganizerDashboardDto> GetOrganizerDashboardDataAsync()

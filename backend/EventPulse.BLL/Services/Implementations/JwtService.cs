@@ -67,12 +67,14 @@ namespace EventPulse.BLL.Services
 
         public int GetAccessTokenExpirationMinutes(IEnumerable<int> roleIds)
         {
-            return IsCustomer(roleIds) ? 24 * 60 : 30;
+            // Customer: 60 mins | Admin/Organizer: 15 mins
+            return IsCustomer(roleIds) ? 60 : 15;
         }
 
         public int GetRefreshTokenExpirationMinutes(IEnumerable<int> roleIds)
         {
-            return IsCustomer(roleIds) ? 24 * 60 : 30;
+            // Customer: 30 days | Admin/Organizer: 7 days
+            return IsCustomer(roleIds) ? 60 * 24 * 30 : 60 * 24 * 7;
         }
 
         private static bool IsCustomer(IEnumerable<int> roleIds)

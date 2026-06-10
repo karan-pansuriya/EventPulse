@@ -5,7 +5,6 @@ using EventPulse.DAL.Entities;
 using EventPulse.DAL.Enums;
 using EventPulse.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace EventPulse.DAL.Repositories.Implementations;
 

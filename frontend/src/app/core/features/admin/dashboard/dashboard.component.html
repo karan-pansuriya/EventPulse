@@ -74,11 +74,11 @@
                 <div class="metric-body">
                     <span class="metric-value">{{ data.totalEvents }}</span>
                     <span class="metric-label">Total Events</span>
-                    <span class="week-change" [class.up]="data.weeklyComparison.eventsChange >= 0"
+                    <!-- <span class="week-change" [class.up]="data.weeklyComparison.eventsChange >= 0"
                         [class.down]="data.weeklyComparison.eventsChange < 0">
                         {{ data.weeklyComparison.eventsChange >= 0 ? '↑' : '↓' }} {{
                         abs(data.weeklyComparison.eventsChange) }}% then last week
-                    </span>
+                    </span> -->
                 </div>
             </div>
         </div>
@@ -93,11 +93,11 @@
                 <div class="metric-body">
                     <span class="metric-value">{{ data.upcomingEvents }}</span>
                     <span class="metric-label">Upcoming</span>
-                    <span class="week-change" [class.up]="data.weeklyComparison.upcomingEventsChange >= 0"
+                    <!-- <span class="week-change" [class.up]="data.weeklyComparison.upcomingEventsChange >= 0"
                         [class.down]="data.weeklyComparison.upcomingEventsChange < 0">
                         {{ data.weeklyComparison.upcomingEventsChange >= 0 ? '↑' : '↓' }} {{
                         abs(data.weeklyComparison.upcomingEventsChange) }}% then last week
-                    </span>
+                    </span> -->
                 </div>
             </div>
         </div>
@@ -112,11 +112,11 @@
                 <div class="metric-body">
                     <span class="metric-value">{{ data.totalAttendees }}</span>
                     <span class="metric-label">Attendees</span>
-                    <span class="week-change" [class.up]="data.weeklyComparison.attendeesChange >= 0"
+                    <!-- <span class="week-change" [class.up]="data.weeklyComparison.attendeesChange >= 0"
                         [class.down]="data.weeklyComparison.attendeesChange < 0">
                         {{ data.weeklyComparison.attendeesChange >= 0 ? '↑' : '↓' }} {{
                         abs(data.weeklyComparison.attendeesChange) }}% then last week
-                    </span>
+                    </span> -->
                 </div>
             </div>
         </div>
@@ -131,11 +131,11 @@
                 <div class="metric-body">
                     <span class="metric-value">{{ data.totalTicketsSold }}</span>
                     <span class="metric-label">Tickets Sold</span>
-                    <span class="week-change" [class.up]="data.weeklyComparison.ticketsSoldChange >= 0"
+                    <!-- <span class="week-change" [class.up]="data.weeklyComparison.ticketsSoldChange >= 0"
                         [class.down]="data.weeklyComparison.ticketsSoldChange < 0">
                         {{ data.weeklyComparison.ticketsSoldChange >= 0 ? '↑' : '↓' }} {{
                         abs(data.weeklyComparison.ticketsSoldChange) }}% then last week
-                    </span>
+                    </span> -->
                 </div>
             </div>
         </div>
@@ -150,11 +150,11 @@
                 <div class="metric-body">
                     <span class="metric-value">{{ formatCurrency(data.totalRevenue) }}</span>
                     <span class="metric-label">Revenue</span>
-                    <span class="week-change" [class.up]="data.weeklyComparison.revenueChange >= 0"
+                    <!-- <span class="week-change" [class.up]="data.weeklyComparison.revenueChange >= 0"
                         [class.down]="data.weeklyComparison.revenueChange < 0">
                         {{ data.weeklyComparison.revenueChange >= 0 ? '↑' : '↓' }} {{
                         abs(data.weeklyComparison.revenueChange) }}% then last week
-                    </span>
+                    </span> -->
                 </div>
             </div>
         </div>
@@ -196,7 +196,7 @@
                 @if (data.topBookedEvents.length > 0) {
                 <div class="top-event-scroll">
                     @for (ev of data.topBookedEvents; track ev.id; let i = $index) {
-                    <a [routerLink]="['/admin/events']" class="top-event-item">
+                    <a class="top-event-item">
                         <span class="top-event-rank">{{ i + 1 }}</span>
                         <div class="top-event-info">
                             <span class="top-event-name">{{ ev.title }}</span>
