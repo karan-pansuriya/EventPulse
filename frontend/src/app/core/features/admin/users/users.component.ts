@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, finalize } from 'rxjs';
 import { GridComponent, GridColumn } from '../../../../shared/components/grid/grid.component';
 import { AdminUserService } from '../layout/admin-layout/services/admin-user.service';
-import { UserListResponse } from '../layout/admin-layout/models/adminuser.model';
+import { UserListResponse, RoleResponse } from '../layout/admin-layout/models/adminuser.model';
 import { RoleCheckbox } from '../layout/admin-layout/models/roles-tab.models';
 
 @Component({
@@ -18,9 +18,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   private adminUserService = inject(AdminUserService);
   private destroy$ = new Subject<void>();
   private cdr = inject(ChangeDetectorRef);
-  private zone = inject(NgZone);
 
-  selectedRole: string = '';
+  selectedRole: number | '' = '';
   users: UserListResponse[] = [];
   totalRecords = 0;
   currentPage = 1;
@@ -47,13 +46,29 @@ export class UsersComponent implements OnInit, OnDestroy {
     { header: 'Delete', field: 'id', type: 'delete', width: '40px' },
   ];
 
+  availableRoles: RoleResponse[] = [];
+
   /* --- Role-selection modal --- */
   selectedUser: UserListResponse | null = null;
   roleCheckboxes: RoleCheckbox[] = [];
   isRemoving = false;
 
   ngOnInit(): void {
+    this.loadRoles();
     this.loadUsers();
+  }
+
+  private loadRoles(): void {
+    this.adminUserService.getRoles().pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.cdr.detectChanges()),
+    ).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.availableRoles = res.data;
+        }
+      },
+    });
   }
 
   ngOnDestroy(): void {
@@ -72,24 +87,22 @@ export class UsersComponent implements OnInit, OnDestroy {
 
     this.adminUserService
       .getAllUsers(this.currentPage, this.pageSize, this.selectedRole || undefined)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        }),
+      )
       .subscribe({
         next: (res) => {
-          this.zone.run(() => {
-            if (res.data) {
-              this.users = res.data.items;
-              this.totalRecords = res.data.totalCount;
-            }
-            this.loading = false;
-            this.cdr.detectChanges();
-          });
+          if (res.data) {
+            this.users = res.data.items;
+            this.totalRecords = res.data.totalCount;
+          }
         },
         error: () => {
-          this.zone.run(() => {
-            this.error = 'Failed to load users.';
-            this.loading = false;
-            this.cdr.detectChanges();
-          });
+          this.error = 'Failed to load users.';
         },
       });
   }
@@ -107,11 +120,10 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   onDelete(user: UserListResponse): void {
     this.selectedUser = user;
-    this.roleCheckboxes = user.roleIds.map((id, i) => ({
-      id,
-      name: user.roles[i] || `Role ${id}`,
-      checked: true,
-    }));
+    this.roleCheckboxes = user.roleIds.map((id) => {
+      const role = this.availableRoles.find((r) => r.id === id);
+      return { id, name: role?.name ?? `Role ${id}`, checked: true };
+    });
     this.isRemoving = false;
   }
 
@@ -143,16 +155,20 @@ export class UsersComponent implements OnInit, OnDestroy {
 
     this.adminUserService
       .removeUserRoles(this.selectedUser.id, toRemove)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.isRemoving = false;
+          this.cdr.detectChanges();
+        }),
+      )
       .subscribe({
         next: () => {
           this.closeModal();
           this.loadUsers();
-          this.cdr.detectChanges();
         },
         error: () => {
-          this.isRemoving = false;
-          this.cdr.detectChanges();
+          this.error = 'Failed to remove roles.';
         },
       });
   }

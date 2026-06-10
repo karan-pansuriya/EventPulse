@@ -20,9 +20,9 @@ public class UsersController : BaseHelper
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetUsers([FromQuery] PageRequest pageRequest, [FromQuery] string? role = null)
+    public async Task<IActionResult> GetUsers([FromQuery] PageRequest pageRequest, [FromQuery] int? roleId = null)
     {
-        PagedResult<UserListResponse> result = await _userService.GetPagedUsersAsync(pageRequest, role);
+        PagedResult<UserListResponse> result = await _userService.GetPagedUsersAsync(pageRequest, roleId);
         return SuccessResponse(result);
     }
 

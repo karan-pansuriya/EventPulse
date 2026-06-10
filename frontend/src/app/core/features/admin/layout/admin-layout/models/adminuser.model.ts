@@ -14,3 +14,8 @@ export interface OrganizerResponse {
     roleIds: number[];
     createdAt: string;
   }
+
+  export interface RoleResponse {
+    id: number;
+    name: string;
+  }

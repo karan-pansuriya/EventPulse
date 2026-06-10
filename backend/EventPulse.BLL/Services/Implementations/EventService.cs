@@ -29,7 +29,6 @@ public class EventService : BaseService, IEventService
     private readonly IImageService _imageService;
     private readonly IMapper _mapper;
     private readonly IMemoryCache _cache;
-    private int _eventsCacheVersion = 0;
 
     public EventService(
         IGenericRepository<Event> eventRepo,
@@ -53,16 +52,7 @@ public class EventService : BaseService, IEventService
         _cache = cache;
     }
 
-    // private string EventsCacheKey<T>(T key)
-    // {
-    //     int? roleId = GetActiveRoleId();
-    //     return $"events_v{_eventsCacheVersion}_{JsonSerializer.Serialize(key)}";
-    // }
-
-    // private void InvalidateEventsCache()
-    // {
-    //     Interlocked.Increment(ref _eventsCacheVersion);
-    // }
+    private static string EventCacheKey(int eventId) => $"event_{eventId}";
 
     private int? GetActiveRoleId()
     {
@@ -74,6 +64,11 @@ public class EventService : BaseService, IEventService
 
     public async Task<EventResponse> GetEventByIdAsync(int id)
     {
+        string cacheKey = EventCacheKey(id);
+
+        if (_cache.TryGetValue<EventResponse>(cacheKey, out var cached))
+            return cached!;
+
         Event eventEntity = await _eventRepository.GetEventWithDetailsAsync(id)
             ?? throw new NotFoundException("Event not found.");
 
@@ -85,15 +80,17 @@ public class EventService : BaseService, IEventService
                 throw new ForbiddenException("You are not authorized to view this event.");
         }
 
-        return _mapper.Map<EventResponse>(eventEntity);
+        var result = _mapper.Map<EventResponse>(eventEntity);
+        _cache.Set(cacheKey, result, CacheDuration);
+        return result;
     }
 
     public async Task<PagedResult<EventListResponse>> GetCustomerPagedEventsAsync(EventFilterRequest filter)
     {
-        // string cacheKey = EventsCacheKey(filter);
+        string cacheKey = $"events_customer_{JsonSerializer.Serialize(filter)}";
 
-        // if (_cache.TryGetValue<PagedResult<EventListResponse>>(cacheKey, out var cached))
-        //     return cached!;
+        if (_cache.TryGetValue<PagedResult<EventListResponse>>(cacheKey, out var cached))
+            return cached!;
 
         (List<Event> items, int totalCount) = await _eventRepository.GetCustomerPagedEventsAsync(filter);
 
@@ -105,7 +102,7 @@ public class EventService : BaseService, IEventService
             TotalCount = totalCount
         };
 
-        // _cache.Set(cacheKey, result, CacheDuration);
+        _cache.Set(cacheKey, result, CacheDuration);
         return result;
     }
 
@@ -113,13 +110,13 @@ public class EventService : BaseService, IEventService
     {
         int organizerId = GetUserId();
 
-        // string cacheKey = EventsCacheKey(new { organizerId, pageRequest });
-
-        // if (_cache.TryGetValue<PagedResult<EventListResponse>>(cacheKey, out var cached))
-        //     return cached!;
-
         pageRequest.SortBy ??= "EventDate";
         pageRequest.SortDirection ??= "desc";
+
+        string cacheKey = $"events_organizer_{organizerId}_{JsonSerializer.Serialize(pageRequest)}";
+
+        if (_cache.TryGetValue<PagedResult<EventListResponse>>(cacheKey, out var cached))
+            return cached!;
 
         var result = await _eventRepo.GetPagedAsync(
             e => e.OrganizerId == organizerId && !e.IsDeleted,
@@ -140,16 +137,16 @@ public class EventService : BaseService, IEventService
             },
             pageRequest);
 
-        // _cache.Set(cacheKey, result, CacheDuration);
+        _cache.Set(cacheKey, result, CacheDuration);
         return result;
     }
 
     public async Task<PagedResult<EventListResponse>> GetAllEventsForAdminAsync(PageRequest pageRequest)
     {
-        // string cacheKey = EventsCacheKey(pageRequest);
+        string cacheKey = $"events_admin_{JsonSerializer.Serialize(pageRequest)}";
 
-        // if (_cache.TryGetValue<PagedResult<EventListResponse>>(cacheKey, out var cached))
-        //     return cached!;
+        if (_cache.TryGetValue<PagedResult<EventListResponse>>(cacheKey, out var cached))
+            return cached!;
 
         var result = await _eventRepo.GetPagedAsync(
             e => !e.IsDeleted && e.EventDate >= DateTime.UtcNow.Date,
@@ -170,7 +167,7 @@ public class EventService : BaseService, IEventService
             },
             pageRequest);
 
-        // _cache.Set(cacheKey, result, CacheDuration);
+        _cache.Set(cacheKey, result, CacheDuration);
         return result;
     }
 
@@ -182,7 +179,7 @@ public class EventService : BaseService, IEventService
         eventEntity.IsVerified = !eventEntity.IsVerified;
         _eventRepo.Update(eventEntity);
         await _unitOfWork.SaveAsync();
-        // InvalidateEventsCache();
+        _cache.Remove(EventCacheKey(id));
     }
 
     public async Task<PagedResult<EventAttendeeDto>> GetAttendeesAsync(int pageNumber = 1, int pageSize = 10)
@@ -204,7 +201,10 @@ public class EventService : BaseService, IEventService
 
     public async Task<EventResponse> CreateEventAsync(CreateEventDto dto, List<(byte[] ImageBytes, string FileName)>? posterImages)
     {
-        int organizerId = GetUserId();
+        int userRoleId = GetActiveRoleId() ?? throw new UnauthorizedAccessException("Active role not found.");
+        int organizerId = userRoleId == RoleId.Admin && dto.OrganizerId.HasValue
+            ? dto.OrganizerId.Value
+            : GetUserId();
 
         if (posterImages?.Count > MaxPosterImages)
             throw new BadRequestException($"Maximum {MaxPosterImages} poster images allowed.");
@@ -214,6 +214,9 @@ public class EventService : BaseService, IEventService
             if (posterImages.Any(f => f.ImageBytes.Length > MaxPosterFileSize))
                 throw new BadRequestException($"Each poster image must be 5 MB or less.");
         }
+
+        if (dto.EventDate.Date == DateTime.Today && dto.StartTime <= DateTime.Now.TimeOfDay)
+            throw new BadRequestException("Event start time must be in the future.");
 
         Event? duplicate = await _eventRepository.GetEventByTitleDateVenueAsync(dto.Title, dto.EventDate, dto.VenueName);
         if (duplicate != null)
@@ -245,7 +248,6 @@ public class EventService : BaseService, IEventService
 
         await _eventRepo.AddAsync(eventEntity);
         await _unitOfWork.SaveAsync();
-        // InvalidateEventsCache();
 
         if (posterImages is { Count: > 0 })
         {
@@ -301,6 +303,9 @@ public class EventService : BaseService, IEventService
         if (duplicate != null && duplicate.Id != id)
             throw new BadRequestException("An event with the same title, date, and venue already exists.");
 
+        if (dto.EventDate.Date == DateTime.Today && dto.StartTime <= DateTime.Now.TimeOfDay)
+            throw new BadRequestException("Event start time must be in the future.");
+
         eventEntity.CategoryId = dto.CategoryId;
         eventEntity.VenueId = venue?.Id;
         eventEntity.Title = dto.Title;
@@ -343,7 +348,7 @@ public class EventService : BaseService, IEventService
         }
 
         await _unitOfWork.SaveAsync();
-        // InvalidateEventsCache();
+        _cache.Remove(EventCacheKey(id));
 
         return await GetEventByIdAsync(id);
     }
@@ -376,7 +381,7 @@ public class EventService : BaseService, IEventService
 
         _eventRepo.Delete(eventEntity);
         await _unitOfWork.SaveAsync();
-        // InvalidateEventsCache();
+        _cache.Remove(EventCacheKey(id));
     }
 
     public async Task<OrganizerDashboardDto> GetOrganizerDashboardDataAsync()

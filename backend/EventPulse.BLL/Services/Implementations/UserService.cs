@@ -16,9 +16,9 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
 
-    public async Task<PagedResult<UserListResponse>> GetPagedUsersAsync(PageRequest pageRequest, string? roleName = null)
+    public async Task<PagedResult<UserListResponse>> GetPagedUsersAsync(PageRequest pageRequest, int? roleId = null)
     {
-        PagedResult<User> paged = await _userRepository.GetPagedUsersAsync(pageRequest, roleName);
+        PagedResult<User> paged = await _userRepository.GetPagedUsersAsync(pageRequest, roleId);
 
         var result = new PagedResult<UserListResponse>
         {

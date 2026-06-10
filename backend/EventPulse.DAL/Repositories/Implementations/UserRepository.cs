@@ -11,7 +11,7 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
 {
     private readonly EventPulseDbContext _context = context;
 
-    public async Task<PagedResult<User>> GetPagedUsersAsync(PageRequest pageRequest, string? roleName = null)
+    public async Task<PagedResult<User>> GetPagedUsersAsync(PageRequest pageRequest, int? roleId = null)
     {
         IQueryable<User> query = _context.Users
             .AsNoTracking()
@@ -19,9 +19,9 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
                 .ThenInclude(ur => ur.Role)
             .Where(u => !u.IsDeleted);
 
-        if (!string.IsNullOrWhiteSpace(roleName))
+        if (roleId.HasValue)
         {
-            query = query.Where(u => u.UserRoles.Any(ur => ur.Role.Name == roleName));
+            query = query.Where(u => u.UserRoles.Any(ur => ur.Role.Id == roleId.Value));
         }
 
         int totalCount = await query.CountAsync();

@@ -33,6 +33,19 @@ function pastDateValidator(minDate: string): ValidatorFn {
   };
 }
 
+function pastTimeValidator(formGroup: FormGroup): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    if (!control.value || !formGroup) return null;
+    const eventDate = formGroup.get('eventDate')?.value;
+    const today = new Date().toISOString().slice(0, 10);
+    if (eventDate !== today) return null;
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const [h, m] = (control.value as string).split(':').map(Number);
+    return h * 60 + m <= currentMinutes ? { pastTime: true } : null;
+  };
+} 
+
 @Component({
   selector: 'app-event-form',
   standalone: true,
@@ -130,6 +143,13 @@ export class EventFormComponent implements OnInit, OnDestroy {
     this.isEditMode = !!this.eventId;
 
     this.isAdmin = this.authService.user()?.roleIds.includes(RoleId.Admin) ?? false;
+
+    const startTimeControl = this.eventForm.get('startTime');
+    startTimeControl?.addValidators(pastTimeValidator(this.eventForm));
+
+    this.eventForm.get('eventDate')?.valueChanges.subscribe(() => {
+      startTimeControl?.updateValueAndValidity();
+    });
 
     if (!this.isEditMode && this.isAdmin) {
       this.eventForm.get('organizerId')?.addValidators(Validators.required);
@@ -394,6 +414,7 @@ export class EventFormComponent implements OnInit, OnDestroy {
     if (errors['max']) return `Maximum value is ${errors['max'].max}.`;
     if (errors['pattern']) return 'Invalid format.';
     if (errors['pastDate']) return 'Event date must be today or later.';
+    if (errors['pastTime']) return 'Start time must be in the future.';
     return null;
   }
 

@@ -19,6 +19,8 @@ public class CreateEventDto
     [Required]
     public int CityId { get; set; }
 
+    public int? OrganizerId { get; set; }
+
     [Required]
     [MaxLength(200)]
     [RegularExpression(@"^[A-Za-z0-9\s.,'\-]{2,200}$", ErrorMessage = "Title must be 2-200 characters and valid symbols only.")]
