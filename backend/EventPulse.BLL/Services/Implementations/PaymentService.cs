@@ -56,7 +56,7 @@ public class PaymentService : BaseService, IPaymentService
         var options = new PaymentIntentCreateOptions
         {
             Amount = amountInCents,
-            Currency = "usd",
+            Currency = "inr",
             Metadata = new Dictionary<string, string>
             {
                 { "event_id", request.EventId.ToString() },

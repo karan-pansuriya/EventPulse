@@ -28,7 +28,6 @@ export class UsersComponent implements OnInit, OnDestroy {
   error: string | null = null;
 
   columns: GridColumn[] = [
-    { header: 'ID', field: 'id', width: '60px' },
     { header: 'Name', field: 'name' },
     { header: 'Email', field: 'email' },
     { header: 'Phone', field: 'phone' },
@@ -43,7 +42,7 @@ export class UsersComponent implements OnInit, OnDestroy {
       },
     },
     { header: 'Joined', field: 'createdAt', type: 'date' },
-    { header: 'Delete', field: 'id', type: 'delete', width: '40px' },
+    { header: 'Action', field: 'id', type: 'delete', width: '40px' },
   ];
 
   availableRoles: RoleResponse[] = [];
@@ -61,7 +60,6 @@ export class UsersComponent implements OnInit, OnDestroy {
   private loadRoles(): void {
     this.adminUserService.getRoles().pipe(
       takeUntil(this.destroy$),
-      finalize(() => this.cdr.detectChanges()),
     ).subscribe({
       next: (res) => {
         if (res.success && res.data) {

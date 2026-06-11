@@ -8,10 +8,10 @@ import {
   PLATFORM_ID,
 } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
 import { AdminDashboardService } from '../layout/admin-layout/services/admin-dashboard.service';
+import { AdminUserService } from '../layout/admin-layout/services/admin-user.service';
 import { OrganizerDashboardData } from '../../organizer/layout/models/dashboard.models';
 
 Chart.register(...registerables);
@@ -19,12 +19,13 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
 export class AdminDashboard implements OnInit, AfterViewInit {
   private dashboardService = inject(AdminDashboardService);
+  private adminUserService = inject(AdminUserService);
   private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
   private platformId = inject(PLATFORM_ID);
@@ -39,6 +40,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   private categoryChart: Chart | null = null;
 
   ngOnInit(): void {
+    this.loadOrganizers();
     this.loadDashboard();
   }
 
@@ -78,7 +80,6 @@ export class AdminDashboard implements OnInit, AfterViewInit {
         if (this.data && res.revenue.data) {
           this.data.monthlyRevenue = res.revenue.data;
         }
-        this.extractOrganizers();
         this.isLoading = false;
         this.cdr.detectChanges();
         this.renderCharts();
@@ -106,15 +107,12 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     });
   }
 
-  private extractOrganizers(): void {
-    if (!this.data) return;
-    const map = new Map<number, string>();
-    for (const ev of this.data.topBookedEvents) {
-      if (!map.has(ev.organizerId)) {
-        map.set(ev.organizerId, ev.organizerName);
-      }
-    }
-    this.organizers = Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  private loadOrganizers(): void {
+    this.adminUserService.getOrganizers().subscribe({
+      next: (res) => {
+        this.organizers = (res.data ?? []).map((o) => ({ id: o.id, name: o.name }));
+      },
+    });
   }
 
   private renderCharts(): void {

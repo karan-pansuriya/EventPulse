@@ -1,12 +1,8 @@
-import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone, ViewChild, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import {
-  GridComponent,
-  GridColumn,
-  GridActionItem,
-} from '../../../../shared/components/grid/grid.component';
+import { GridComponent, GridColumn } from '../../../../shared/components/grid/grid.component';
 import { AdminCategoryService } from '../layout/admin-layout/services/admin-category.service';
 import { Category, CreateCategoryRequest, UpdateCategoryRequest } from '../layout/admin-layout/models/category.models';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
@@ -35,17 +31,13 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   formSubmitted = false;
   saving = false;
 
+  @ViewChild('actionTemplate', { static: true }) actionTemplate!: TemplateRef<any>;
+
   confirmCategory: Category | null = null;
 
   columns: GridColumn[] = [
-    // { header: 'ID', field: 'id', width: '60px' },
     { header: 'Name', field: 'name' },
-    { header: 'Actions', field: 'id', type: 'action' },
-  ];
-
-  getRowActionItems: (row: Category) => GridActionItem[] = () => [
-    { label: 'Edit', icon: 'bi-pencil', emit: 'edit' },
-    { label: 'Delete', icon: 'bi-trash', emit: 'delete' },
+    { header: 'Actions', field: 'id', type: 'action', width: '80px'},
   ];
 
   ngOnInit(): void {

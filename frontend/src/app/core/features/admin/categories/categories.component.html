@@ -17,10 +17,29 @@
     [trackByField]="'id'"
     [isLoading]="loading"
     [errorMessage]="error"
-    [actionItems]="getRowActionItems"
+    [actionTemplate]="actionTemplate"
     (edit)="onEdit($event)"
     (delete)="onDelete($event)"
   />
+
+  <ng-template #actionTemplate let-row>
+    <div class="d-flex gap-1">
+      <button
+        class="btn btn-sm btn-outline-primary border-0 p-1"
+        (click)="$event.stopPropagation(); onEdit(row)"
+        title="Edit"
+      >
+        <i class="bi bi-pencil"></i>
+      </button>
+      <button
+        class="btn btn-sm btn-outline-danger border-0 p-1"
+        (click)="$event.stopPropagation(); onDelete(row)"
+        title="Delete"
+      >
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+  </ng-template>
 </div>
 
 <app-confirmation-modal

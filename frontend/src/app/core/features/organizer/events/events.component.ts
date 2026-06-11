@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, ViewChild, TemplateRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { OrganizerEventService } from '../layout/services/organizer-event.service';
@@ -6,7 +6,6 @@ import { ConfirmationModalComponent } from '../../../../shared/components/confir
 import {
   GridComponent,
   GridColumn,
-  GridActionItem,
 } from '../../../../shared/components/grid/grid.component';
 import { EventListResponse } from '../../attendee/home/models/event.models';
 import { environment } from '../../../../../environments/environment';
@@ -33,6 +32,8 @@ export class EventsComponent implements OnInit {
   pageSize = 10;
   isLoading = true;
   hasError = false;
+  @ViewChild('actionTemplate', { static: true }) actionTemplate!: TemplateRef<any>;
+
   showDeleteModal = false;
   deletingEvent: EventListResponse | null = null;
 
@@ -57,21 +58,8 @@ export class EventsComponent implements OnInit {
           ? '<span class="badge bg-success">Verified</span>'
           : '<span class="badge bg-danger">Not Verified</span>',
     },
-    { header: '', field: 'actions', type: 'action', width: '60px' },
+    { header: 'Actions', field: 'actions', type: 'action', width: '60px' },
   ];
-
-  getRowActionItems = (row: Record<string, unknown>): GridActionItem[] => {
-    const r = row as unknown as EventListResponse;
-    const isPast = this.isPastEvent(r.eventDate);
-    const items: GridActionItem[] = [];
-    if (!r.isVerified && !isPast) {
-      items.push({ label: 'Edit', icon: 'assets/icons/Edit.svg', emit: 'edit' });
-    }
-    if (!r.isVerified && !isPast) {
-      items.push({ label: 'Delete', icon: 'assets/icons/Delete.svg', emit: 'delete' });
-    }
-    return items;
-  };
 
   ngOnInit(): void {
     this.loadEvents();
@@ -155,7 +143,7 @@ export class EventsComponent implements OnInit {
     return `Are you sure you want to delete "${title}"? This action cannot be undone.`;
   }
 
-  private isPastEvent(eventDate: string): boolean {
+  isPastEvent(eventDate: string): boolean {
     const today = new Date().toISOString().slice(0, 10);
     return eventDate < today;
   }

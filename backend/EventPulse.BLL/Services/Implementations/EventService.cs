@@ -55,8 +55,8 @@ public class EventService : BaseService, IEventService
     private static string EventCacheKey(int eventId) => $"event_{eventId}";
 
     // Tracker keys — each holds a HashSet<string> of registered cache keys for that group
-    private const string CustomerCacheTrackerKey  = "tracker_events_customer";
-    private const string AdminCacheTrackerKey     = "tracker_events_admin";
+    private const string CustomerCacheTrackerKey = "tracker_events_customer";
+    private const string AdminCacheTrackerKey = "tracker_events_admin";
     private const string OrganizerCacheTrackerKey = "tracker_events_organizer";
 
     // Registers a cache key into the named tracker so it can be bulk-invalidated later.
@@ -89,13 +89,7 @@ public class EventService : BaseService, IEventService
         InvalidateTrackedKeys(AdminCacheTrackerKey);
         if (organizerId.HasValue)
         {
-            // Tracker key is per-organizer so we can scope removals precisely
             InvalidateTrackedKeys($"{OrganizerCacheTrackerKey}_{organizerId.Value}");
-        }
-        else
-        {
-            // Fallback: wipe all organizer list caches
-            InvalidateTrackedKeys(OrganizerCacheTrackerKey);
         }
     }
 
@@ -109,27 +103,27 @@ public class EventService : BaseService, IEventService
 
     public async Task<EventResponse> GetEventByIdAsync(int id)
     {
-        string cacheKey = EventCacheKey(id);
-
-        if (_cache.TryGetValue<EventResponse>(cacheKey, out var cached))
-            return cached!;
-
-        Event eventEntity = await _eventRepository.GetEventWithDetailsAsync(id)
-            ?? throw new NotFoundException("Event not found.");
-
         int? userRoleId = GetActiveRoleId();
         if (userRoleId == RoleId.Organizer)
         {
             int userId = GetUserId();
+            Event? eventEntity = await _eventRepo.GetByIdAsync(id)
+                ?? throw new NotFoundException("Event not found.");
             if (eventEntity.OrganizerId != userId)
                 throw new ForbiddenException("You are not authorized to view this event.");
         }
 
-        var result = _mapper.Map<EventResponse>(eventEntity);
+        string cacheKey = EventCacheKey(id);
+        if (_cache.TryGetValue<EventResponse>(cacheKey, out var cached))
+            return cached!;
+
+        Event full = await _eventRepository.GetEventWithDetailsAsync(id)
+            ?? throw new NotFoundException("Event not found.");
+
+        var result = _mapper.Map<EventResponse>(full);
         _cache.Set(cacheKey, result, CacheDuration);
         return result;
     }
-
     public async Task<PagedResult<EventListResponse>> GetCustomerPagedEventsAsync(EventFilterRequest filter)
     {
         string cacheKey = $"events_customer_{JsonSerializer.Serialize(filter)}";
@@ -488,6 +482,7 @@ public class EventService : BaseService, IEventService
                 RevenueGenerated = g.Sum(b => b.TotalAmount),
             })
             .OrderByDescending(x => x.TotalBookings)
+            .Take(10)
             .ToList();
 
         List<TopBookedEventDto> topBookedEvents = bookingStats
@@ -599,6 +594,7 @@ public class EventService : BaseService, IEventService
                 RevenueGenerated = g.Sum(b => b.TotalAmount),
             })
             .OrderByDescending(x => x.TotalBookings)
+            .Take(10)
             .ToList()
             .Select(bs =>
             {

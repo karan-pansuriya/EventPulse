@@ -43,9 +43,9 @@ export function getRefreshToken(): string | null {
   return getCookie(REFRESH_KEY);
 }
 
-export function saveTokens(accessToken: string, refreshToken: string): void {
-  setCookie(ACCESS_KEY, accessToken, 900);
-  setCookie(REFRESH_KEY, refreshToken, 604800);
+export function saveTokens(accessToken: string, refreshToken: string, expiresIn: number, refreshExpiresIn: number): void {
+  setCookie(ACCESS_KEY, accessToken, expiresIn);
+  setCookie(REFRESH_KEY, refreshToken, refreshExpiresIn);
 }
 
 export function clearTokens(): void {

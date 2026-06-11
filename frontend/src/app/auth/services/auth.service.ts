@@ -113,7 +113,7 @@ export class AuthService {
   }
 
   private handleTokens(tokens: TokenResponse): void {
-    saveTokens(tokens.accessToken, tokens.refreshToken);
+    saveTokens(tokens.accessToken, tokens.refreshToken, tokens.expiresIn, tokens.refreshExpiresIn);
     const user = decodeToken(tokens.accessToken);
     if (user) {
       this.user.set(user);
