@@ -59,8 +59,27 @@
           <div class="p-4">
             <div class="mb-3">
               <label class="form-label fw-semibold">Name</label>
-              <input type="text" class="form-control" [(ngModel)]="editForm.name"
-                     placeholder="Your name" required />
+              <input
+                #nameInput="ngModel"
+                type="text"
+                class="form-control"
+                [class.is-invalid]="nameInput.invalid && (nameInput.dirty || nameInput.touched)"
+                [(ngModel)]="editForm.name"
+                name="name"
+                placeholder="Your name"
+                required
+                minlength="2"
+                maxlength="100"
+                pattern="^[A-Za-z0-9\s.,'\-]+$"
+              />
+              @if (nameInput.invalid && (nameInput.dirty || nameInput.touched)) {
+                <div class="invalid-feedback d-block">
+                  @if (nameInput.errors?.['required']) { Name is required. }
+                  @if (nameInput.errors?.['minlength']) { Name must be at least 2 characters. }
+                  @if (nameInput.errors?.['maxlength']) { Name must be at most 100 characters. }
+                  @if (nameInput.errors?.['pattern']) { Name contains invalid characters. }
+                </div>
+              }
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Email</label>
@@ -70,13 +89,27 @@
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Phone</label>
-              <input type="tel" class="form-control" [(ngModel)]="editForm.phone"
-                     placeholder="Phone number (optional)" />
+              <input
+                #phoneInput="ngModel"
+                type="tel"
+                class="form-control"
+                [class.is-invalid]="phoneInput.invalid && (phoneInput.dirty || phoneInput.touched)"
+                [(ngModel)]="editForm.phone"
+                name="phone"
+                placeholder="Phone number (optional)"
+                maxlength="10"
+                pattern="^[0-9]{6,15}$"
+              />
+              @if (phoneInput.invalid && (phoneInput.dirty || phoneInput.touched)) {
+                <div class="invalid-feedback d-block">
+                  @if (phoneInput.errors?.['pattern']) { Invalid phone number format. }
+                </div>
+              }
             </div>
 
             <div class="d-flex gap-2 mt-4">
               <button class="btn btn-primary flex-fill" (click)="saveProfile()"
-                      [disabled]="isSaving || !editForm.name.trim()">
+                      [disabled]="isSaving || nameInput.invalid">
                 @if (isSaving) {
                   <span class="spinner-border spinner-border-sm me-1"></span>
                 }

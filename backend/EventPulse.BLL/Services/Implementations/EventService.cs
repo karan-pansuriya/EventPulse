@@ -674,13 +674,13 @@ public class EventService : BaseService, IEventService
             return paidBookings
                 .Where(b => b.CreatedAt.Year == now.Year && b.CreatedAt.Month == now.Month)
                 .GroupBy(b => b.CreatedAt.Day)
+                .OrderBy(m => m.Key)
                 .Select(g => new MonthlyRevenueDto
                 {
                     Month = $"{now:MMM} {g.Key}",
                     Revenue = g.Sum(b => b.TotalAmount),
                     Bookings = g.Sum(b => b.Quantity),
                 })
-                .OrderBy(m => m.Month)
                 .ToList();
         }
 

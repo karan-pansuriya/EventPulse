@@ -62,9 +62,12 @@ export class ProfileComponent implements OnInit {
   }
 
   saveProfile(): void {
-    if (!this.editForm.name.trim()) return;
     this.isSaving = true;
-    this.profileService.updateProfile(this.editForm).subscribe({
+
+    this.profileService.updateProfile({
+      name: this.editForm.name.trim(),
+      phone: this.editForm.phone?.trim() || null,
+    }).subscribe({
       next: (data) => {
         this.profile = data;
         this.isEditing = false;

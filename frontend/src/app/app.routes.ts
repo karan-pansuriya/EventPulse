@@ -41,14 +41,14 @@ export const routes: Routes = [
       {
         path: APP_ROUTES.ADMIN.CREATE_EVENT,
         loadComponent: () =>
-          import('./shared/components/event-form/event-form.component').then(
+          import('./shared/components/event-create-edit/event-form.component').then(
             (m) => m.EventFormComponent,
           ),
       },
       {
         path: APP_ROUTES.ADMIN.EDIT_EVENT,
         loadComponent: () =>
-          import('./shared/components/event-form/event-form.component').then(
+          import('./shared/components/event-create-edit/event-form.component').then(
             (m) => m.EventFormComponent,
           ),
       },
@@ -102,14 +102,14 @@ export const routes: Routes = [
       {
         path: APP_ROUTES.ORGANIZER.CREATE_EVENT,
         loadComponent: () =>
-          import('./shared/components/event-form/event-form.component').then(
+          import('./shared/components/event-create-edit/event-form.component').then(
             (m) => m.EventFormComponent,
           ),
       },
       {
         path: APP_ROUTES.ORGANIZER.EDIT_EVENT,
         loadComponent: () =>
-          import('./shared/components/event-form/event-form.component').then(
+          import('./shared/components/event-create-edit/event-form.component').then(
             (m) => m.EventFormComponent,
           ),
       },
