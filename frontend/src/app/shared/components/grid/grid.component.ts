@@ -151,4 +151,9 @@ export class GridComponent<T> implements OnInit, OnDestroy {
   getFieldValue(row: T, field: string): unknown {
     return (row as any)[field];
   }
+
+  displayValue(value: unknown): string {
+    if (value === null || value === undefined || value === '') return '-';
+    return String(value);
+  }
 }

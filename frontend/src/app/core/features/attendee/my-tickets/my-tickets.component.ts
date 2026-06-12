@@ -18,6 +18,22 @@ export class MyTicketsComponent implements OnInit {
   bookings: MyTicketResponse[] = [];
   isLoading = true;
   hasError = false;
+  activeTab: 'upcoming' | 'completed' = 'upcoming';
+
+  get filteredBookings(): MyTicketResponse[] {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return this.bookings.filter(b => {
+      const allUsed = b.tickets.length > 0 && b.tickets.every(t => t.isUsed);
+      const eventDate = b.eventDate ? new Date(b.eventDate) : null;
+      const eventPassed = eventDate !== null && eventDate < today;
+      if (this.activeTab === 'upcoming') {
+        return !eventPassed && !allUsed;
+      } else {
+        return eventPassed || allUsed;
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.fetchTickets();
@@ -38,6 +54,10 @@ export class MyTicketsComponent implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  setActiveTab(tab: 'upcoming' | 'completed'): void {
+    this.activeTab = tab;
   }
 
   getDownloadUrl(ticketId: number): string {

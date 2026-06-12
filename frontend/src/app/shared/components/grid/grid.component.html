@@ -45,12 +45,11 @@
               <td class="position-relative" [attr.data-label]="col.header">
                 @if (col.type === 'truncate') {
                 <span class="tooltip-container">
-                  {{
-                    (getFieldValue(row, col.field) ?? '').toString().length > 50
-                      ? ((getFieldValue(row, col.field) ?? '').toString() | slice : 0 : 50) + '...'
-                      : getFieldValue(row, col.field) ?? ''
-                  }}
-                  <span class="tooltip-text">{{ getFieldValue(row, col.field) }}</span>
+                  @let val = getFieldValue(row, col.field);
+                  <span>{{ val ? (displayValue(val).length > 50 ? (displayValue(val) | slice : 0 : 50) + '...' : val) : '-' }}</span>
+                  @if (val) {
+                  <span class="tooltip-text">{{ val }}</span>
+                  }
                 </span>
                 } @else if (col.type === 'toggle') {
                 <div class="form-check form-switch mb-0" (click)="$event.stopPropagation()">
@@ -116,13 +115,13 @@
                 </div>
                 }
                 } } @else if (col.type === 'currency') {
-                <span>&#8377; {{ getFieldValue(row, col.field) }}</span>
+                <span>{{ getFieldValue(row, col.field) != null ? '₹ ' + getFieldValue(row, col.field) : '-' }}</span>
                 } @else if (col.type === 'percent') {
-                <span>{{ getFieldValue(row, col.field) }}%</span>
+                <span>{{ getFieldValue(row, col.field) != null ? getFieldValue(row, col.field) + '%' : '-' }}</span>
                 } @else if (col.type === 'date') {
-                <span>{{ asDate(getFieldValue(row, col.field)) | date : 'dd MMM yyyy' }}</span>
+                <span>{{ getFieldValue(row, col.field) != null ? (asDate(getFieldValue(row, col.field)) | date : 'dd MMM yyyy') : '-' }}</span>
                 } @else {
-                  <span [innerHTML]="col.formatter ? col.formatter(getFieldValue(row, col.field)) : getFieldValue(row, col.field)"></span>
+                  <span [innerHTML]="col.formatter ? col.formatter(getFieldValue(row, col.field)) : displayValue(getFieldValue(row, col.field))"></span>
                 }
               </td>
               }

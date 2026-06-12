@@ -8,14 +8,28 @@
 
     <!-- ── Page Header ──────────────────────── -->
     <div class="d-flex align-items-center gap-3 mb-3 mb-md-4">
-      <i class="bi bi-ticket-perforated fs-2 text-primary"></i>
+      <i class="bi bi-ticket-perforated fs-2 text-danger"></i>
       <h2 class="fw-bold mb-0">My Tickets</h2>
     </div>
+
+    <!-- ── Upcoming / Completed Toggle ──────── -->
+    @if (!isLoading) {
+      <div class="d-flex gap-2 mb-3 mb-md-4">
+        <button class="btn toggle-btn" [class.active]="activeTab === 'upcoming'"
+                (click)="setActiveTab('upcoming')">
+          <i class="bi bi-calendar-check me-1"></i>Upcoming
+        </button>
+        <button class="btn toggle-btn" [class.active]="activeTab === 'completed'"
+                (click)="setActiveTab('completed')">
+          <i class="bi bi-clock-history me-1"></i>Completed
+        </button>
+      </div>
+    }
 
     <!-- ── Loading ──────────────────────────── -->
     @if (isLoading) {
       <div class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
+        <div class="spinner-border text-bg-danger" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
         <p class="text-muted mt-2">Loading your tickets…</p>
@@ -31,19 +45,29 @@
     }
 
     <!-- ── Empty state ──────────────────────── -->
-    @if (!isLoading && !hasError && bookings.length === 0) {
+    @if (!isLoading && !hasError && filteredBookings.length === 0) {
       <div class="text-center py-5">
         <i class="bi bi-ticket fs-1 text-muted"></i>
-        <p class="text-muted mt-3 mb-3">You haven't purchased any tickets yet.</p>
-        <a class="btn btn-primary" routerLink="/attendee/home">
-          <i class="bi bi-search me-1"></i>Browse Events
-        </a>
+        @if (bookings.length === 0) {
+          <p class="text-muted mt-3 mb-3">You haven't purchased any tickets yet.</p>
+          <a class="btn btn-primary" routerLink="/attendee/home">
+            <i class="bi bi-search me-1"></i>Browse Events
+          </a>
+        } @else {
+          <p class="text-muted mt-3 mb-3">
+            @if (activeTab === 'upcoming') {
+              No upcoming tickets.
+            } @else {
+              No completed tickets.
+            }
+          </p>
+        }
       </div>
     }
 
     <!-- ── Booking List ─────────────────────── -->
     @if (!isLoading && !hasError) {
-      @for (booking of bookings; track booking.bookingId) {
+      @for (booking of filteredBookings; track booking.bookingId) {
         <div class="booking-card mb-3 mb-md-4">
 
           <!-- Booking header -->
