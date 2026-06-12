@@ -3,8 +3,6 @@ export const APP_ROUTES = {
       ROOT: 'auth',
       LOGIN: 'login',
       REGISTER: 'register',
-      FORGOT_PASSWORD: 'forgot-password',
-      RESET_PASSWORD: 'reset-password',
     },
   
     ATTENDEE: {
@@ -29,7 +27,6 @@ export const APP_ROUTES = {
       EDIT_EVENT: 'events/edit/:id',
       EVENT_DETAILS: 'events/:id',
       ATTENDEES: 'attendees',
-      SALES_ANALYTICS: 'analytics',
       CHECK_IN: 'check-in',
       PROFILE: 'profile',
     },
@@ -46,7 +43,6 @@ export const APP_ROUTES = {
       ATTENDEES: 'attendees',
       CATEGORIES: 'categories',
       BOOKINGS: 'bookings',
-      ANALYTICS: 'analytics',
       PROFILE: 'profile',
     },
   } as const;

@@ -430,13 +430,35 @@ public class EventService : BaseService, IEventService
         InvalidateListCaches(eventEntity.OrganizerId);
     }
 
+    private static (DateTime start, DateTime end) GetCurrentWeekBounds()
+    {
+        DateTime today = DateTime.Today;
+        int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+        DateTime start = today.AddDays(-diff);
+        return (start, start.AddDays(7));
+    }
+
+    private static int GrowthPercent(int current, int previous)
+    {
+        if (previous == 0) return current > 0 ? 100 : 0;
+        return (int)Math.Round((current - previous) * 100.0 / previous);
+    }
+
+    private static decimal GrowthPercent(decimal current, decimal previous)
+    {
+        if (previous == 0) return current > 0 ? 100m : 0m;
+        return Math.Round((current - previous) * 100m / previous, 1);
+    }
+
     public async Task<OrganizerDashboardDto> GetOrganizerDashboardDataAsync()
     {
         int organizerId = GetUserId();
 
         DateTime now = DateTime.Today;
         DateTime periodStart = new DateTime(now.Year, 1, 1);
-        DateTime prevPeriodStart = periodStart.AddYears(-1);
+
+        var (currentWeekStart, currentWeekEnd) = GetCurrentWeekBounds();
+        DateTime lastWeekStart = currentWeekStart.AddDays(-7);
 
         List<Event> allEvents = await _eventRepository.GetEventsByOrganizerIdAsync(organizerId);
         List<Booking> allBookings = await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId);
@@ -451,14 +473,25 @@ public class EventService : BaseService, IEventService
         decimal totalRevenue = periodPaidBookings.Sum(b => b.TotalAmount);
         int totalAttendees = periodPaidBookings.Select(b => b.UserId).Distinct().Count();
 
-        List<Event> prevPeriodEvents = allEvents.Where(e => e.CreatedAt >= prevPeriodStart && e.CreatedAt < periodStart).ToList();
-        List<Booking> prevPeriodPaidBookings = allPaidBookings.Where(b => b.CreatedAt >= prevPeriodStart && b.CreatedAt < periodStart).ToList();
+        // Current week
+        List<Event> currentWeekEvents = allEvents.Where(e => e.CreatedAt >= currentWeekStart && e.CreatedAt < currentWeekEnd).ToList();
+        List<Booking> currentWeekPaid = allPaidBookings.Where(b => b.CreatedAt >= currentWeekStart && b.CreatedAt < currentWeekEnd).ToList();
 
-        int prevTotalEvents = prevPeriodEvents.Count;
-        int prevUpcomingEvents = prevPeriodEvents.Count(e => e.EventDate >= DateTime.Today);
-        int prevTicketsSold = prevPeriodPaidBookings.Sum(b => b.Quantity);
-        decimal prevRevenue = prevPeriodPaidBookings.Sum(b => b.TotalAmount);
-        int prevAttendees = prevPeriodPaidBookings.Select(b => b.UserId).Distinct().Count();
+        int cwEvents = currentWeekEvents.Count;
+        int cwUpcoming = currentWeekEvents.Count(e => e.EventDate >= DateTime.Today);
+        int cwTickets = currentWeekPaid.Sum(b => b.Quantity);
+        decimal cwRevenue = currentWeekPaid.Sum(b => b.TotalAmount);
+        int cwAttendees = currentWeekPaid.Select(b => b.UserId).Distinct().Count();
+
+        // Last week
+        List<Event> lastWeekEvents = allEvents.Where(e => e.CreatedAt >= lastWeekStart && e.CreatedAt < currentWeekStart).ToList();
+        List<Booking> lastWeekPaid = allPaidBookings.Where(b => b.CreatedAt >= lastWeekStart && b.CreatedAt < currentWeekStart).ToList();
+
+        int lwEvents = lastWeekEvents.Count;
+        int lwUpcoming = lastWeekEvents.Count(e => e.EventDate >= DateTime.Today);
+        int lwTickets = lastWeekPaid.Sum(b => b.Quantity);
+        decimal lwRevenue = lastWeekPaid.Sum(b => b.TotalAmount);
+        int lwAttendees = lastWeekPaid.Select(b => b.UserId).Distinct().Count();
 
         List<MonthlyRevenueDto> monthlyRevenue = [];
 
@@ -526,11 +559,11 @@ public class EventService : BaseService, IEventService
             TotalAttendees = totalAttendees,
             WeeklyComparison = new WeeklyComparisonDto
             {
-                EventsChange = prevTotalEvents > 0 ? (totalEvents - prevTotalEvents) * 100 / prevTotalEvents : (totalEvents > 0 ? 100 : 0),
-                UpcomingEventsChange = prevUpcomingEvents > 0 ? (upcomingEvents - prevUpcomingEvents) * 100 / prevUpcomingEvents : (upcomingEvents > 0 ? 100 : 0),
-                TicketsSoldChange = prevTicketsSold > 0 ? (totalTicketsSold - prevTicketsSold) * 100 / prevTicketsSold : (totalTicketsSold > 0 ? 100 : 0),
-                RevenueChange = prevRevenue > 0 ? (totalRevenue - prevRevenue) * 100m / prevRevenue : (totalRevenue > 0 ? 100m : 0m),
-                AttendeesChange = prevAttendees > 0 ? (totalAttendees - prevAttendees) * 100 / prevAttendees : (totalAttendees > 0 ? 100 : 0),
+                EventsChange = GrowthPercent(cwEvents, lwEvents),
+                UpcomingEventsChange = GrowthPercent(cwUpcoming, lwUpcoming),
+                TicketsSoldChange = GrowthPercent(cwTickets, lwTickets),
+                RevenueChange = GrowthPercent(cwRevenue, lwRevenue),
+                AttendeesChange = GrowthPercent(cwAttendees, lwAttendees),
             },
             EventsByCategory = eventsByCategory,
             MonthlyRevenue = monthlyRevenue,
@@ -543,7 +576,9 @@ public class EventService : BaseService, IEventService
     {
         DateTime now = DateTime.Today;
         DateTime periodStart = new DateTime(now.Year, 1, 1);
-        DateTime prevPeriodStart = periodStart.AddYears(-1);
+
+        var (currentWeekStart, currentWeekEnd) = GetCurrentWeekBounds();
+        DateTime lastWeekStart = currentWeekStart.AddDays(-7);
 
         List<Event> allEvents = organizerId.HasValue
             ? await _eventRepository.GetEventsByOrganizerIdAsync(organizerId.Value)
@@ -564,14 +599,25 @@ public class EventService : BaseService, IEventService
         decimal totalRevenue = periodPaidBookings.Sum(b => b.TotalAmount);
         int totalAttendees = periodPaidBookings.Select(b => b.UserId).Distinct().Count();
 
-        List<Event> prevPeriodEvents = allEvents.Where(e => e.CreatedAt >= prevPeriodStart && e.CreatedAt < periodStart).ToList();
-        List<Booking> prevPeriodPaidBookings = allPaidBookings.Where(b => b.CreatedAt >= prevPeriodStart && b.CreatedAt < periodStart).ToList();
+        // Current week
+        List<Event> currentWeekEvents = allEvents.Where(e => e.CreatedAt >= currentWeekStart && e.CreatedAt < currentWeekEnd).ToList();
+        List<Booking> currentWeekPaid = allPaidBookings.Where(b => b.CreatedAt >= currentWeekStart && b.CreatedAt < currentWeekEnd).ToList();
 
-        int prevTotalEvents = prevPeriodEvents.Count;
-        int prevUpcomingEvents = prevPeriodEvents.Count(e => e.EventDate >= DateTime.Today);
-        int prevTicketsSold = prevPeriodPaidBookings.Sum(b => b.Quantity);
-        decimal prevRevenue = prevPeriodPaidBookings.Sum(b => b.TotalAmount);
-        int prevAttendees = prevPeriodPaidBookings.Select(b => b.UserId).Distinct().Count();
+        int cwEvents = currentWeekEvents.Count;
+        int cwUpcoming = currentWeekEvents.Count(e => e.EventDate >= DateTime.Today);
+        int cwTickets = currentWeekPaid.Sum(b => b.Quantity);
+        decimal cwRevenue = currentWeekPaid.Sum(b => b.TotalAmount);
+        int cwAttendees = currentWeekPaid.Select(b => b.UserId).Distinct().Count();
+
+        // Last week
+        List<Event> lastWeekEvents = allEvents.Where(e => e.CreatedAt >= lastWeekStart && e.CreatedAt < currentWeekStart).ToList();
+        List<Booking> lastWeekPaid = allPaidBookings.Where(b => b.CreatedAt >= lastWeekStart && b.CreatedAt < currentWeekStart).ToList();
+
+        int lwEvents = lastWeekEvents.Count;
+        int lwUpcoming = lastWeekEvents.Count(e => e.EventDate >= DateTime.Today);
+        int lwTickets = lastWeekPaid.Sum(b => b.Quantity);
+        decimal lwRevenue = lastWeekPaid.Sum(b => b.TotalAmount);
+        int lwAttendees = lastWeekPaid.Select(b => b.UserId).Distinct().Count();
 
         List<MonthlyRevenueDto> monthlyRevenue = [];
 
@@ -617,11 +663,11 @@ public class EventService : BaseService, IEventService
             TotalAttendees = totalAttendees,
             WeeklyComparison = new WeeklyComparisonDto
             {
-                EventsChange = prevTotalEvents > 0 ? (totalEvents - prevTotalEvents) * 100 / prevTotalEvents : (totalEvents > 0 ? 100 : 0),
-                UpcomingEventsChange = prevUpcomingEvents > 0 ? (upcomingEvents - prevUpcomingEvents) * 100 / prevUpcomingEvents : (upcomingEvents > 0 ? 100 : 0),
-                TicketsSoldChange = prevTicketsSold > 0 ? (totalTicketsSold - prevTicketsSold) * 100 / prevTicketsSold : (totalTicketsSold > 0 ? 100 : 0),
-                RevenueChange = prevRevenue > 0 ? (totalRevenue - prevRevenue) * 100m / prevRevenue : (totalRevenue > 0 ? 100m : 0m),
-                AttendeesChange = prevAttendees > 0 ? (totalAttendees - prevAttendees) * 100 / prevAttendees : (totalAttendees > 0 ? 100 : 0),
+                EventsChange = GrowthPercent(cwEvents, lwEvents),
+                UpcomingEventsChange = GrowthPercent(cwUpcoming, lwUpcoming),
+                TicketsSoldChange = GrowthPercent(cwTickets, lwTickets),
+                RevenueChange = GrowthPercent(cwRevenue, lwRevenue),
+                AttendeesChange = GrowthPercent(cwAttendees, lwAttendees),
             },
             TopBookedEvents = topBookedEvents,
             RecentAttendees = [],

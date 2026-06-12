@@ -225,6 +225,15 @@
     max-height: 200px;
     max-width: 100%;
   }
+  .empty-chart {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
 
   .section-card {
     background: #fff;

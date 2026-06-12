@@ -68,11 +68,11 @@
                 <div class="metric-body">
                     <span class="metric-value">{{ data.totalEvents }}</span>
                     <span class="metric-label">Total Events</span>
-                    <!-- <span class="week-change" [class.up]="data.weeklyComparison.eventsChange >= 0"
+                    <span class="week-change" [class.up]="data.weeklyComparison.eventsChange >= 0"
                         [class.down]="data.weeklyComparison.eventsChange < 0">
                         {{ data.weeklyComparison.eventsChange >= 0 ? '↑' : '↓' }} {{
                         abs(data.weeklyComparison.eventsChange) }}% then last week
-                    </span> -->
+                    </span>
                 </div>
             </div>
         </div>
@@ -87,11 +87,11 @@
                 <div class="metric-body">
                     <span class="metric-value">{{ data.upcomingEvents }}</span>
                     <span class="metric-label">Upcoming</span>
-                    <!-- <span class="week-change" [class.up]="data.weeklyComparison.upcomingEventsChange >= 0"
+                    <span class="week-change" [class.up]="data.weeklyComparison.upcomingEventsChange >= 0"
                         [class.down]="data.weeklyComparison.upcomingEventsChange < 0">
                         {{ data.weeklyComparison.upcomingEventsChange >= 0 ? '↑' : '↓' }} {{
                         abs(data.weeklyComparison.upcomingEventsChange) }}% then last week
-                    </span> -->
+                    </span>
                 </div>
             </div>
         </div>
@@ -106,11 +106,11 @@
                 <div class="metric-body">
                     <span class="metric-value">{{ data.totalAttendees }}</span>
                     <span class="metric-label">Attendees</span>
-                    <!-- <span class="week-change" [class.up]="data.weeklyComparison.attendeesChange >= 0"
+                    <span class="week-change" [class.up]="data.weeklyComparison.attendeesChange >= 0"
                         [class.down]="data.weeklyComparison.attendeesChange < 0">
                         {{ data.weeklyComparison.attendeesChange >= 0 ? '↑' : '↓' }} {{
                         abs(data.weeklyComparison.attendeesChange) }}% then last week
-                    </span> -->
+                    </span>
                 </div>
             </div>
         </div>
@@ -125,11 +125,11 @@
                 <div class="metric-body">
                     <span class="metric-value">{{ data.totalTicketsSold }}</span>
                     <span class="metric-label">Tickets Sold</span>
-                    <!-- <span class="week-change" [class.up]="data.weeklyComparison.ticketsSoldChange >= 0"
+                    <span class="week-change" [class.up]="data.weeklyComparison.ticketsSoldChange >= 0"
                         [class.down]="data.weeklyComparison.ticketsSoldChange < 0">
                         {{ data.weeklyComparison.ticketsSoldChange >= 0 ? '↑' : '↓' }} {{
                         abs(data.weeklyComparison.ticketsSoldChange) }}% then last week
-                    </span> -->
+                    </span>
                 </div>
             </div>
         </div>
@@ -144,11 +144,11 @@
                 <div class="metric-body">
                     <span class="metric-value">{{ formatCurrency(data.totalRevenue) }}</span>
                     <span class="metric-label">Revenue</span>
-                    <!-- <span class="week-change" [class.up]="data.weeklyComparison.revenueChange >= 0"
+                    <span class="week-change" [class.up]="data.weeklyComparison.revenueChange >= 0"
                         [class.down]="data.weeklyComparison.revenueChange < 0">
                         {{ data.weeklyComparison.revenueChange >= 0 ? '↑' : '↓' }} {{
                         abs(data.weeklyComparison.revenueChange) }}% then last week
-                    </span> -->
+                    </span>
                 </div>
             </div>
         </div>
@@ -169,7 +169,11 @@
                     </div>
                 </div>
                 <div class="chart-container">
+                    @if (data.monthlyRevenue.length > 0) {
                     <canvas id="revenueChart"></canvas>
+                    } @else {
+                    <div class="empty-chart text-center py-4 text-muted">No revenue data available</div>
+                    }
                 </div>
             </div>
         </div>
@@ -177,7 +181,11 @@
             <div class="chart-card">
                 <h5 class="chart-title">Interest Categories By Event</h5>
                 <div class="chart-container">
+                    @if (data.eventsByCategory.length > 0) {
                     <canvas id="categoryChart"></canvas>
+                    } @else {
+                    <div class="empty-chart text-center py-4 text-muted">No category data available</div>
+                    }
                 </div>
             </div>
         </div>
