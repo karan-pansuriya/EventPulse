@@ -364,7 +364,7 @@ label {
 .submit-btn {
   width: 100%;
   padding: 13px;
-  background: #e94560;
+  background: #e2314f;
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -381,7 +381,7 @@ label {
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: #d63850;
+  background: #e11d48;
 }
 
 .submit-btn:active:not(:disabled) {

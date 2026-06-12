@@ -382,7 +382,7 @@ label {
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: #d63850;
+  background: #e11d48;
 }
 
 .submit-btn:active:not(:disabled) {

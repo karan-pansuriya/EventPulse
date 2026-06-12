@@ -5,33 +5,41 @@
 
 .event-card {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border-radius: 16px;
+  border: 1px solid #ebe9e9;
   overflow: hidden;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s;
   display: flex;
   flex-direction: column;
   cursor: pointer;
   height: 100%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  position: relative;
 }
 
 .event-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.06);
+  border-color: #fbcfe8;
 }
 
 .event-card-poster {
   position: relative;
   width: 100%;
-  height: 180px;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: #f3f4f6;
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
 }
 
 .event-poster-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.event-card:hover .event-poster-img {
+  transform: scale(1.08);
 }
 
 .event-poster-placeholder {
@@ -40,36 +48,80 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #d1d5db;
+}
+
+.event-poster-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.5;
+}
+
+.poster-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
+}
+
+.event-date-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(8px);
+  border-radius: 10px;
+  padding: 6px 10px;
+  min-width: 46px;
+  line-height: 1.1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.date-badge-day {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #be185d;
+}
+
+.date-badge-month {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .event-card-category {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: rgba(190, 24, 93, 0.9);
+  top: 12px;
+  left: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #be185d, #e11d48);
   color: #ffffff;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
-  text-transform: uppercase;
   letter-spacing: 0.03em;
+  box-shadow: 0 2px 8px rgba(190, 24, 93, 0.35);
 }
 
 .event-card-body {
-  padding: 14px 16px 16px;
+  padding: 16px 18px 18px;
   display: flex;
   flex-direction: column;
   flex: 1;
+  gap: 10px;
 }
 
 .event-card-title {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
   color: #111827;
-  margin: 0 0 10px;
-  line-height: 1.3;
+  margin: 0;
+  line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -77,53 +129,79 @@
 }
 
 .event-card-meta {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  column-gap: 8px;
-  row-gap: 6px;
-  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   flex: 1;
-}
-
-.meta-item:nth-child(1) {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.meta-item:nth-child(2) {
-  grid-column: 2;
-  grid-row: 1;
-  justify-self: end;
-}
-
-.meta-item:nth-child(3) {
-  grid-column: 1 / -1;
-  grid-row: 2;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.8rem;
+  gap: 7px;
+  font-size: 0.78rem;
   color: #6b7280;
+  line-height: 1.3;
 }
 
 .meta-item svg {
   flex-shrink: 0;
+  color: #9ca3af;
 }
 
 .event-card-footer {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   padding-top: 12px;
   border-top: 1px solid #f3f4f6;
+  gap: 8px;
+}
+
+.price-section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.price-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .event-card-price {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: #000000;
+  line-height: 1.2;
+}
+
+.book-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #be185d, #e11d48);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.book-btn svg {
+  transition: transform 0.2s;
+}
+
+.event-card:hover .book-btn {
+  box-shadow: 0 4px 12px rgba(190, 24, 93, 0.35);
+}
+
+.event-card:hover .book-btn svg {
+  transform: translateX(2px);
 }
