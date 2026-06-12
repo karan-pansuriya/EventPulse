@@ -83,8 +83,4 @@ export class AttendeesComponent implements OnInit {
     this.currentPage = 1;
     this.loadAttendees();
   }
-
-  trackByBookingId(index: number, item: Record<string, unknown>): unknown {
-    return item['bookingId'];
-  }
 }

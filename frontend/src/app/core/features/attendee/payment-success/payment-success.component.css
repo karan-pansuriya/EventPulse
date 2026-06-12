@@ -16,21 +16,6 @@
   to   { transform: scale(1);   opacity: 1; }
 }
 
-/* ── Booking code badge ───────────────────────────── */
-.booking-code-badge {
-  display: inline-block;
-  background: rgba(190, 24, 93, 0.08);
-  color: #9d174d;
-  border-radius: 8px;
-  padding: 6px 16px;
-  font-size: 0.9rem;
-}
-
-.booking-code-badge span {
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
 /* ── Booking summary card ─────────────────────────── */
 .booking-summary-card {
   background: #ffffff;

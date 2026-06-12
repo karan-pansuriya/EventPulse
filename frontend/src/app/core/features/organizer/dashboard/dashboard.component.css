@@ -75,16 +75,6 @@
     align-items: center;
 }
 
-.skeleton-thumb {
-    width: 100px;
-    height: 70px;
-    border-radius: 8px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
-    flex-shrink: 0;
-}
-
 @keyframes shimmer {
     0% {
         background-position: 200% 0;
@@ -196,15 +186,6 @@
 
 .chart-card:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.glow-card {
-    border-color: rgba(225, 29, 72, 0.12);
-    box-shadow: 0 0 24px rgba(225, 29, 72, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
-}
-
-.glow-card:hover {
-    box-shadow: 0 0 36px rgba(225, 29, 72, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .chart-header {
@@ -383,10 +364,6 @@
 }
 
 /* ── Sales Summary ── */
-.sales-section {
-    margin-top: 1.5rem;
-}
-
 .sales-table-scroll {
     max-height: 320px;
     overflow-y: auto;
@@ -440,32 +417,6 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-}
-
-.sales-event-link {
-    font-weight: 600;
-    color: #111827;
-    text-decoration: none;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.sales-event-link:hover {
-    color: #e11d48;
-}
-
-.sales-event-date {
-    font-size: 0.68rem;
-    color: #9ca3af;
-}
-
-.sales-total-row td {
-    font-weight: 700;
-    color: #111827;
-    border-top: 2px solid #e5e7eb;
-    border-bottom: none;
-    padding-top: 10px;
 }
 
 .att-name {

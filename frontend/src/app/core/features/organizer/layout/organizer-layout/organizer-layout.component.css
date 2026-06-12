@@ -29,19 +29,6 @@
     overflow-y: auto;
 }
 
-.sidebar-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #be185d;
-    letter-spacing: -0.02em;
-    white-space: nowrap;
-}
-
 @media (max-width: 767.98px) {
     .sidebar {
         position: fixed;

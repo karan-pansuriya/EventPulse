@@ -140,9 +140,6 @@ export class CheckoutComponent implements OnInit {
   get totalPrice(): number {
     return this.event ? this.event.price * this.quantity : 0;
   }
-
-  private readonly imageBaseUrl = '';
-
   getPosterStyle(url: string | null): string {
     const fullUrl = url ? `${environment.apiUrl.replace('/api', '')}/${url}` : '';
     return `url(${fullUrl})`;

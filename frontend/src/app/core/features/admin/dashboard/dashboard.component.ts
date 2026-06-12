@@ -62,13 +62,6 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     this.loadDashboard();
   }
 
-  filterByOrganizer(organizerId?: number): void {
-    this.selectedOrganizerId = organizerId ?? null;
-    this.isLoading = true;
-    this.destroyCharts();
-    this.loadDashboard();
-  }
-
   private loadDashboard(period: string = 'year'): void {
     const orgId = this.selectedOrganizerId ?? undefined;
     forkJoin({

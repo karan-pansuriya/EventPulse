@@ -8,7 +8,6 @@ import {
   GridColumn,
 } from '../../../../shared/components/grid/grid.component';
 import { EventListResponse } from '../../attendee/home/models/event.models';
-import { environment } from '../../../../../environments/environment';
 import { ToastService } from '../../../../shared/services/toast.service';
 
 @Component({
@@ -23,8 +22,6 @@ export class EventsComponent implements OnInit {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private toastService = inject(ToastService);
-
-  private imageBaseUrl = environment.apiUrl.replace('/api', '');
 
   events: EventListResponse[] = [];
   totalCount = 0;
