@@ -165,7 +165,7 @@ export const routes: Routes = [
         path: APP_ROUTES.ATTENDEE.EVENT_DETAILS,
         loadComponent: () =>
           import('./core/features/attendee/home/event_details/event_details.component').then(
-            (m) => m.EventDetailsComponent
+            (m) => m.EventDetailsComponent,
           ),
       },
       {

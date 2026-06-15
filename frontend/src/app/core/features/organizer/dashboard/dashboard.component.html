@@ -177,9 +177,12 @@
                 <div class="chart-header">
                     <h5 class="chart-title mb-0">Revenue Trend</h5>
                     <div class="period-pills">
-                        <button class="pill" [class.active]="selectedPeriod === 'week'" (click)="setPeriod('week')">This Week</button>
-                        <button class="pill" [class.active]="selectedPeriod === 'month'" (click)="setPeriod('month')">This Month</button>
-                        <button class="pill" [class.active]="selectedPeriod === 'year'" (click)="setPeriod('year')">This Year</button>
+                        <button class="pill" [class.active]="selectedPeriod === 'week'" (click)="setPeriod('week')">This
+                            Week</button>
+                        <button class="pill" [class.active]="selectedPeriod === 'month'"
+                            (click)="setPeriod('month')">This Month</button>
+                        <button class="pill" [class.active]="selectedPeriod === 'year'" (click)="setPeriod('year')">This
+                            Year</button>
                     </div>
                 </div>
                 <div class="chart-container">
@@ -248,7 +251,7 @@
                 @if (data.topBookedEvents.length > 0) {
                 <div class="top-event-scroll">
                     @for (ev of data.topBookedEvents; track ev.id; let i = $index) {
-                    <div  class="top-event-item">
+                    <div class="top-event-item">
                         <span class="top-event-rank">{{ i + 1 }}</span>
                         <div class="top-event-info">
                             <span class="top-event-name">{{ ev.title }}</span>

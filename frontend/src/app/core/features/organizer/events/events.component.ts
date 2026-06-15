@@ -1,12 +1,16 @@
-import { ChangeDetectorRef, Component, OnInit, inject, ViewChild, TemplateRef } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ViewChild,
+  TemplateRef,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { OrganizerEventService } from '../layout/services/organizer-event.service';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
-import {
-  GridComponent,
-  GridColumn,
-} from '../../../../shared/components/grid/grid.component';
+import { GridComponent, GridColumn } from '../../../../shared/components/grid/grid.component';
 import { EventListResponse } from '../../attendee/home/models/event.models';
 import { ToastService } from '../../../../shared/services/toast.service';
 

@@ -4,17 +4,7 @@
     <h4 class="fw-bold mb-0 fs-5 fs-md-2">Attendees</h4>
   </div>
 
-  <app-grid
-    [columns]="columns"
-    [data]="gridData"
-    [totalRecords]="totalRecords"
-    [currentPage]="currentPage"
-    [pageSize]="pageSize"
-    [trackByField]="'bookingId'"
-    [isLoading]="isLoading"
-    [errorMessage]="errorMessage"
-    [actionItems]="[]"
-    (pageChange)="onPageChange($event)"
-    (pageSizeChange)="onPageSizeChange($event)"
-  />
+  <app-grid [columns]="columns" [data]="gridData" [totalRecords]="totalRecords" [currentPage]="currentPage"
+    [pageSize]="pageSize" [trackByField]="'bookingId'" [isLoading]="isLoading" [errorMessage]="errorMessage"
+    [actionItems]="[]" (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)" />
 </div>

@@ -1,18 +1,16 @@
-<button class="btn btn-brand-primary fw-bold d-inline-flex align-items-center" 
-
-(click)="onButtonClick.emit($event)"
-[ngClass]="{
+<button class="btn btn-brand-primary fw-bold d-inline-flex align-items-center" (click)="onButtonClick.emit($event)"
+  [ngClass]="{
     'full-width': fullWidth,
     'rounded-pill': rounded,
        'justify-content-center': fullWidth
     }">
   @if(!imageAtBack && src) {
-    <img [src]="src" class="btn-icon me-2" alt="" />
+  <img [src]="src" class="btn-icon me-2" alt="" />
   }
 
   <ng-content />
 
   @if(imageAtBack && src) {
-    <img [src]="src" class="btn-icon ms-2" alt="" />
+  <img [src]="src" class="btn-icon ms-2" alt="" />
   }
 </button>

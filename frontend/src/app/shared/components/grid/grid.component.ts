@@ -1,4 +1,13 @@
-import { Component, Input, Output, EventEmitter, HostListener, TemplateRef, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  HostListener,
+  TemplateRef,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import { DatePipe } from '@angular/common';
 
@@ -6,7 +15,16 @@ export interface GridColumn {
   header: string;
   field: string;
   sortable?: boolean;
-  type?: 'text' | 'truncate' | 'action' | 'toggle' | 'currency' | 'percent' | 'date' | 'edit' | 'delete';
+  type?:
+    | 'text'
+    | 'truncate'
+    | 'action'
+    | 'toggle'
+    | 'currency'
+    | 'percent'
+    | 'date'
+    | 'edit'
+    | 'delete';
   width?: string;
   formatter?: (value: unknown) => string;
 }

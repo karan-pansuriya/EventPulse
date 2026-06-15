@@ -2,142 +2,121 @@
 
   <!-- Initial load spinner (no data yet) -->
   @if (isLoading && (!data || data.length === 0)) {
-    <div class="grid-state-wrapper">
-      <div class="grid-spinner"></div>
-    </div>
+  <div class="grid-state-wrapper">
+    <div class="grid-spinner"></div>
+  </div>
   }
 
   <!-- Error state (not loading, no data) -->
   @if (!isLoading && errorMessage && (!data || data.length === 0)) {
-    <div class="grid-state-wrapper text-danger">{{ errorMessage }}</div>
+  <div class="grid-state-wrapper text-danger">{{ errorMessage }}</div>
   }
 
   <!-- Table: only render when NOT in initial loading state -->
   @if (!isLoading || (data && data.length > 0)) {
-    @if (!errorMessage || (data && data.length > 0)) {
-      <div class="table-responsive">
-        <table class="table">
-          <thead>
-            <tr>
-              @for (col of columns; track col.field) {
-              <th
-                (click)="col.sortable && sort(col.field)"
-                [style.cursor]="col.sortable ? 'pointer' : 'default'"
-              >
-                {{ col.header }}
-                @if (col.sortable && sortColumn === col.field) {
-                <span>{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                }
-              </th>
-              }
-            </tr>
-          </thead>
+  @if (!errorMessage || (data && data.length > 0)) {
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          @for (col of columns; track col.field) {
+          <th (click)="col.sortable && sort(col.field)" [style.cursor]="col.sortable ? 'pointer' : 'default'">
+            {{ col.header }}
+            @if (col.sortable && sortColumn === col.field) {
+            <span>{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+            }
+          </th>
+          }
+        </tr>
+      </thead>
 
-          <tbody>
-            @if (!data || data.length === 0) {
-            <tr>
-              <td [attr.colspan]="columns.length" class="text-center">No data available</td>
-            </tr>
-            }
-            @for (row of data; track trackByFn($index, row)) {
-            <tr [style.cursor]="rowClick.observed ? 'pointer' : 'default'" (click)="rowClick.emit(row)">
-              @for (col of columns; track col.field) {
-              <td class="position-relative" [attr.data-label]="col.header">
-                @if (col.type === 'truncate') {
-                <span class="tooltip-container">
-                  @let val = getFieldValue(row, col.field);
-                  <span>{{ val ? (displayValue(val).length > 50 ? (displayValue(val) | slice : 0 : 50) + '...' : val) : '-' }}</span>
-                  @if (val) {
-                  <span class="tooltip-text">{{ val }}</span>
-                  }
-                </span>
-                } @else if (col.type === 'toggle') {
-                <div class="form-check form-switch mb-0" (click)="$event.stopPropagation()">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    role="switch"
-                    [checked]="!!getFieldValue(row, col.field)"
-                    (click)="$event.preventDefault(); toggle.emit(row)"
-                  />
-                </div>
-                } @else if (col.type === 'edit') {
-                <button
-                  class="btn btn-sm btn-outline-primary border-0 p-1"
-                  (click)="$event.stopPropagation(); edit.emit(row)"
-                  title="Edit"
-                >
-                  <i class="bi bi-pencil"></i>
-                </button>
-                } @else if (col.type === 'delete') {
-                <button
-                  class="btn btn-sm btn-outline-danger border-0 p-1"
-                  (click)="$event.stopPropagation(); delete.emit(row)"
-                  title="Delete"
-                >
-                  <i class="bi bi-trash"></i>
-                </button>
-                } @else if (col.type === 'action') { @if (actionTemplate) {
-                <div (click)="$event.stopPropagation()">
-                  <ng-container
-                    *ngTemplateOutlet="actionTemplate; context: { $implicit: row }"
-                  ></ng-container>
-                </div>
-                } @else {
-                @if (getRowActionItems(row).length > 0) {
-                <div class="dropdown action-dropdown" (click)="$event.stopPropagation()">
-                  <button
-                    class="btn p-0 border-0 bg-transparent"
-                    type="button"
-                    (click)="$event.stopPropagation(); toggleDropdown($event, row)"
-                  >
-                    <i class="bi bi-three-dots-vertical fs-5 text-muted"></i>
-                  </button>
-                  @if (activeDropdownRow === row) {
-                  <ul
-                    class="dropdown-menu profile-dropdown show"
-                    [style.top.px]="dropdownTop"
-                    [style.left.px]="dropdownLeft"
-                  >
-                    @for (action of getRowActionItems(row); track action.label) {
-                    <li>
-                      <button
-                        class="dropdown-item d-flex align-items-center gap-2"
-                        (click)="handleAction(action, row)"
-                      >
-                        <i class="bi" [class.bi-pencil]="action.emit === 'edit'" [class.bi-trash]="action.emit === 'delete'"></i>
-                        {{ action.label }}
-                      </button>
-                    </li>
-                    }
-                  </ul>
-                  }
-                </div>
-                }
-                } } @else if (col.type === 'currency') {
-                <span>{{ getFieldValue(row, col.field) != null ? '₹ ' + getFieldValue(row, col.field) : '-' }}</span>
-                } @else if (col.type === 'percent') {
-                <span>{{ getFieldValue(row, col.field) != null ? getFieldValue(row, col.field) + '%' : '-' }}</span>
-                } @else if (col.type === 'date') {
-                <span>{{ getFieldValue(row, col.field) != null ? (asDate(getFieldValue(row, col.field)) | date : 'dd MMM yyyy') : '-' }}</span>
-                } @else {
-                  <span [innerHTML]="col.formatter ? col.formatter(getFieldValue(row, col.field)) : displayValue(getFieldValue(row, col.field))"></span>
-                }
-              </td>
+      <tbody>
+        @if (!data || data.length === 0) {
+        <tr>
+          <td [attr.colspan]="columns.length" class="text-center">No data available</td>
+        </tr>
+        }
+        @for (row of data; track trackByFn($index, row)) {
+        <tr [style.cursor]="rowClick.observed ? 'pointer' : 'default'" (click)="rowClick.emit(row)">
+          @for (col of columns; track col.field) {
+          <td class="position-relative" [attr.data-label]="col.header">
+            @if (col.type === 'truncate') {
+            <span class="tooltip-container">
+              @let val = getFieldValue(row, col.field);
+              <span>{{ val ? (displayValue(val).length > 50 ? (displayValue(val) | slice : 0 : 50) + '...' : val) : '-'
+                }}</span>
+              @if (val) {
+              <span class="tooltip-text">{{ val }}</span>
               }
-            </tr>
+            </span>
+            } @else if (col.type === 'toggle') {
+            <div class="form-check form-switch mb-0" (click)="$event.stopPropagation()">
+              <input class="form-check-input" type="checkbox" role="switch" [checked]="!!getFieldValue(row, col.field)"
+                (click)="$event.preventDefault(); toggle.emit(row)" />
+            </div>
+            } @else if (col.type === 'edit') {
+            <button class="btn btn-sm btn-outline-primary border-0 p-1"
+              (click)="$event.stopPropagation(); edit.emit(row)" title="Edit">
+              <i class="bi bi-pencil"></i>
+            </button>
+            } @else if (col.type === 'delete') {
+            <button class="btn btn-sm btn-outline-danger border-0 p-1"
+              (click)="$event.stopPropagation(); delete.emit(row)" title="Delete">
+              <i class="bi bi-trash"></i>
+            </button>
+            } @else if (col.type === 'action') { @if (actionTemplate) {
+            <div (click)="$event.stopPropagation()">
+              <ng-container *ngTemplateOutlet="actionTemplate; context: { $implicit: row }"></ng-container>
+            </div>
+            } @else {
+            @if (getRowActionItems(row).length > 0) {
+            <div class="dropdown action-dropdown" (click)="$event.stopPropagation()">
+              <button class="btn p-0 border-0 bg-transparent" type="button"
+                (click)="$event.stopPropagation(); toggleDropdown($event, row)">
+                <i class="bi bi-three-dots-vertical fs-5 text-muted"></i>
+              </button>
+              @if (activeDropdownRow === row) {
+              <ul class="dropdown-menu profile-dropdown show" [style.top.px]="dropdownTop"
+                [style.left.px]="dropdownLeft">
+                @for (action of getRowActionItems(row); track action.label) {
+                <li>
+                  <button class="dropdown-item d-flex align-items-center gap-2" (click)="handleAction(action, row)">
+                    <i class="bi" [class.bi-pencil]="action.emit === 'edit'"
+                      [class.bi-trash]="action.emit === 'delete'"></i>
+                    {{ action.label }}
+                  </button>
+                </li>
+                }
+              </ul>
+              }
+            </div>
             }
-          </tbody>
-        </table>
-      </div>
-    }
+            } } @else if (col.type === 'currency') {
+            <span>{{ getFieldValue(row, col.field) != null ? '₹ ' + getFieldValue(row, col.field) : '-' }}</span>
+            } @else if (col.type === 'percent') {
+            <span>{{ getFieldValue(row, col.field) != null ? getFieldValue(row, col.field) + '%' : '-' }}</span>
+            } @else if (col.type === 'date') {
+            <span>{{ getFieldValue(row, col.field) != null ? (asDate(getFieldValue(row, col.field)) | date : 'dd MMM
+              yyyy') : '-' }}</span>
+            } @else {
+            <span
+              [innerHTML]="col.formatter ? col.formatter(getFieldValue(row, col.field)) : displayValue(getFieldValue(row, col.field))"></span>
+            }
+          </td>
+          }
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
   }
 
   <!-- Inline refresh spinner when reloading existing data -->
   @if (isLoading && data && data.length > 0) {
-    <div class="grid-state-wrapper">
-      <div class="grid-spinner"></div>
-    </div>
+  <div class="grid-state-wrapper">
+    <div class="grid-spinner"></div>
+  </div>
   }
 
   @if (totalRecords > 0) {

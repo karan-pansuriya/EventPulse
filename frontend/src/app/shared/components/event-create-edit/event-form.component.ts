@@ -44,7 +44,7 @@ function pastTimeValidator(formGroup: FormGroup): ValidatorFn {
     const [h, m] = (control.value as string).split(':').map(Number);
     return h * 60 + m <= currentMinutes ? { pastTime: true } : null;
   };
-} 
+}
 
 @Component({
   selector: 'app-event-form',

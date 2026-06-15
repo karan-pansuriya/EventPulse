@@ -23,8 +23,13 @@
   font-weight: 700;
 }
 
-:host.pink .profile-avatar { background: #be185d; }
-:host.purple .profile-avatar { background: #7c3aed; }
+:host.pink .profile-avatar {
+  background: #be185d;
+}
+
+:host.purple .profile-avatar {
+  background: #7c3aed;
+}
 
 .info-row {
   display: flex;
@@ -53,16 +58,26 @@
   word-break: break-word;
 }
 
-:host.pink .bi-person-circle { color: #be185d; }
-:host.purple .bi-person-circle { color: #7c3aed; }
+:host.pink .bi-person-circle {
+  color: #be185d;
+}
+
+:host.purple .bi-person-circle {
+  color: #7c3aed;
+}
 
 .spinner-border {
   width: 2.5rem;
   height: 2.5rem;
 }
 
-:host.pink .spinner-border { color: #be185d; }
-:host.purple .spinner-border { color: #7c3aed; }
+:host.pink .spinner-border {
+  color: #be185d;
+}
+
+:host.purple .spinner-border {
+  color: #7c3aed;
+}
 
 .form-control {
   border-radius: 8px;

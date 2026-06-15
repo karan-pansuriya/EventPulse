@@ -12,7 +12,9 @@ import { successToastInterceptor } from './shared/interceptors/success-toast.int
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor, errorToastInterceptor, successToastInterceptor])),
+    provideHttpClient(
+      withInterceptors([authInterceptor, errorToastInterceptor, successToastInterceptor]),
+    ),
     provideAnimationsAsync(),
     provideToastr({
       timeOut: 3000,
@@ -20,5 +22,5 @@ export const appConfig: ApplicationConfig = {
       preventDuplicates: true,
       closeButton: true,
     }),
-  ]
+  ],
 };
