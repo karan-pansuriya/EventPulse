@@ -10,96 +10,67 @@
     </button>
   </div>
 
-  <app-grid
-    [columns]="columns"
-    [data]="categories"
-    [totalRecords]="0"
-    [trackByField]="'id'"
-    [isLoading]="loading"
-    [errorMessage]="error"
-    [actionTemplate]="actionTemplate"
-    (edit)="onEdit($event)"
-    (delete)="onDelete($event)"
-  />
+  <app-grid [columns]="columns" [data]="categories" [totalRecords]="0" [trackByField]="'id'" [isLoading]="loading"
+    [errorMessage]="error" [actionTemplate]="actionTemplate" (edit)="onEdit($event)" (delete)="onDelete($event)" />
 
   <ng-template #actionTemplate let-row>
     <div class="d-flex gap-1">
-      <button
-        class="btn btn-sm btn-outline-primary border-0 p-1"
-        (click)="$event.stopPropagation(); onEdit(row)"
-        title="Edit"
-      >
+      <button class="btn btn-sm btn-outline-primary border-0 p-1" (click)="$event.stopPropagation(); onEdit(row)"
+        title="Edit">
         <i class="bi bi-pencil"></i>
       </button>
-      <button
-        class="btn btn-sm btn-outline-danger border-0 p-1"
-        (click)="$event.stopPropagation(); onDelete(row)"
-        title="Delete"
-      >
+      <button class="btn btn-sm btn-outline-danger border-0 p-1" (click)="$event.stopPropagation(); onDelete(row)"
+        title="Delete">
         <i class="bi bi-trash"></i>
       </button>
     </div>
   </ng-template>
 </div>
 
-<app-confirmation-modal
-  [isOpen]="!!confirmCategory"
-  title="Delete Category"
+<app-confirmation-modal [isOpen]="!!confirmCategory" title="Delete Category"
   [message]="'Delete category ' + (confirmCategory?.name || 'this category') + '? This action cannot be undone.'"
-  confirmLabel="Delete"
-  confirmButtonClass="btn-danger"
-  (confirmed)="onDeleteConfirmed()"
-  (cancelled)="onDeleteCancelled()"
-/>
+  confirmLabel="Delete" confirmButtonClass="btn-danger" (confirmed)="onDeleteConfirmed()"
+  (cancelled)="onDeleteCancelled()" />
 
 @if (showModal) {
-  <div class="modal-backdrop fade show" (click)="cancelModal()"></div>
-  <div class="modal fade show d-block" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">{{ modalMode === 'add' ? 'Add' : 'Edit' }} Category</h5>
-          <button type="button" class="btn-close" (click)="cancelModal()"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label" for="catName">Category Name</label>
-            <input
-              #nameInput="ngModel"
-              id="catName"
-              type="text"
-              class="form-control"
-              [class.is-invalid]="formSubmitted && (nameInput.invalid || formName.length > 100)"
-              [(ngModel)]="formName"
-              name="catName"
-              placeholder="Enter category name"
-              required
-              minlength="1"
-            />
-            @if (formSubmitted && nameInput.invalid) {
-              <div class="invalid-feedback">
-                @if (nameInput.errors?.['required'] || nameInput.errors?.['minlength']) {
-                  Category name is required.
-                }
-              </div>
-            }
-            @if (formSubmitted && formName.length > 100) {
-              <div class="invalid-feedback d-block">
-                Category name must be at most 100 characters.
-              </div>
+<div class="modal-backdrop fade show" (click)="cancelModal()"></div>
+<div class="modal fade show d-block" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ modalMode === 'add' ? 'Add' : 'Edit' }} Category</h5>
+        <button type="button" class="btn-close" (click)="cancelModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label" for="catName">Category Name</label>
+          <input #nameInput="ngModel" id="catName" type="text" class="form-control"
+            [class.is-invalid]="formSubmitted && (nameInput.invalid || formName.length > 100)" [(ngModel)]="formName"
+            name="catName" placeholder="Enter category name" required minlength="1" />
+          @if (formSubmitted && nameInput.invalid) {
+          <div class="invalid-feedback">
+            @if (nameInput.errors?.['required'] || nameInput.errors?.['minlength']) {
+            Category name is required.
             }
           </div>
+          }
+          @if (formSubmitted && formName.length > 100) {
+          <div class="invalid-feedback d-block">
+            Category name must be at most 100 characters.
+          </div>
+          }
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="cancelModal()">Cancel</button>
-          <button type="button" class="btn btn-danger" (click)="save()" [disabled]="saving">
-            @if (saving) {
-              <span class="spinner-border spinner-border-sm me-1"></span>
-            }
-            {{ modalMode === 'add' ? 'Add' : 'Save' }}
-          </button>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelModal()">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="save()" [disabled]="saving">
+          @if (saving) {
+          <span class="spinner-border spinner-border-sm me-1"></span>
+          }
+          {{ modalMode === 'add' ? 'Add' : 'Save' }}
+        </button>
       </div>
     </div>
   </div>
+</div>
 }

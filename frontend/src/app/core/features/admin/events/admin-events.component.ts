@@ -4,10 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { NgZone } from '@angular/core';
-import {
-  GridComponent,
-  GridColumn,
-} from '../../../../shared/components/grid/grid.component';
+import { GridComponent, GridColumn } from '../../../../shared/components/grid/grid.component';
 import { AdminEventService } from '../layout/admin-layout/services/admin-event.service';
 import { EventListResponse } from '../layout/admin-layout/models/event.models';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';

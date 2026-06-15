@@ -58,15 +58,16 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   private loadRoles(): void {
-    this.adminUserService.getRoles().pipe(
-      takeUntil(this.destroy$),
-    ).subscribe({
-      next: (res) => {
-        if (res.success && res.data) {
-          this.availableRoles = res.data;
-        }
-      },
-    });
+    this.adminUserService
+      .getRoles()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          if (res.success && res.data) {
+            this.availableRoles = res.data;
+          }
+        },
+      });
   }
 
   ngOnDestroy(): void {

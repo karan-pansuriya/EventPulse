@@ -1,18 +1,9 @@
 <div class="admin-page">
-    <div class="page-header">
-      <h1>All Bookings</h1>
-    </div>
-
-    <app-grid
-      [columns]="columns"
-      [data]="bookings"
-      [totalRecords]="totalRecords"
-      [currentPage]="currentPage"
-      [pageSize]="pageSize"
-      [trackByField]="'id'"
-      [isLoading]="loading"
-      [errorMessage]="error"
-      (pageChange)="onPageChange($event)"
-      (pageSizeChange)="onPageSizeChange($event)"
-    />
+  <div class="page-header">
+    <h1>All Bookings</h1>
   </div>
+
+  <app-grid [columns]="columns" [data]="bookings" [totalRecords]="totalRecords" [currentPage]="currentPage"
+    [pageSize]="pageSize" [trackByField]="'id'" [isLoading]="loading" [errorMessage]="error"
+    (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)" />
+</div>

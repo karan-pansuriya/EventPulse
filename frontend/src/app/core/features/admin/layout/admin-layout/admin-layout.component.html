@@ -2,7 +2,7 @@
     <app-header mode="admin" (toggleSidebar)="toggleSidebar()" />
     <div class="admin-body" [class.sidebar-open]="sidebarOpen">
         @if (sidebarOpen) {
-            <div class="sidebar-backdrop d-md-none"></div>
+        <div class="sidebar-backdrop d-md-none"></div>
         }
         <aside class="sidebar" [class.open]="sidebarOpen">
             <nav class="sidebar-nav">

@@ -1,10 +1,23 @@
-import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone, ViewChild, TemplateRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  ChangeDetectorRef,
+  NgZone,
+  ViewChild,
+  TemplateRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { GridComponent, GridColumn } from '../../../../shared/components/grid/grid.component';
 import { AdminCategoryService } from '../layout/admin-layout/services/admin-category.service';
-import { Category, CreateCategoryRequest, UpdateCategoryRequest } from '../layout/admin-layout/models/category.models';
+import {
+  Category,
+  CreateCategoryRequest,
+  UpdateCategoryRequest,
+} from '../layout/admin-layout/models/category.models';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
@@ -37,7 +50,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
   columns: GridColumn[] = [
     { header: 'Name', field: 'name' },
-    { header: 'Actions', field: 'id', type: 'action', width: '80px'},
+    { header: 'Actions', field: 'id', type: 'action', width: '80px' },
   ];
 
   ngOnInit(): void {
