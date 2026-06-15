@@ -23,8 +23,8 @@ export class MyTicketsComponent implements OnInit {
   get filteredBookings(): MyTicketResponse[] {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return this.bookings.filter(b => {
-      const allUsed = b.tickets.length > 0 && b.tickets.every(t => t.isUsed);
+    return this.bookings.filter((b) => {
+      const allUsed = b.tickets.length > 0 && b.tickets.every((t) => t.isUsed);
       const eventDate = b.eventDate ? new Date(b.eventDate) : null;
       const eventPassed = eventDate !== null && eventDate < today;
       if (this.activeTab === 'upcoming') {

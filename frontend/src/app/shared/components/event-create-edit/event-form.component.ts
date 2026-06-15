@@ -168,7 +168,7 @@ export class EventFormComponent implements OnInit, OnDestroy {
       },
     });
 
-    this.categoryService.getAll().subscribe({
+    this.categoryService.getAllCatagorys().subscribe({
       next: (res) => {
         if (res.success && res.data) this.categories = res.data;
         this.isLoadingCategories = false;

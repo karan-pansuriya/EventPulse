@@ -2,7 +2,14 @@ import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { take } from 'rxjs';
-import { loadStripe, Stripe, StripeElements, StripeCardNumberElement, StripeCardExpiryElement, StripeCardCvcElement } from '@stripe/stripe-js';
+import {
+  loadStripe,
+  Stripe,
+  StripeElements,
+  StripeCardNumberElement,
+  StripeCardExpiryElement,
+  StripeCardCvcElement,
+} from '@stripe/stripe-js';
 import { EventService } from '../home/services/event.service';
 import { PaymentService, PaymentIntentResponse } from '../home/services/payment.service';
 import { EventDetailResponse } from '../home/models/event.models';
@@ -58,21 +65,24 @@ export class CheckoutComponent implements OnInit {
     const q = Number(this.route.snapshot.queryParamMap.get('qty'));
     if (q > 0) this.quantity = q;
 
-    this.eventService.getEventById(eventId).pipe(take(1)).subscribe({
-      next: (res) => {
-        if (res.data) {
-          this.event = res.data;
-        }
-        this.loading = false;
-        this.cdr.detectChanges();
-        setTimeout(() => this.initStripe(), 0);
-      },
-      error: () => {
-        this.error = 'Failed to load event details.';
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-    });
+    this.eventService
+      .getEventById(eventId)
+      .pipe(take(1))
+      .subscribe({
+        next: (res) => {
+          if (res.data) {
+            this.event = res.data;
+          }
+          this.loading = false;
+          this.cdr.detectChanges();
+          setTimeout(() => this.initStripe(), 0);
+        },
+        error: () => {
+          this.error = 'Failed to load event details.';
+          this.loading = false;
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   private async initStripe(): Promise<void> {
@@ -105,7 +115,10 @@ export class CheckoutComponent implements OnInit {
         invalid: { color: '#dc2626' },
       };
 
-      this.cardNumber = this.elements.create('cardNumber', { style, placeholder: '1234 5678 9012 3456' });
+      this.cardNumber = this.elements.create('cardNumber', {
+        style,
+        placeholder: '1234 5678 9012 3456',
+      });
       this.cardNumber.mount('#stripe-card-number');
       this.cardNumber.on('change', (e) => {
         this.cardNumberError = e.error?.message ?? '';
@@ -167,49 +180,53 @@ export class CheckoutComponent implements OnInit {
 
     this.processing = true;
 
-    this.paymentService.createPaymentIntent({
-      eventId: this.event.id,
-      quantity: this.quantity,
-    }).pipe(take(1)).subscribe({
-      next: async (pi) => {
-        this.paymentIntent = pi;
+    this.paymentService
+      .createPaymentIntent({
+        eventId: this.event.id,
+        quantity: this.quantity,
+      })
+      .pipe(take(1))
+      .subscribe({
+        next: async (pi) => {
+          this.paymentIntent = pi;
 
-        const { error, paymentIntent } = await this.stripe!.confirmCardPayment(pi.clientSecret, {
-          payment_method: { card: this.cardNumber! },
-        });
+          const { error, paymentIntent } = await this.stripe!.confirmCardPayment(pi.clientSecret, {
+            payment_method: { card: this.cardNumber! },
+          });
 
-        if (error) {
+          if (error) {
+            this.processing = false;
+            this.toast.error(error.message || 'Payment failed.', 'Error');
+            this.cdr.detectChanges();
+            return;
+          }
+
+          if (paymentIntent?.status === 'succeeded') {
+            this.paymentService
+              .confirmPayment({ paymentIntentId: pi.paymentIntentId })
+              .pipe(take(1))
+              .subscribe({
+                next: (booking) => {
+                  this.processing = false;
+                  this.router.navigate(['/attendee/payment-success'], {
+                    queryParams: { code: booking.id },
+                  });
+                },
+                error: () => {
+                  this.processing = false;
+                  this.cdr.detectChanges();
+                },
+              });
+          } else {
+            this.processing = false;
+            this.toast.error('Payment was not completed.', 'Error');
+            this.cdr.detectChanges();
+          }
+        },
+        error: () => {
           this.processing = false;
-          this.toast.error(error.message || 'Payment failed.', 'Error');
           this.cdr.detectChanges();
-          return;
-        }
-
-        if (paymentIntent?.status === 'succeeded') {
-          this.paymentService.confirmPayment({ paymentIntentId: pi.paymentIntentId })
-            .pipe(take(1))
-            .subscribe({
-              next: (booking) => {
-                this.processing = false;
-                this.router.navigate(['/attendee/payment-success'], {
-                  queryParams: { code: booking.id },
-                });
-              },
-              error: () => {
-                this.processing = false;
-                this.cdr.detectChanges();
-              },
-            });
-        } else {
-          this.processing = false;
-          this.toast.error('Payment was not completed.', 'Error');
-          this.cdr.detectChanges();
-        }
-      },
-      error: () => {
-        this.processing = false;
-        this.cdr.detectChanges();
-      },
-    });
+        },
+      });
   }
 }

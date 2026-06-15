@@ -12,8 +12,15 @@
 }
 
 @keyframes pop-in {
-  from { transform: scale(0.5); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ── Booking summary card ─────────────────────────── */
@@ -103,11 +110,9 @@
 /* ── Perforation line ─────────────────────────────── */
 .ticket-perforation {
   height: 4px;
-  background: repeating-linear-gradient(
-    90deg,
-    #9d174d 0px, #9d174d 12px,
-    transparent 12px, transparent 20px
-  );
+  background: repeating-linear-gradient(90deg,
+      #9d174d 0px, #9d174d 12px,
+      transparent 12px, transparent 20px);
   opacity: 0.25;
 }
 
@@ -166,11 +171,11 @@
     justify-content: center;
   }
 
-  .ticket-card-inner > .col {
+  .ticket-card-inner>.col {
     padding: 0 16px;
   }
 
-  .ticket-card-inner > .col-auto.pe-3 {
+  .ticket-card-inner>.col-auto.pe-3 {
     padding-right: 0 !important;
     width: 100%;
     display: flex;

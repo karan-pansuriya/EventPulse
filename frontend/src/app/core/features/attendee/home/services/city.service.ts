@@ -8,7 +8,7 @@ export class CityService {
   private http = inject(BaseHttpService);
   private cache$: Observable<ApiResponse<string[]>> | null = null;
 
-  getAll(): Observable<ApiResponse<string[]>> {
+  getAllCitys(): Observable<ApiResponse<string[]>> {
     if (!this.cache$) {
       this.cache$ = this.http.get<string[]>('venues/cities').pipe(shareReplay(1));
     }

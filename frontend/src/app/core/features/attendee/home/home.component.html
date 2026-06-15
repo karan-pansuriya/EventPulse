@@ -10,8 +10,8 @@
           <circle cx="11" cy="11" r="8" />
           <path d="M21 21l-4.35-4.35" />
         </svg>
-        <input type="text" class="search-input" placeholder="Search events by title"
-          [value]="searchQuery" (input)="onSearchInput($any($event.target).value)" />
+        <input type="text" class="search-input" placeholder="Search events by title" [value]="searchQuery"
+          (input)="onSearchInput($any($event.target).value)" />
       </div>
     </div>
   </section>
@@ -58,14 +58,9 @@
           @if (showCityDropdown) {
           <div class="custom-select-options">
             <div class="custom-select-search">
-              <input
-                type="text"
-                class="custom-select-search-input"
-                placeholder="Type a city..."
-                [value]="citySearchText"
-                (input)="onCitySearchInput($any($event.target).value)"
-                (click)="$event.stopPropagation()"
-              />
+              <input type="text" class="custom-select-search-input" placeholder="Type a city..."
+                [value]="citySearchText" (input)="onCitySearchInput($any($event.target).value)"
+                (click)="$event.stopPropagation()" />
             </div>
             <button type="button" class="custom-select-option" [class.selected]="!selectedCity"
               (click)="selectCityOption('')">All Cities</button>
@@ -110,7 +105,7 @@
         <span class="results-count">Total Events: {{ result.totalCount }}</span>
       </div>
       @if (result.items.length > 0) {
-        <span class="results-count">Showing {{ currentPageCount }} of {{ result.totalCount }} events</span>
+      <span class="results-count">Showing {{ currentPageCount }} of {{ result.totalCount }} events</span>
       }
     </div>
 
@@ -137,13 +132,9 @@
     } @else {
     <div class="row g-3">
       @for (event of result.items; track event.id) {
-        <div class="col-12 col-sm-6 col-lg-4">
-          <app-event-card
-            [event]="event"
-            [imageBaseUrl]="imageBaseUrl"
-            [link]="['/attendee/events', event.id]"
-          />
-        </div>
+      <div class="col-12 col-sm-6 col-lg-4">
+        <app-event-card [event]="event" [imageBaseUrl]="imageBaseUrl" [link]="['/attendee/events', event.id]" />
+      </div>
       }
     </div>
 

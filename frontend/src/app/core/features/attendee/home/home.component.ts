@@ -57,7 +57,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
 
     this.categoryService
-      .getAll()
+      .getAllCatagorys()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
@@ -148,7 +148,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.citiesLoading) return;
     this.citiesLoading = true;
     this.cityService
-      .getAll()
+      .getAllCitys()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {

@@ -65,9 +65,11 @@
     width: 60px;
     height: 45px;
   }
+
   .text-content {
     flex: 1 1 100%;
   }
+
   h5 {
     font-size: 1rem;
   }
