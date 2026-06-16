@@ -78,7 +78,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
 
         Venue? existing = await _context.Venues
             .Include(v => v.City).ThenInclude(c => c!.State).ThenInclude(s => s!.Country)
-            .FirstOrDefaultAsync(v => v.Name.ToLower() == name.ToLower() && !v.IsDeleted);
+            .FirstOrDefaultAsync(v => EF.Functions.ILike(v.Name, name) && !v.IsDeleted);
 
         if (existing != null)
         {

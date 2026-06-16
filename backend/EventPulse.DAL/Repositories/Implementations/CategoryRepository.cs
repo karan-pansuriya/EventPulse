@@ -28,7 +28,7 @@ public class CategoryRepository(EventPulseDbContext context) : ICategoryReposito
     public async Task<bool> CategoryNameExistsAsync(string name)
     {
         return await _context.Categories
-            .AnyAsync(c => c.Name.ToLower() == name.ToLower() && !c.IsDeleted);
+            .AnyAsync(c => EF.Functions.ILike(c.Name, name) && !c.IsDeleted);
     }
 
     public async Task AddCategoryAsync(Category category)

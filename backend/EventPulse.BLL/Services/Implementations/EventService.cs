@@ -681,7 +681,7 @@ public class EventService : BaseService, IEventService
         int organizerId = GetUserId();
         List<Booking> bookings = await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId);
         List<Booking> paidBookings = bookings.Where(b => b.PaymentStatus == PaymentStatus.Paid).ToList();
-        return BuildMonthlyRevenue(paidBookings, period);
+        return WeekMonthYearWiseRevenue(paidBookings, period);
     }
 
     public async Task<List<MonthlyRevenueDto>> GetAdminRevenueTrendAsync(string? period = "year", int? organizerId = null)
@@ -690,10 +690,10 @@ public class EventService : BaseService, IEventService
             ? await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId.Value)
             : await _bookingRepository.GetAllBookingsAsync();
         List<Booking> paidBookings = bookings.Where(b => b.PaymentStatus == PaymentStatus.Paid).ToList();
-        return BuildMonthlyRevenue(paidBookings, period);
+        return WeekMonthYearWiseRevenue(paidBookings, period);
     }
 
-    private static List<MonthlyRevenueDto> BuildMonthlyRevenue(List<Booking> paidBookings, string? period)
+    private static List<MonthlyRevenueDto> WeekMonthYearWiseRevenue(List<Booking> paidBookings, string? period)
     {
         string periodKey = period?.ToLower() ?? "year";
 

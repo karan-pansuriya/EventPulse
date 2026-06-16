@@ -188,7 +188,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.loadEvents();
   }
 
-  readonly pageSize = 12;
+  readonly pageSize = 9;
 
   get currentPageCount(): number {
     return this.result.items.length;

@@ -4,8 +4,6 @@ namespace EventPulse.DAL.Repositories.Interfaces;
 
 public interface IAuthRepository
 {
-    Task<bool> UserEmailExistsAsync(string normalizedEmail);
-
     Task<Role?> GetRoleByIdAsync(int roleId);
 
     Task<List<Role>> GetRolesAsync();

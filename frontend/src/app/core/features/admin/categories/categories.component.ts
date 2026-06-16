@@ -67,7 +67,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     this.error = null;
 
     this.categoryService
-      .getAll()
+      .getAllCategoris()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
@@ -116,7 +116,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     this.confirmCategory = null;
 
     this.categoryService
-      .delete(cat.id)
+      .deleteCategory(cat.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.zone.run(() => {
@@ -139,8 +139,8 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
     const obs$ =
       this.modalMode === 'add'
-        ? this.categoryService.create({ name } as CreateCategoryRequest)
-        : this.categoryService.update(this.editId!, { name } as UpdateCategoryRequest);
+        ? this.categoryService.createCategory({ name } as CreateCategoryRequest)
+        : this.categoryService.updateCategory(this.editId!, { name } as UpdateCategoryRequest);
 
     obs$.pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {

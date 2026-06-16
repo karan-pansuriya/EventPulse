@@ -1,3 +1,4 @@
+using EventPulse.BLL.DTOs.User;
 using EventPulse.Common.Models;
 using EventPulse.Common.Models.Response;
 using EventPulse.DAL.Context;
@@ -11,31 +12,46 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
 {
     private readonly EventPulseDbContext _context = context;
 
-    public async Task<PagedResult<User>> GetPagedUsersAsync(PageRequest pageRequest, int? roleId = null)
+    public async Task<PagedResult<UserListResponse>> GetPagedUsersAsync(PageRequest pageRequest, int? roleId = null)
     {
         IQueryable<User> query = _context.Users
             .AsNoTracking()
-            .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
             .Where(u => !u.IsDeleted);
 
         if (roleId.HasValue)
         {
-            query = query.Where(u => u.UserRoles.Any(ur => ur.Role.Id == roleId.Value));
+            query = query.Where(u =>
+                u.UserRoles.Any(ur => ur.RoleId == roleId.Value));
         }
 
-        int totalCount = await query.CountAsync();
+        var totalCount = await query.CountAsync();
 
-        List<User> items = await query
+        var users = await query
             .OrderByDescending(u => u.CreatedAt)
             .Skip((pageRequest.PageNumber - 1) * pageRequest.PageSize)
             .Take(pageRequest.PageSize)
+            .Select(u => new UserListResponse
+            {
+                Id = u.Id,
+                Name = u.Name,
+                Email = u.Email,
+                Phone = u.Phone,
+                IsActive = u.IsActive,
+                CreatedAt = u.CreatedAt,
+                Roles = u.UserRoles
+                    .Select(ur => ur.Role.Name)
+                    .ToList(),
+
+                RoleIds = u.UserRoles
+                    .Select(ur => ur.RoleId)
+                    .ToList()
+            })
             .ToListAsync();
 
-        return new PagedResult<User>
+        return new PagedResult<UserListResponse>
         {
-            Items = items,
-            TotalCount = totalCount
+            Items = users,
+            TotalCount = totalCount,
         };
     }
 

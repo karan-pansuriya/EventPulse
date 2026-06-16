@@ -9,11 +9,6 @@ public class AuthRepository(EventPulseDbContext context) : IAuthRepository
 {
     private readonly EventPulseDbContext _context = context;
 
-    public async Task<bool> UserEmailExistsAsync(string normalizedEmail)
-    {
-        return await _context.Users.AsNoTracking().AnyAsync(u => u.Email.ToLower() == normalizedEmail);
-    }
-
     public async Task<Role?> GetRoleByIdAsync(int roleId)
     {
         return await _context.Roles.AsNoTracking().FirstOrDefaultAsync(r => r.Id == roleId);
@@ -30,7 +25,7 @@ public class AuthRepository(EventPulseDbContext context) : IAuthRepository
             .AsNoTracking()
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+            .FirstOrDefaultAsync(u => u.Email == normalizedEmail);
     }
 
     public async Task<RefreshToken?> GetRefreshTokenWithUserAsync(string token)
