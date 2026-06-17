@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TicketService } from '../payment-success/services/tickets.service';
 import { MyTicketResponse } from '../payment-success/models/ticket.model';
+import { PagedResult } from '../../../../shared/models/paged-result.model';
 
 @Component({
   selector: 'app-my-tickets',
@@ -19,6 +20,9 @@ export class MyTicketsComponent implements OnInit {
   isLoading = true;
   hasError = false;
   activeTab: 'upcoming' | 'completed' = 'upcoming';
+  pageNumber = 1;
+  pageSize = 10;
+  totalCount = 0;
 
   get filteredBookings(): MyTicketResponse[] {
     const today = new Date();
@@ -35,15 +39,30 @@ export class MyTicketsComponent implements OnInit {
     });
   }
 
+  get totalPages(): number {
+    return Math.ceil(this.totalCount / this.pageSize);
+  }
+
+  get pages(): number[] {
+    const total = this.totalPages;
+    const current = this.pageNumber;
+    const pages: number[] = [];
+    const start = Math.max(1, current - 2);
+    const end = Math.min(total, current + 2);
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  }
+
   ngOnInit(): void {
     this.fetchTickets();
   }
 
   private fetchTickets(): void {
-    this.ticketService.getAllMyTickets().subscribe({
+    this.ticketService.getAllMyTickets(this.pageNumber, this.pageSize).subscribe({
       next: (res) => {
         if (res.success && res.data) {
-          this.bookings = res.data;
+          this.bookings = res.data.items;
+          this.totalCount = res.data.totalCount;
         }
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -54,6 +73,12 @@ export class MyTicketsComponent implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages || page === this.pageNumber) return;
+    this.pageNumber = page;
+    this.fetchTickets();
   }
 
   setActiveTab(tab: 'upcoming' | 'completed'): void {

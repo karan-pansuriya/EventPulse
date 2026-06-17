@@ -29,6 +29,13 @@ namespace EventPulse.BLL.Services
 
             if (existingUser != null)
             {
+                if (existingUser.IsDeleted)
+                {
+                    existingUser.IsDeleted = false;
+                    existingUser.UpdatedAt = DateTime.UtcNow;
+
+                    await authRepository.UpdateUserAsync(existingUser);
+                }
                 user = existingUser;
                 roleIds = user.UserRoles.Select(ur => ur.Role.Id).ToList();
 

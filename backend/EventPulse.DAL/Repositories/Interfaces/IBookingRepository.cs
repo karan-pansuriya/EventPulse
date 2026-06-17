@@ -1,3 +1,4 @@
+using EventPulse.BLL.DTOs.Booking;
 using EventPulse.Common.Models.Response;
 using EventPulse.Common.Models;
 using EventPulse.DAL.Entities;
@@ -32,7 +33,9 @@ public interface IBookingRepository
 
     Task<List<Booking>> GetUserAllBookingsAsync(int userId);
 
-    Task<List<Booking>> GetAllBookingsAsync();
+    Task<PagedResult<Booking>> GetPagedUserBookingsAsync(int userId, PageRequest pageRequest);
 
-    Task<PagedResult<Booking>> GetPagedBookingsAsync(PageRequest pageRequest);
+    Task<List<BookingProjection>> GetAllBookingsAsync();
+
+    Task<PagedResult<PagedBookingProjection>> GetPagedBookingsAsync(PageRequest pageRequest);
 }

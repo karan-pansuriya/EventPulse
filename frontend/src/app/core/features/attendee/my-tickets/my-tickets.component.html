@@ -153,6 +153,27 @@
 
     </div>
     }
+
+    <!-- ── Pagination ───────────────────────── -->
+    @if (totalPages > 1) {
+    <div class="pagination-nav">
+      <button class="page-btn" [disabled]="pageNumber === 1" (click)="goToPage(pageNumber - 1)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
+      @for (p of pages; track p) {
+      <button class="page-btn" [class.active]="p === pageNumber" (click)="goToPage(p)">
+        {{ p }}
+      </button>
+      }
+      <button class="page-btn" [disabled]="pageNumber === totalPages" (click)="goToPage(pageNumber + 1)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </button>
+    </div>
+    }
     }
 
   </div>

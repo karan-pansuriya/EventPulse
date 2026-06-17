@@ -19,4 +19,7 @@ public interface IAuthRepository
     Task AddRefreshTokenAsync(RefreshToken token);
 
     Task DeleteUserRefreshTokensAsync(int userId);
+
+    Task UpdateUserAsync(User user);
+
 }

@@ -1,6 +1,8 @@
 using EventPulse.BLL.DTOs.Booking;
 using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
+using EventPulse.Common.Models;
+using EventPulse.Common.Models.Response;
 using EventPulse.DAL.Entities;
 using EventPulse.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -55,17 +57,17 @@ public class TicketService : BaseService, ITicketService
         }).ToList();
     }
 
-    public async Task<List<MyTicketResponse>> GetAllMyTicketsAsync()
+    public async Task<PagedResult<MyTicketResponse>> GetAllMyTicketsAsync(PageRequest pageRequest)
     {
         int userId = GetUserId();
-        List<Booking> bookings = await _bookingRepository.GetUserAllBookingsAsync(userId);
+        PagedResult<Booking> paged = await _bookingRepository.GetPagedUserBookingsAsync(userId, pageRequest);
 
         HttpRequest? request = HttpContextAccessor.HttpContext?.Request;
         string baseUrl = request != null
             ? $"{request.Scheme}://{request.Host}"
             : string.Empty;
 
-        return bookings.Select(b => new MyTicketResponse
+        List<MyTicketResponse> items = paged.Items.Select(b => new MyTicketResponse
         {
             BookingId = b.Id,
             BookingCode = b.UniqueCode,
@@ -86,6 +88,12 @@ public class TicketService : BaseService, ITicketService
                 UsedAt = t.UsedAt,
             }).ToList()
         }).ToList();
+
+        return new PagedResult<MyTicketResponse>
+        {
+            Items = items,
+            TotalCount = paged.TotalCount,
+        };
     }
 
     public async Task<(string FullPath, string TicketCode)> GetTicketDownloadInfoAsync(int ticketId)

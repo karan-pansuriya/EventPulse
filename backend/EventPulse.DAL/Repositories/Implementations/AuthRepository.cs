@@ -22,7 +22,7 @@ public class AuthRepository(EventPulseDbContext context) : IAuthRepository
     public async Task<User?> GetUserWithRolesByEmailAsync(string normalizedEmail)
     {
         return await _context.Users
-            .AsNoTracking()
+            .IgnoreQueryFilters()
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Email == normalizedEmail);
@@ -63,5 +63,11 @@ public class AuthRepository(EventPulseDbContext context) : IAuthRepository
         {
             _context.RefreshTokens.RemoveRange(tokens);
         }
+    }
+
+    public async Task UpdateUserAsync(User user)
+    {
+        _context.Users.Update(user);
+        await Task.CompletedTask;
     }
 }

@@ -240,39 +240,39 @@ namespace EventPulse.DAL.Context
             });
 
             // ── Ticket ────────────────────────────────────────────────────────
-modelBuilder.Entity<Ticket>(entity =>
-{
-    entity.ToTable("tickets");
+            modelBuilder.Entity<Ticket>(entity =>
+            {
+                entity.ToTable("tickets");
 
-    entity.HasKey(t => t.Id);
+                entity.HasKey(t => t.Id);
 
-    entity.HasIndex(t => t.TicketCode)
-          .IsUnique();
+                entity.HasIndex(t => t.TicketCode)
+                      .IsUnique();
 
-    entity.Property(t => t.TicketCode)
-          .IsRequired();
+                entity.Property(t => t.TicketCode)
+                      .IsRequired();
 
-    entity.Property(t => t.QrCodePath)
-          .HasColumnName("qr_code_path");
+                entity.Property(t => t.QrCodePath)
+                      .HasColumnName("qr_code_path");
 
-    entity.Property(t => t.PdfPath)
-          .HasColumnName("pdf_path");
+                entity.Property(t => t.PdfPath)
+                      .HasColumnName("pdf_path");
 
-    entity.Property(t => t.IsUsed)
-          .HasColumnName("is_used")
-          .HasDefaultValue(false);
+                entity.Property(t => t.IsUsed)
+                      .HasColumnName("is_used")
+                      .HasDefaultValue(false);
 
-    entity.Property(t => t.UsedAt)
-          .HasColumnName("used_at");
+                entity.Property(t => t.UsedAt)
+                      .HasColumnName("used_at");
 
-    entity.Property(t => t.CreatedAt)
-          .HasDefaultValueSql("now()");
+                entity.Property(t => t.CreatedAt)
+                      .HasDefaultValueSql("now()");
 
-    entity.HasOne(t => t.Booking)
-          .WithMany(b => b.Tickets)
-          .HasForeignKey(t => t.BookingId)
-          .OnDelete(DeleteBehavior.Cascade);
-});
+                entity.HasOne(t => t.Booking)
+                      .WithMany(b => b.Tickets)
+                      .HasForeignKey(t => t.BookingId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
 
             // ── Seed roles ────────────────────────────────────────────────────
             SeedData(modelBuilder);

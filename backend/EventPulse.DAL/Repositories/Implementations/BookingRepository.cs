@@ -1,3 +1,4 @@
+using EventPulse.BLL.DTOs.Booking;
 using EventPulse.Common.Models;
 using EventPulse.Common.Models.Response;
 using EventPulse.DAL.Context;
@@ -196,34 +197,56 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
             .ToListAsync();
     }
 
-    public async Task<List<Booking>> GetAllBookingsAsync()
+    public async Task<List<BookingProjection>> GetAllBookingsAsync()
     {
         return await _context.Bookings
             .AsNoTracking()
             .Where(b => b.PaymentStatus == PaymentStatus.Paid && !b.IsDeleted)
-            .Include(b => b.User)
-            .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
             .OrderByDescending(b => b.CreatedAt)
+            .Select(b => new BookingProjection
+            {
+                Id = b.Id,
+                UserId = b.UserId,
+                EventId = b.EventId,
+                Quantity = b.Quantity,
+                TotalAmount = b.TotalAmount,
+                PaymentStatus = b.PaymentStatus,
+                CreatedAt = b.CreatedAt,
+                IsDeleted = b.IsDeleted,
+            })
             .ToListAsync();
     }
 
-    public async Task<PagedResult<Booking>> GetPagedBookingsAsync(PageRequest pageRequest)
+    public async Task<PagedResult<PagedBookingProjection>> GetPagedBookingsAsync(PageRequest pageRequest)
     {
-        IQueryable<Booking> query = _context.Bookings
+        IQueryable<PagedBookingProjection> query = _context.Bookings
             .AsNoTracking()
             .Where(b => b.PaymentStatus == PaymentStatus.Paid && !b.IsDeleted)
-            .Include(b => b.User)
-            .Include(b => b.Event)!.ThenInclude(e => e!.Venue);
+            .Select(b => new PagedBookingProjection
+            {
+                Id = b.Id,
+                UserId = b.UserId,
+                CustomerName = b.User.Name,
+                CustomerEmail = b.User.Email,
+                EventId = b.EventId,
+                EventTitle = b.Event.Title,
+                VenueName = b.Event.Venue != null ? b.Event.Venue.Name : null,
+                Quantity = b.Quantity,
+                TotalAmount = b.TotalAmount,
+                PaymentStatus = b.PaymentStatus,
+                UniqueCode = b.UniqueCode,
+                CreatedAt = b.CreatedAt,
+            });
 
         int totalCount = await query.CountAsync();
 
-        List<Booking> items = await query
+        List<PagedBookingProjection> items = await query
             .OrderByDescending(b => b.CreatedAt)
             .Skip((pageRequest.PageNumber - 1) * pageRequest.PageSize)
             .Take(pageRequest.PageSize)
             .ToListAsync();
 
-        return new PagedResult<Booking>
+        return new PagedResult<PagedBookingProjection>
         {
             Items = items,
             TotalCount = totalCount
@@ -239,5 +262,28 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
             .Include(b => b.Tickets)
             .OrderBy(b => b.Event!.EventDate)
             .ToListAsync();
+    }
+
+    public async Task<PagedResult<Booking>> GetPagedUserBookingsAsync(int userId, PageRequest pageRequest)
+    {
+        IQueryable<Booking> query = _context.Bookings
+            .AsNoTracking()
+            .Where(b => b.UserId == userId && b.PaymentStatus == PaymentStatus.Paid && !b.IsDeleted)
+            .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
+            .Include(b => b.Tickets);
+
+        int totalCount = await query.CountAsync();
+
+        List<Booking> items = await query
+            .OrderBy(b => b.Event!.EventDate)
+            .Skip((pageRequest.PageNumber - 1) * pageRequest.PageSize)
+            .Take(pageRequest.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<Booking>
+        {
+            Items = items,
+            TotalCount = totalCount
+        };
     }
 }
