@@ -38,4 +38,6 @@ public interface IBookingRepository
     Task<List<BookingProjection>> GetAllBookingsAsync();
 
     Task<PagedResult<PagedBookingProjection>> GetPagedBookingsAsync(PageRequest pageRequest);
+
+    Task<bool> HasBookingsAsync(int eventId);
 }

@@ -13,7 +13,10 @@
 
   <ng-template #actionTemplate let-row>
     <div class="d-flex gap-1">
-      <button class="btn btn-sm btn-outline-primary border-0 p-1" (click)="$event.stopPropagation(); onEdit(row)"
+      <button class="btn btn-sm btn-outline-primary border-0 p-1"
+        [disabled]="row.isVerified"
+        [class.text-muted]="row.isVerified"
+        (click)="$event.stopPropagation(); row.isVerified || onEdit(row)"
         title="Edit">
         <i class="bi bi-pencil"></i>
       </button>

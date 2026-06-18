@@ -17,7 +17,7 @@ public interface IEventRepository
     Task<(List<Booking> Items, int TotalCount)> GetPagedBookingsByOrganizerIdAsync(int organizerId, int pageNumber, int pageSize);
     Task<List<Event>> GetEventsByOrganizerIdAsync(int organizerId);
 
-    Task<Event?> GetEventByTitleDateVenueAsync(string title, DateTime eventDate, string venueName);
+    Task<Event?> GetEventByTitleDateVenueAsync( DateTime eventDate, string venueName);
 
     Task<int> GetBookingCountByEventIdAsync(int eventId);
 

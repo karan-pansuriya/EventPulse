@@ -159,14 +159,13 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
             .ToListAsync();
     }
 
-    public async Task<Event?> GetEventByTitleDateVenueAsync(string title, DateTime eventDate, string venueName)
+    public async Task<Event?> GetEventByTitleDateVenueAsync( DateTime eventDate, string venueName)
     {
         return await _context.Events
             .AsNoTracking()
             .Include(e => e.Venue)
             .FirstOrDefaultAsync(e =>
                 !e.IsDeleted &&
-                e.Title.ToLower() == title.ToLower() &&
                 e.EventDate == eventDate &&
                 e.Venue != null && e.Venue.Name.ToLower() == venueName.ToLower());
     }

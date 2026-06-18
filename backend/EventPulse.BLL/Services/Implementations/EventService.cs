@@ -219,6 +219,10 @@ public class EventService : BaseService, IEventService
         Event? eventEntity = await _eventRepo.GetByIdAsync(id)
             ?? throw new NotFoundException("Event not found.");
 
+        bool turningUnverified = eventEntity.IsVerified;
+        if (turningUnverified && await _bookingRepository.HasBookingsAsync(id))
+            throw new BadRequestException("Cannot unverify an event with booked tickets.");
+
         eventEntity.IsVerified = !eventEntity.IsVerified;
         _eventRepo.Update(eventEntity);
         await _unitOfWork.SaveAsync();
@@ -262,7 +266,7 @@ public class EventService : BaseService, IEventService
         if (dto.EventDate.Date == DateTime.Today && dto.StartTime <= DateTime.Now.TimeOfDay)
             throw new BadRequestException("Event start time must be in the future.");
 
-        Event? duplicate = await _eventRepository.GetEventByTitleDateVenueAsync(dto.Title, dto.EventDate, dto.VenueName);
+        Event? duplicate = await _eventRepository.GetEventByTitleDateVenueAsync( dto.EventDate, dto.VenueName);
         if (duplicate != null)
             throw new BadRequestException("An event with the same title, date, and venue already exists.");
 
@@ -344,7 +348,7 @@ public class EventService : BaseService, IEventService
             await _unitOfWork.SaveAsync();
         }
 
-        Event? duplicate = await _eventRepository.GetEventByTitleDateVenueAsync(dto.Title, dto.EventDate, dto.VenueName ?? string.Empty);
+        Event? duplicate = await _eventRepository.GetEventByTitleDateVenueAsync( dto.EventDate, dto.VenueName ?? string.Empty);
         if (duplicate != null && duplicate.Id != id)
             throw new BadRequestException("An event with the same title, date, and venue already exists.");
 

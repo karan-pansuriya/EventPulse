@@ -286,4 +286,9 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
             TotalCount = totalCount
         };
     }
+
+    public async Task<bool> HasBookingsAsync(int eventId)
+    {
+        return await _context.Bookings.AnyAsync(b => b.EventId == eventId);
+    }
 }
