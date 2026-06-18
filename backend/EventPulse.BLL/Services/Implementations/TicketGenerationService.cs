@@ -43,7 +43,7 @@ public class TicketGenerationService : ITicketGenerationService
             await File.WriteAllBytesAsync(pdfFull, pdfBytes);
 
             ticket.QrCodePath = qrRelative;
-            ticket.PdfPath    = pdfRelative;
+            ticket.PdfPath = pdfRelative;
         }
     }
 
@@ -57,89 +57,198 @@ public class TicketGenerationService : ITicketGenerationService
 
     private static byte[] GeneratePdf(Booking booking, Ticket ticket, byte[] qrBytes)
     {
-        // ── Data — always per single ticket ─────────────────────────────────
+        // ── Data ────────────────────────────────────────────────────────────
         string eventTitle = booking.Event?.Title ?? "Event";
-        string eventDate  = booking.Event?.EventDate.ToString("ddd, MMM dd yyyy") ?? "";
-        string eventTime  = booking.Event != null
+        string eventDate = booking.Event?.EventDate.ToString("dddd, MMMM dd yyyy") ?? "";
+        string eventTime = booking.Event != null
             ? $"{booking.Event.StartTime.Hours:D2}:{booking.Event.StartTime.Minutes:D2}"
             : "";
-        string venueName  = booking.Event?.Venue?.Name ?? "";
-        string venueCity  = booking.Event?.Venue?.City?.Name ?? "";
-        string location   = string.Join(", ",
-            new[] { venueName, venueCity }.Where(s => !string.IsNullOrWhiteSpace(s)));
+        string venueName = booking.Event?.Venue?.Name ?? "";
+        string venueCity = booking.Event?.Venue?.City?.Name ?? "";
+        string venueAddress = booking.Event?.Venue?.Address ?? "";
+        string category = booking.Event?.Category?.Name ?? "";
+        string genre = booking.Event?.Genre ?? "";
+        string fullAddress = string.Join(", ",
+            new[] { venueAddress, venueCity }.Where(s => !string.IsNullOrWhiteSpace(s)));
 
-        string bookingCode = booking.UniqueCode;
-        string ticketCode  = ticket.TicketCode;
+        string bookingRef = booking.UniqueCode;
+        string ticketCode = ticket.TicketCode;
 
-        // Each PDF = 1 ticket, so quantity is always 1 and price is per-ticket
         decimal unitPrice = booking.PricePerTicket;
+        string bookedBy = booking.User?.Name ?? "";
+        string bookedEmail = booking.User?.Email ?? "";
 
-        // ── Colors ──────────────────────────────────────────────────────────
-        string bgGrey    = "#F0F0F0";
-        string black     = "#111111";
-        string darkGrey  = "#333333";
-        string midGrey   = "#666666";
-        string lightLine = "#BBBBBB";
-        string stubBg    = "#E8E8E8";
+        // ── Color Palette — Deep Navy + Gold ────────────────────────────────
+        string navy = "#1A1F36";
+        string navyLight = "#252B4A";
+        string gold = "#F5A623";
+        string white = "#FFFFFF";
+        string softGrey = "#E2E5F0";
+        string midGrey = "#8B93B0";
+        string stubBg = "#12172B";
 
         return Document.Create(container =>
         {
             container.Page(page =>
             {
-                page.Size(620, 240, Unit.Point);
+                page.Size(780, 290, Unit.Point);
                 page.Margin(0);
-                // No LetterSpacing on default — that caused the spaced-out text bug
                 page.DefaultTextStyle(x =>
-                    x.FontFamily("Helvetica").FontSize(10).FontColor(black));
+                    x.FontFamily("Helvetica").FontSize(10).FontColor(white));
 
-                page.Content().Background(bgGrey).Row(mainRow =>
+                page.Content().Background(navy).Row(mainRow =>
                 {
-                    // LEFT PANEL — Event details + pricing
+                    // ── Left gold accent bar ─────────────────────────────
+                    mainRow.ConstantItem(6).Background(gold);
+
+                    // ── Main body ────────────────────────────────────────
                     mainRow.RelativeItem().Padding(28).Column(col =>
                     {
-                        // Event name
-                        col.Item().PaddingBottom(10)
+                        // Top row: category badge + brand
+                        col.Item().PaddingBottom(12).Row(row =>
+                        {
+                            if (!string.IsNullOrWhiteSpace(category))
+                            {
+                                row.AutoItem()
+                                    .Background(gold)
+                                    .PaddingHorizontal(10).PaddingVertical(3)
+                                    .Text(category.ToUpper())
+                                    .FontSize(8).Bold().FontColor(navy);
+                            }
+                            row.RelativeItem();
+                            row.AutoItem()
+                                .Text("EVENTPULSE")
+                                .FontSize(8).Bold().FontColor(midGrey)
+                                .LetterSpacing(0.12f);
+                        });
+
+                        // Event title
+                        col.Item().PaddingBottom(6)
                             .Text(eventTitle)
-                            .Bold().FontSize(18).FontColor(black);
+                            .FontSize(22).Bold().FontColor(white);
 
-                        // Date
-                        col.Item().PaddingBottom(3)
-                            .Text($"Date  :  {eventDate}  |  {eventTime}")
-                            .FontSize(10).FontColor(darkGrey);
+                        // Gold underline
+                        col.Item().PaddingBottom(14)
+                            .Height(2).Background(gold);
 
-                        // Location
-                        col.Item().PaddingBottom(16)
-                            .Text($"Location  :  {location}")
-                            .FontSize(10).FontColor(darkGrey);
+                        // Info grid
+                        col.Item().PaddingBottom(10).Row(infoRow =>
+                        {
+                            // Date block
+                            infoRow.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text("DATE & TIME")
+                                    .FontSize(7).Bold().FontColor(gold)
+                                    .LetterSpacing(0.1f);
+                                c.Item().PaddingTop(3)
+                                    .Text(eventDate)
+                                    .FontSize(10).FontColor(white);
+                                c.Item().PaddingTop(1)
+                                    .Text(eventTime)
+                                    .FontSize(13).Bold().FontColor(white);
+                            });
 
-                        // Ticket price row
-                        col.Item().PaddingBottom(3)
-                                .Text($"Ticket Price  :  Rs. {unitPrice:N2}")
-                                .FontSize(10).FontColor(darkGrey);
+                            infoRow.ConstantItem(1).PaddingVertical(2).Background(midGrey);
 
+                            // Venue block
+                            infoRow.RelativeItem().PaddingLeft(16).Column(c =>
+                            {
+                                c.Item().Text("VENUE")
+                                    .FontSize(7).Bold().FontColor(gold)
+                                    .LetterSpacing(0.1f);
+                                c.Item().PaddingTop(3)
+                                    .Text(venueName)
+                                    .FontSize(10).Bold().FontColor(white);
+                                c.Item().PaddingTop(1)
+                                    .Text(fullAddress)
+                                    .FontSize(9).FontColor(midGrey);
+                            });
+
+                            // Genre block
+                            if (!string.IsNullOrWhiteSpace(genre))
+                            {
+                                infoRow.ConstantItem(1).PaddingVertical(2).Background(midGrey);
+                                infoRow.RelativeItem().PaddingLeft(16).Column(c =>
+                                {
+                                    c.Item().Text("GENRE")
+                                        .FontSize(7).Bold().FontColor(gold)
+                                        .LetterSpacing(0.1f);
+                                    c.Item().PaddingTop(3)
+                                        .Text(genre)
+                                        .FontSize(10).FontColor(white);
+                                });
+                            }
+                        });
+
+                        // Footer bar: booking ref + attendee + price
+                        col.Item().PaddingTop(6)
+                            .Background(navyLight)
+                            .Padding(10)
+                            .Row(footRow =>
+                            {
+                                footRow.RelativeItem().Column(c =>
+                                {
+                                    c.Item().Text("BOOKING REF")
+                                        .FontSize(7).Bold().FontColor(gold)
+                                        .LetterSpacing(0.08f);
+                                    c.Item().PaddingTop(2)
+                                        .Text(bookingRef)
+                                        .FontSize(9).FontColor(softGrey);
+                                });
+
+                                if (!string.IsNullOrWhiteSpace(bookedBy))
+                                {
+                                    footRow.RelativeItem().Column(c =>
+                                    {
+                                        c.Item().Text("ATTENDEE")
+                                            .FontSize(7).Bold().FontColor(gold)
+                                            .LetterSpacing(0.08f);
+                                        c.Item().PaddingTop(2)
+                                            .Text(bookedBy)
+                                            .FontSize(9).FontColor(softGrey);
+                                        if (!string.IsNullOrWhiteSpace(bookedEmail))
+                                            c.Item().Text(bookedEmail)
+                                                .FontSize(8).FontColor(midGrey);
+                                    });
+                                }
+
+                                footRow.AutoItem().AlignRight().Column(c =>
+                                {
+                                    c.Item().Text("TICKET PRICE")
+                                        .FontSize(7).Bold().FontColor(gold)
+                                        .LetterSpacing(0.08f);
+                                    c.Item().PaddingTop(2)
+                                        .Text($"Rs. {unitPrice:N2}")
+                                        .FontSize(16).Bold().FontColor(white);
+                                });
+                            });
                     });
 
-                    // ── Vertical separator ───────────────────────────────
-                    mainRow.ConstantItem(1).Background(lightLine);
-
-                    // RIGHT STUB — QR + Booking ID
-                    mainRow.ConstantItem(175).Background(stubBg)
+                    // ── Right stub ───────────────────────────────────────
+                    mainRow.ConstantItem(190).Background(stubBg)
                         .Padding(20).Column(col =>
                         {
-                            // QR code
-                            col.Item().AlignCenter().PaddingBottom(8)
-                                .Width(90).Height(90)
+                            col.Item().AlignCenter().PaddingBottom(10)
+                                .Text("ADMIT ONE")
+                                .FontSize(8).Bold().FontColor(gold)
+                                .LetterSpacing(0.15f);
+
+                            col.Item().AlignCenter().PaddingBottom(10)
+                                .Background(white)
+                                .Padding(6)
+                                .Width(110).Height(110)
                                 .Image(qrBytes).FitArea();
 
-                            // Label
-                            col.Item().AlignCenter().PaddingBottom(2)
-                                .Text("Ticket Code")
-                                .FontSize(9).FontColor(midGrey);
+                            col.Item().AlignCenter().PaddingBottom(3)
+                                .Text("TICKET CODE")
+                                .FontSize(7).Bold().FontColor(gold)
+                                .LetterSpacing(0.1f);
 
-                            // Short ID
-                            col.Item().AlignCenter().PaddingBottom(12)
+                            col.Item().AlignCenter().PaddingBottom(10)
                                 .Text(ticketCode)
-                                .Bold().FontSize(13).FontColor(black);
+                                .Bold().FontSize(10).FontColor(white)
+                                .LineHeight(1.4f);
+
                         });
                 });
             });
