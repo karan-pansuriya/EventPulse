@@ -42,6 +42,9 @@ namespace EventPulse.BLL.Services
                 if (roleIds.Contains(role.Id))
                     throw new BadRequestException($"You already have the '{role.Name}' role.");
 
+                if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
+                    throw new BadRequestException("Password does not match the existing account for this email.");
+
                 await authRepository.AddUserRoleAsync(new UserRole { UserId = user.Id, RoleId = role.Id });
                 roleIds.Add(role.Id);
             }
