@@ -17,7 +17,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
     {
         return await _context.Events
             .AsNoTracking()
-            .FirstOrDefaultAsync(e => e.Id == eventId && !e.IsDeleted);
+            .FirstOrDefaultAsync(e => e.Id == eventId);
     }
 
     public async Task<Booking> CreatePendingBookingAsync(
