@@ -13,7 +13,6 @@ public class CategoryRepository(EventPulseDbContext context) : ICategoryReposito
     {
         return await _context.Categories
             .AsNoTracking()
-            .Where(c => !c.IsDeleted)
             .OrderBy(c => c.Name)
             .ToListAsync();
     }
@@ -22,7 +21,7 @@ public class CategoryRepository(EventPulseDbContext context) : ICategoryReposito
     {
         return await _context.Categories
             .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
+            .FirstOrDefaultAsync(c => c.Id == id);
     }
 
     public async Task<bool> CategoryNameExistsAsync(string name)
@@ -35,7 +34,7 @@ public class CategoryRepository(EventPulseDbContext context) : ICategoryReposito
     {
         return await _context.Categories
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(c => EF.Functions.ILike(c.Name, name) && c.IsDeleted);
+            .FirstOrDefaultAsync(c => EF.Functions.ILike(c.Name, name));
     }
 
     public async Task AddCategoryAsync(Category category)

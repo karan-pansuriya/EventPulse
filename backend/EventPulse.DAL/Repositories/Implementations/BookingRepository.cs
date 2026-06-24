@@ -201,7 +201,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
     {
         return await _context.Bookings
             .AsNoTracking()
-            .Where(b => b.PaymentStatus == PaymentStatus.Paid && !b.IsDeleted)
+            .Where(b => b.PaymentStatus == PaymentStatus.Paid)
             .OrderByDescending(b => b.CreatedAt)
             .Select(b => new BookingProjection
             {
@@ -221,7 +221,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
     {
         IQueryable<PagedBookingProjection> query = _context.Bookings
             .AsNoTracking()
-            .Where(b => b.PaymentStatus == PaymentStatus.Paid && !b.IsDeleted)
+            .Where(b => b.PaymentStatus == PaymentStatus.Paid)
             .Select(b => new PagedBookingProjection
             {
                 Id = b.Id,
@@ -257,7 +257,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
     {
         return await _context.Bookings
             .AsNoTracking()
-            .Where(b => b.UserId == userId && b.PaymentStatus == PaymentStatus.Paid && b.IsDeleted == false)
+            .Where(b => b.UserId == userId && b.PaymentStatus == PaymentStatus.Paid)
             .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
             .Include(b => b.Tickets)
             .OrderBy(b => b.Event!.EventDate)
@@ -268,7 +268,7 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
     {
         IQueryable<Booking> query = _context.Bookings
             .AsNoTracking()
-            .Where(b => b.UserId == userId && b.PaymentStatus == PaymentStatus.Paid && !b.IsDeleted)
+            .Where(b => b.UserId == userId && b.PaymentStatus == PaymentStatus.Paid)
             .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
             .Include(b => b.Tickets);
 

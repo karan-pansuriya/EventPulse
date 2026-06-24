@@ -15,8 +15,7 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
     public async Task<PagedResult<UserListResponse>> GetPagedUsersAsync(PageRequest pageRequest, int? roleId = null)
     {
         IQueryable<User> query = _context.Users
-            .AsNoTracking()
-            .Where(u => !u.IsDeleted);
+            .AsNoTracking();
 
         if (roleId.HasValue)
         {
@@ -58,13 +57,13 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
     {
         return await _context.Users
             .AsNoTracking()
-            .Where(u => u.UserRoles.Any(ur => ur.Role.Id == 2) && !u.IsDeleted)
+            .Where(u => u.UserRoles.Any(ur => ur.Role.Id == 2))
             .ToListAsync();
     }
 
     public async Task DeleteUserAsync(int id)
     {
-        User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
+        User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
         if (user is null) return;
 
         user.IsDeleted = true;
@@ -76,7 +75,7 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
     {
         User? user = await _context.Users
             .Include(u => u.UserRoles)
-            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+            .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user is null) return;
 

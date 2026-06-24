@@ -19,14 +19,14 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
             .Include(e => e.Venue).ThenInclude(v => v!.City).ThenInclude(c => c!.State).ThenInclude(s => s!.Country)
             .Include(e => e.Posters)
             .Include(e => e.Organizer)
-            .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
+            .FirstOrDefaultAsync(e => e.Id == id);
     }
 
     public async Task<(List<Event> Items, int TotalCount)> GetCustomerPagedEventsAsync(EventFilterRequest filter)
     {
         IQueryable<Event> query = _context.Events
             .AsNoTracking()
-            .Where(e => !e.IsDeleted && e.IsVerified && e.EventDate >= DateTime.Today);
+            .Where(e => e.IsVerified && e.EventDate >= DateTime.Today);
 
         if (filter.DateFrom.HasValue)
             query = query.Where(e => e.EventDate >= filter.DateFrom.Value);
@@ -78,7 +78,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
 
         Venue? existing = await _context.Venues
             .Include(v => v.City).ThenInclude(c => c!.State).ThenInclude(s => s!.Country)
-            .FirstOrDefaultAsync(v => EF.Functions.ILike(v.Name, name) && !v.IsDeleted);
+            .FirstOrDefaultAsync(v => EF.Functions.ILike(v.Name, name));
 
         if (existing != null)
         {
@@ -112,7 +112,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     {
         return await _context.Bookings
             .AsNoTracking()
-            .Where(b => !b.IsDeleted && b.Event!.OrganizerId == organizerId)
+            .Where(b => b.Event!.OrganizerId == organizerId)
             .Include(b => b.User)
             .Include(b => b.Event).ThenInclude(e => e!.Category)
             .OrderByDescending(b => b.CreatedAt)
@@ -123,7 +123,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     {
         IQueryable<Booking> query = _context.Bookings
             .AsNoTracking()
-            .Where(b => !b.IsDeleted && b.Event!.OrganizerId == organizerId);
+            .Where(b => b.Event!.OrganizerId == organizerId);
 
         int totalCount = await query.CountAsync();
 
@@ -142,7 +142,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     {
         return await _context.Events
             .AsNoTracking()
-            .Where(e => e.OrganizerId == organizerId && !e.IsDeleted)
+            .Where(e => e.OrganizerId == organizerId)
             .Include(e => e.Category)
             .Include(e => e.Posters)
             .Include(e => e.Organizer)
@@ -154,7 +154,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     {
         return await _context.EventPosters
             .AsNoTracking()
-            .Where(p => p.EventId == eventId && !p.IsDeleted)
+            .Where(p => p.EventId == eventId)
             .ToListAsync();
     }
 
@@ -164,7 +164,6 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
             .AsNoTracking()
             .Include(e => e.Venue)
             .FirstOrDefaultAsync(e =>
-                !e.IsDeleted &&
                 e.EventDate == eventDate &&
                 e.Venue != null && e.Venue.Name.ToLower() == venueName.ToLower());
     }
@@ -172,14 +171,13 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
     public async Task<int> GetBookingCountByEventIdAsync(int eventId)
     {
         return await _context.Bookings
-            .CountAsync(b => b.EventId == eventId && !b.IsDeleted && b.PaymentStatus == Enums.PaymentStatus.Paid);
+            .CountAsync(b => b.EventId == eventId && b.PaymentStatus == Enums.PaymentStatus.Paid);
     }
 
     public async Task<List<Event>> GetAllEventsWithDetailsAsync()
     {
         return await _context.Events
             .AsNoTracking()
-            .Where(e => !e.IsDeleted)
             .Include(e => e.Category)
             .Include(e => e.Venue).ThenInclude(v => v!.City).ThenInclude(c => c!.State).ThenInclude(s => s!.Country)
             .Include(e => e.Posters)

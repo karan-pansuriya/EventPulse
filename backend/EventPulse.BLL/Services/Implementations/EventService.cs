@@ -160,7 +160,7 @@ public class EventService : BaseService, IEventService
             return cached!;
 
         var result = await _eventRepo.GetPagedAsync(
-            e => e.OrganizerId == organizerId && !e.IsDeleted,
+            e => e.OrganizerId == organizerId,
             e => new EventListResponse
             {
                 Id = e.Id,
@@ -190,7 +190,7 @@ public class EventService : BaseService, IEventService
             return cached!;
 
         var result = await _eventRepo.GetPagedAsync(
-            e => !e.IsDeleted && e.EventDate >= DateTime.UtcNow.Date,
+            e => e.EventDate >= DateTime.UtcNow.Date,
             e => new EventListResponse
             {
                 Id = e.Id,

@@ -66,14 +66,8 @@ namespace EventPulse.BLL.Services
                 roleIds = new List<int> { role.Id };
             }
 
-            try
-            {
-                await unitOfWork.SaveAsync();
-            }
-            catch (DbUpdateException)
-            {
-                throw new BadRequestException("Email is already in use.");
-            }
+            await unitOfWork.SaveAsync();
+
 
             string accessToken = jwtService.GenerateAccessToken(user, roleIds);
             string refreshToken = jwtService.GenerateRefreshToken();
