@@ -118,27 +118,24 @@ public class EventService : BaseService, IEventService
         if (_cache.TryGetValue<EventResponse>(cacheKey, out var cached))
             return cached!;
 
-        Event full = await _eventRepository.GetEventWithDetailsAsync(id)
+        EventResponse full = await _eventRepository.GetEventWithDetailsAsync(id)
             ?? throw new NotFoundException("Event not found.");
 
-        var result = _mapper.Map<EventResponse>(full);
-        _cache.Set(cacheKey, result, CacheDuration);
-        return result;
+        _cache.Set(cacheKey, full, CacheDuration);
+        return full;
     }
-    public async Task<PagedResult<EventListResponse>> GetCustomerPagedEventsAsync(EventFilterRequest filter)
+    public async Task<PagedResult<EventListResponse>>   GetCustomerPagedEventsAsync(EventFilterRequest filter)
     {
         string cacheKey = $"events_customer_{JsonSerializer.Serialize(filter)}";
 
         if (_cache.TryGetValue<PagedResult<EventListResponse>>(cacheKey, out var cached))
             return cached!;
 
-        (List<Event> items, int totalCount) = await _eventRepository.GetCustomerPagedEventsAsync(filter);
-
-        List<EventListResponse> responseItems = _mapper.Map<List<EventListResponse>>(items);
+        (List<EventListResponse> items, int totalCount) = await _eventRepository.GetCustomerPagedEventsAsync(filter);
 
         var result = new PagedResult<EventListResponse>
         {
-            Items = responseItems,
+            Items = items,
             TotalCount = totalCount
         };
 
@@ -232,15 +229,11 @@ public class EventService : BaseService, IEventService
     {
         int organizerId = GetUserId();
 
-        var (bookings, totalCount) = await _eventRepository.GetPagedBookingsByOrganizerIdAsync(organizerId, pageNumber, pageSize);
-
-        List<EventAttendeeDto> items = bookings
-            .Where(b => b.User != null && b.Event != null)
-            .Select(_mapper.Map<EventAttendeeDto>).ToList();
+        (List<EventAttendeeDto> bookings, int totalCount) = await _eventRepository.GetPagedBookingsByOrganizerIdAsync(organizerId, pageNumber, pageSize);
 
         return new PagedResult<EventAttendeeDto>
         {
-            Items = items,
+            Items = bookings,
             TotalCount = totalCount,
         };
     }
@@ -264,9 +257,9 @@ public class EventService : BaseService, IEventService
         if (dto.EventDate.Date == DateTime.Today && dto.StartTime <= DateTime.Now.TimeOfDay)
             throw new BadRequestException("Event start time must be in the future.");
 
-        Event? duplicate = await _eventRepository.GetEventByTitleDateVenueAsync( dto.EventDate, dto.VenueName);
+        Event? duplicate = await _eventRepository.GetEventByDateVenueAsync( dto.EventDate, dto.VenueName);
         if (duplicate != null)
-            throw new BadRequestException("An event with the same title, date, and venue already exists.");
+            throw new BadRequestException("An event with the same date, and venue already exists.");
 
         Venue? venue = await _eventRepository.ResolveVenueAsync(dto.VenueName, dto.VenueAddress, dto.CityId);
         if (venue != null && venue.Id == 0)
@@ -345,7 +338,7 @@ public class EventService : BaseService, IEventService
             await _unitOfWork.SaveAsync();
         }
 
-        Event? duplicate = await _eventRepository.GetEventByTitleDateVenueAsync( dto.EventDate, dto.VenueName ?? string.Empty);
+        Event? duplicate = await _eventRepository.GetEventByDateVenueAsync( dto.EventDate, dto.VenueName ?? string.Empty);
         if (duplicate != null && duplicate.Id != id)
             throw new BadRequestException("An event with the same title, date, and venue already exists.");
 

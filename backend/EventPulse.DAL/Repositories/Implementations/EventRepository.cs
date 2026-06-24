@@ -1,4 +1,5 @@
 using System.Reflection;
+using EventPulse.BLL.DTOs.Event;
 using EventPulse.Common.Models;
 using EventPulse.DAL.Context;
 using EventPulse.DAL.Entities;
@@ -11,18 +12,67 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
 {
     private readonly EventPulseDbContext _context = context;
 
-    public async Task<Event?> GetEventWithDetailsAsync(int id)
+    public async Task<EventResponse?> GetEventWithDetailsAsync(int id)
     {
         return await _context.Events
             .AsNoTracking()
-            .Include(e => e.Category)
-            .Include(e => e.Venue).ThenInclude(v => v!.City).ThenInclude(c => c!.State).ThenInclude(s => s!.Country)
-            .Include(e => e.Posters)
-            .Include(e => e.Organizer)
-            .FirstOrDefaultAsync(e => e.Id == id);
+            .Where(e => e.Id == id)
+            .Select(e => new EventResponse
+            {
+                Id = e.Id,
+                OrganizerId = e.OrganizerId,
+                OrganizerName = e.Organizer.Name,
+                CategoryId = e.CategoryId,
+                CategoryName = e.Category != null ? e.Category.Name : null,
+
+                Title = e.Title,
+                Description = e.Description,
+
+                VenueId = e.VenueId,
+                VenueAddress = e.Venue != null
+                    ? e.Venue.Address
+                    : null,
+
+                VenueName = e.Venue != null
+                    ? e.Venue.Name
+                    : null,
+
+                VenueCity = e.Venue != null
+                    ? e.Venue.City!.Name
+                    : null,
+
+                VenueState = e.Venue != null
+                    ? e.Venue.City!.State!.Name
+                    : null,
+
+                VenueCountry = e.Venue != null
+                    ? e.Venue.City!.State!.Country!.Name
+                    : null,
+
+                CityId = e.Venue != null
+                    ? e.Venue.CityId
+                    : null,
+
+                Genre = e.Genre,
+                AgeRestriction = e.AgeRestriction,
+                Performers = e.Performers,
+                DurationMins = e.DurationMins,
+                EventDate = e.EventDate,
+                StartTime = e.StartTime,
+                Price = e.Price,
+                TotalSeats = e.TotalSeats,
+                IsVerified = e.IsVerified,
+                CreatedAt = e.CreatedAt,
+                UpdatedAt = e.UpdatedAt,
+
+                PosterUrls = e.Posters
+                    .Select(p => p.PosterUrl)
+                    .ToList()
+            })
+            .FirstOrDefaultAsync();
     }
 
-    public async Task<(List<Event> Items, int TotalCount)> GetCustomerPagedEventsAsync(EventFilterRequest filter)
+    public async Task<(List<EventListResponse> Items, int TotalCount)> GetCustomerPagedEventsAsync(EventFilterRequest filter)
     {
         IQueryable<Event> query = _context.Events
             .AsNoTracking()
@@ -60,12 +110,33 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
 
         int totalCount = await query.CountAsync();
 
-        List<Event> items = await query
+        List<EventListResponse> items = await query
             .Skip((filter.PageNumber - 1) * filter.PageSize)
             .Take(filter.PageSize)
-            .Include(e => e.Category)
-            .Include(e => e.Venue).ThenInclude(v => v!.City).ThenInclude(c => c!.State).ThenInclude(s => s!.Country)
-            .Include(e => e.Posters)
+            .Select(e => new EventListResponse
+            {
+                Id = e.Id,
+                Title = e.Title,
+                VenueId = e.VenueId,
+                EventDate = e.EventDate,
+                StartTime = e.StartTime,
+                Price = e.Price,
+                TotalSeats = e.TotalSeats,
+                IsVerified = e.IsVerified,
+
+                CategoryName = e.Category != null
+                    ? e.Category.Name
+                    : null,
+
+                VenueName = e.Venue != null
+                    ? e.Venue.Name
+                    : null,
+
+                PosterUrl = e.Posters
+                    .OrderByDescending(p => p.Id)
+                    .Select(p => p.PosterUrl)
+                    .FirstOrDefault()
+            })
             .ToListAsync();
 
         return (items, totalCount);
@@ -119,7 +190,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
             .ToListAsync();
     }
 
-    public async Task<(List<Booking> Items, int TotalCount)> GetPagedBookingsByOrganizerIdAsync(int organizerId, int pageNumber, int pageSize)
+    public async Task<(List<EventAttendeeDto> Items, int TotalCount)> GetPagedBookingsByOrganizerIdAsync(int organizerId, int pageNumber, int pageSize)
     {
         IQueryable<Booking> query = _context.Bookings
             .AsNoTracking()
@@ -127,12 +198,24 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
 
         int totalCount = await query.CountAsync();
 
-        List<Booking> items = await query
-            .Include(b => b.User)
-            .Include(b => b.Event).ThenInclude(e => e!.Category)
+        List<EventAttendeeDto> items = await query
             .OrderByDescending(b => b.CreatedAt)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
+            .Select(b => new EventAttendeeDto
+            {
+                BookingId = b.Id,
+                UserId = b.UserId,
+                CustomerName = b.User != null ? b.User.Name: string.Empty,
+                CustomerEmail = b.User != null ? b.User.Email : string.Empty,
+                CustomerPhone = b.User != null ? b.User.Phone : null,
+                EventId = b.EventId,
+                EventTitle = b.Event != null ? b.Event.Title : string.Empty,
+                Quantity = b.Quantity,
+                TotalAmount = b.TotalAmount,
+                PaymentStatus = b.PaymentStatus.ToString(),
+                BookedAt = b.CreatedAt
+            })
             .ToListAsync();
 
         return (items, totalCount);
@@ -158,7 +241,7 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
             .ToListAsync();
     }
 
-    public async Task<Event?> GetEventByTitleDateVenueAsync( DateTime eventDate, string venueName)
+    public async Task<Event?> GetEventByDateVenueAsync(DateTime eventDate, string venueName)
     {
         return await _context.Events
             .AsNoTracking()
