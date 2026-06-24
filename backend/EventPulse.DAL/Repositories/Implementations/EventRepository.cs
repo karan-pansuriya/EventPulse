@@ -102,7 +102,6 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
             Name = name,
             Address = address ?? string.Empty,
             CityId = city.Id,
-            IsActive = true,
         };
 
         _context.Venues.Add(venue);

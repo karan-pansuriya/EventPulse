@@ -5,7 +5,7 @@ using EventPulse.Common.Entities;
 namespace EventPulse.DAL.Entities
 {
     [Table("categories")]
-    public class Category : ActivatableEntity
+    public class Category : BaseEntity
     {
         [Required]
         [MaxLength(100)]

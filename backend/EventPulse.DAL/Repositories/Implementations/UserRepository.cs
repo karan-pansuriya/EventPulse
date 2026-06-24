@@ -36,7 +36,6 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
                 Name = u.Name,
                 Email = u.Email,
                 Phone = u.Phone,
-                IsActive = u.IsActive,
                 CreatedAt = u.CreatedAt,
                 Roles = u.UserRoles
                     .Select(ur => ur.Role.Name)

@@ -3,6 +3,7 @@ using System;
 using EventPulse.DAL.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventPulse.DAL.Migrations
 {
     [DbContext(typeof(EventPulseDbContext))]
-    partial class EventPulseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260624045550_RemoveIsActive")]
+    partial class RemoveIsActive
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

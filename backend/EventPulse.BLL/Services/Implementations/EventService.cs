@@ -173,7 +173,6 @@ public class EventService : BaseService, IEventService
                 Price = e.Price,
                 TotalSeats = e.TotalSeats,
                 IsVerified = e.IsVerified,
-                IsActive = e.IsActive,
                 PosterUrl = e.Posters.Select(p => p.PosterUrl).FirstOrDefault(),
             },
             pageRequest);
@@ -204,7 +203,6 @@ public class EventService : BaseService, IEventService
                 Price = e.Price,
                 TotalSeats = e.TotalSeats,
                 IsVerified = e.IsVerified,
-                IsActive = e.IsActive,
                 PosterUrl = e.Posters.Select(p => p.PosterUrl).FirstOrDefault(),
             },
             pageRequest);
@@ -291,7 +289,6 @@ public class EventService : BaseService, IEventService
             StartTime = dto.StartTime,
             Price = dto.Price,
             TotalSeats = dto.TotalSeats,
-            IsActive = true,
         };
 
         await _eventRepo.AddAsync(eventEntity);

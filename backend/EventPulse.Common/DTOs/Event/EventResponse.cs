@@ -25,7 +25,6 @@ public class EventResponse
     public decimal Price { get; set; }
     public int TotalSeats { get; set; }
     public bool IsVerified { get; set; }
-    public bool IsActive { get; set; }
     
     // public string? PosterUrl { get; set; }
     public List<string> PosterUrls { get; set; } = [];

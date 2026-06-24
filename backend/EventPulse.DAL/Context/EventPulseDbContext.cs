@@ -47,7 +47,6 @@ namespace EventPulse.DAL.Context
                 entity.HasIndex(u => u.Email).IsUnique();
                 entity.Property(u => u.CreatedAt).HasDefaultValueSql("now()");
                 entity.Property(u => u.UpdatedAt).HasDefaultValueSql("now()");
-                entity.Property(u => u.IsActive).HasDefaultValue(true);
                 entity.Property(u => u.IsDeleted).HasDefaultValue(false);
 
                 entity.HasMany(u => u.UserRoles)
@@ -96,7 +95,6 @@ namespace EventPulse.DAL.Context
                 entity.HasIndex(c => c.Name).IsUnique();
                 entity.Property(c => c.CreatedAt).HasDefaultValueSql("now()");
                 entity.Property(c => c.UpdatedAt).HasDefaultValueSql("now()");
-                entity.Property(c => c.IsActive).HasDefaultValue(true);
                 entity.Property(c => c.IsDeleted).HasDefaultValue(false);
 
                 entity.HasQueryFilter(c => !c.IsDeleted);
@@ -109,7 +107,6 @@ namespace EventPulse.DAL.Context
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("now()");
-                entity.Property(e => e.IsActive).HasDefaultValue(true);
                 entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
                 entity.HasOne(e => e.Organizer)
@@ -183,7 +180,6 @@ namespace EventPulse.DAL.Context
                 entity.HasKey(v => v.Id);
                 entity.Property(v => v.CreatedAt).HasDefaultValueSql("now()");
                 entity.Property(v => v.UpdatedAt).HasDefaultValueSql("now()");
-                entity.Property(v => v.IsActive).HasDefaultValue(true);
                 entity.Property(v => v.IsDeleted).HasDefaultValue(false);
 
                 entity.HasOne(v => v.City)
