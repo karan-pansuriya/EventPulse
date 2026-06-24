@@ -92,8 +92,10 @@ export class EventDetailsComponent implements OnInit, OnDestroy {
       });
   }
 
+  private readonly fallbackImage = "/images/hero_image.png";
+
   getPosterUrl(url: string | null): string {
-    return url ? `${this.imageBaseUrl}/${url}` : '';
+    return url ? `${this.imageBaseUrl}/${url}` : this.fallbackImage;
   }
 
   retry(): void {

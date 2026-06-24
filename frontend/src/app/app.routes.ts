@@ -136,6 +136,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: APP_ROUTES.ORGANIZER.TOP_BOOKED,
+        loadComponent: () =>
+          import('./core/features/organizer/top-booked-events/top-booked-events.component').then(
+            (m) => m.TopBookedEventsComponent,
+          ),
+      },
+      {
         path: APP_ROUTES.ORGANIZER.PROFILE,
         loadComponent: () =>
           import('./core/features/organizer/profile/profile.component').then(

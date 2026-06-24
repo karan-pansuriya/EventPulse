@@ -571,6 +571,51 @@ public class EventService : BaseService, IEventService
         };
     }
 
+    public async Task<PagedResult<TopBookedEventDto>> GetTopBookedEventsForOrganizerAsync(PageRequest pageRequest)
+    {
+        int organizerId = GetUserId();
+
+        List<Event> allEvents = await _eventRepository.GetEventsByOrganizerIdAsync(organizerId);
+        List<Booking> allBookings = await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId);
+        List<Booking> allPaidBookings = allBookings.Where(b => b.PaymentStatus == PaymentStatus.Paid).ToList();
+
+        var bookingStats = allPaidBookings
+            .GroupBy(b => b.EventId)
+            .Select(g => new
+            {
+                EventId = g.Key,
+                TotalBookings = g.Sum(b => b.Quantity),
+                RevenueGenerated = g.Sum(b => b.TotalAmount),
+            })
+            .OrderByDescending(x => x.TotalBookings)
+            .ToList();
+
+        List<TopBookedEventDto> topBookedEvents = bookingStats
+            .Select(bs =>
+            {
+                Event? ev = allEvents.FirstOrDefault(e => e.Id == bs.EventId);
+                if (ev == null) return null;
+                TopBookedEventDto dto = _mapper.Map<TopBookedEventDto>(ev);
+                dto.TotalBookings = bs.TotalBookings;
+                dto.RevenueGenerated = bs.RevenueGenerated;
+                return dto;
+            })
+            .OfType<TopBookedEventDto>()
+            .ToList();
+
+        int totalCount = topBookedEvents.Count;
+        List<TopBookedEventDto> paged = topBookedEvents
+            .Skip((pageRequest.PageNumber - 1) * pageRequest.PageSize)
+            .Take(pageRequest.PageSize)
+            .ToList();
+
+        return new PagedResult<TopBookedEventDto>
+        {
+            Items = paged,
+            TotalCount = totalCount,
+        };
+    }
+
     public async Task<OrganizerDashboardDto> GetAdminDashboardDataAsync(int? organizerId = null)
     {
         var (currentWeekStart, currentWeekEnd) = GetCurrentWeekBounds();

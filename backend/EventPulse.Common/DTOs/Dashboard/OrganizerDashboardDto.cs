@@ -27,7 +27,6 @@ public class TopBookedEventDto
 {
     public int Id { get; set; }
     public string Title { get; set; } = "";
-    public string? PosterUrl { get; set; }
     public int TotalBookings { get; set; }
     public decimal RevenueGenerated { get; set; }
     public DateTime EventDate { get; set; }

@@ -297,6 +297,27 @@
     border-radius: 10px;
 }
 
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.view-all-btn {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #be185d;
+  text-decoration: none;
+  padding: 4px 12px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.view-all-btn:hover {
+  background: #fdf2f8;
+}
+
 .top-event-item {
     display: flex;
     align-items: center;

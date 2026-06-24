@@ -106,6 +106,13 @@ public class EventsController : BaseHelper
         return SuccessResponse(result);
     }
 
+    [HttpGet("top-booked")]
+    public async Task<IActionResult> GetTopBookedEvents([FromQuery] PageRequest pageRequest)
+    {
+        PagedResult<TopBookedEventDto> result = await _eventService.GetTopBookedEventsForOrganizerAsync(pageRequest);
+        return SuccessResponse(result);
+    }
+
     [HttpGet("attendees")]
     public async Task<IActionResult> GetAttendees([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {

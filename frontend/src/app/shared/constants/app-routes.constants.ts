@@ -28,6 +28,7 @@ export const APP_ROUTES = {
     EVENT_DETAILS: 'events/:id',
     ATTENDEES: 'attendees',
     CHECK_IN: 'check-in',
+    TOP_BOOKED: 'top-booked',
     PROFILE: 'profile',
   },
 

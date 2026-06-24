@@ -211,7 +211,12 @@
     <div class="row g-3 mb-4">
         <div class="col-12 col-lg-6">
             <div class="section-card">
-                <h5 class="section-title">Recent Attendees</h5>
+                <div class="section-header">
+                    <h5 class="section-title mb-0">Recent Attendees</h5>
+                    @if (data.topBookedEvents.length > 0) {
+                    <a routerLink="/organizer/attendees" class="view-all-btn">View All</a>
+                    }
+                </div>
                 @if (data.recentAttendees.length > 0) {
                 <div class="sales-table-scroll">
                     <table class="sales-table">
@@ -247,7 +252,12 @@
         </div>
         <div class="col-12 col-lg-6">
             <div class="section-card">
-                <h5 class="section-title">Top Events</h5>
+                <div class="section-header">
+                    <h5 class="section-title mb-0">Top Events</h5>
+                    @if (data.topBookedEvents.length > 0) {
+                    <a routerLink="/organizer/top-booked" class="view-all-btn">View All</a>
+                    }
+                </div>
                 @if (data.topBookedEvents.length > 0) {
                 <div class="top-event-scroll">
                     @for (ev of data.topBookedEvents; track ev.id; let i = $index) {

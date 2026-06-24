@@ -1,0 +1,24 @@
+<div class="top-booked-page">
+  <div class="page-header">
+    <div class="d-flex align-items-center gap-3">
+      <a routerLink="/organizer/dashboard" class="btn-back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </a>
+      <h1>Top Booked Events</h1>
+    </div>
+  </div>
+
+  <app-grid
+    [columns]="columns"
+    [data]="events"
+    [totalRecords]="totalRecords"
+    [currentPage]="currentPage"
+    [pageSize]="pageSize"
+    [trackByField]="'id'"
+    [isLoading]="loading"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+  />
+</div>
