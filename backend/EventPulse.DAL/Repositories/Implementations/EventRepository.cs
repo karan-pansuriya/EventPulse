@@ -179,48 +179,6 @@ public class EventRepository(EventPulseDbContext context) : IEventRepository
         return venue;
     }
 
-    public async Task<List<Booking>> GetBookingsByOrganizerIdAsync(int organizerId)
-    {
-        return await _context.Bookings
-            .AsNoTracking()
-            .Where(b => b.Event!.OrganizerId == organizerId)
-            .Include(b => b.User)
-            .Include(b => b.Event).ThenInclude(e => e!.Category)
-            .OrderByDescending(b => b.CreatedAt)
-            .ToListAsync();
-    }
-
-    public async Task<(List<EventAttendeeDto> Items, int TotalCount)> GetPagedBookingsByOrganizerIdAsync(int organizerId, int pageNumber, int pageSize)
-    {
-        IQueryable<Booking> query = _context.Bookings
-            .AsNoTracking()
-            .Where(b => b.Event!.OrganizerId == organizerId);
-
-        int totalCount = await query.CountAsync();
-
-        List<EventAttendeeDto> items = await query
-            .OrderByDescending(b => b.CreatedAt)
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .Select(b => new EventAttendeeDto
-            {
-                BookingId = b.Id,
-                UserId = b.UserId,
-                CustomerName = b.User != null ? b.User.Name: string.Empty,
-                CustomerEmail = b.User != null ? b.User.Email : string.Empty,
-                CustomerPhone = b.User != null ? b.User.Phone : null,
-                EventId = b.EventId,
-                EventTitle = b.Event != null ? b.Event.Title : string.Empty,
-                Quantity = b.Quantity,
-                TotalAmount = b.TotalAmount,
-                PaymentStatus = b.PaymentStatus.ToString(),
-                BookedAt = b.CreatedAt
-            })
-            .ToListAsync();
-
-        return (items, totalCount);
-    }
-
     public async Task<List<Event>> GetEventsByOrganizerIdAsync(int organizerId)
     {
         return await _context.Events

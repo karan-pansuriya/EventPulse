@@ -2,6 +2,7 @@ using EventPulse.BLL.DTOs.Booking;
 using EventPulse.Common.Models.Response;
 using EventPulse.Common.Models;
 using EventPulse.DAL.Entities;
+using EventPulse.BLL.DTOs.Event;
 
 namespace EventPulse.DAL.Repositories.Interfaces;
 
@@ -38,4 +39,10 @@ public interface IBookingRepository
     Task<PagedResult<AdminBookingResponse>> GetPagedBookingsAsync(PageRequest pageRequest);
 
     Task<bool> HasBookingsAsync(int eventId);
+
+    Task<(List<EventAttendeeDto> Items, int TotalCount)> GetPagedBookingsByOrganizerIdAsync(int organizerId, int pageNumber, int pageSize);
+
+    Task<List<Booking>> GetBookingsByOrganizerIdAsync(int organizerId);
+
+
 }

@@ -16,9 +16,12 @@ public class EventsController : BaseHelper
 {
     private readonly IEventService _eventService;
 
-    public EventsController(IEventService eventService)
+    private readonly IBookingService _bookingService;
+
+    public EventsController(IEventService eventService, IBookingService bookingService)
     {
         _eventService = eventService;
+        _bookingService = bookingService;
     }
 
     [Authorize(Policy = "AdminOnly")]
@@ -103,20 +106,6 @@ public class EventsController : BaseHelper
     public async Task<IActionResult> GetAdminRevenueTrend([FromQuery] string? period = "year", [FromQuery] int? organizerId = null)
     {
         List<MonthlyRevenueDto> result = await _eventService.GetAdminRevenueTrendAsync(period, organizerId);
-        return SuccessResponse(result);
-    }
-
-    [HttpGet("top-booked")]
-    public async Task<IActionResult> GetTopBookedEvents([FromQuery] PageRequest pageRequest)
-    {
-        PagedResult<TopBookedEventDto> result = await _eventService.GetTopBookedEventsForOrganizerAsync(pageRequest);
-        return SuccessResponse(result);
-    }
-
-    [HttpGet("attendees")]
-    public async Task<IActionResult> GetAttendees([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-    {
-        PagedResult<EventAttendeeDto> result = await _eventService.GetAttendeesAsync(pageNumber, pageSize);
         return SuccessResponse(result);
     }
 

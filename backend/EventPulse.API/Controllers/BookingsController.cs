@@ -1,5 +1,7 @@
 using EventPulse.API.Helpers;
 using EventPulse.BLL.DTOs.Booking;
+using EventPulse.BLL.DTOs.Dashboard;
+using EventPulse.BLL.DTOs.Event;
 using EventPulse.BLL.Interfaces;
 using EventPulse.Common.Models;
 using EventPulse.Common.Models.Response;
@@ -23,6 +25,20 @@ public class BookingsController : BaseHelper
     public async Task<IActionResult> GetPagedBookings([FromQuery] PageRequest pageRequest)
     {
         PagedResult<AdminBookingResponse> result = await _bookingService.GetPagedBookingsAsync(pageRequest);
+        return SuccessResponse(result);
+    }
+
+    [HttpGet("top-booked")]
+    public async Task<IActionResult> GetTopBookedEvents([FromQuery] PageRequest pageRequest)
+    {
+        PagedResult<TopBookedEventDto> result = await _bookingService.GetTopBookedEventsForOrganizerAsync(pageRequest);
+        return SuccessResponse(result);
+    }
+
+    [HttpGet("attendees")]
+    public async Task<IActionResult> GetAttendees([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        PagedResult<EventAttendeeDto> result = await _bookingService.GetAttendeesAsync(pageNumber, pageSize);
         return SuccessResponse(result);
     }
 }
