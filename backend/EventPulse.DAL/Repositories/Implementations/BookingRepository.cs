@@ -116,13 +116,37 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<Booking?> GetByPaymentIntentAsync(string paymentIntentId)
+    public async Task<BookingResponse?> GetByPaymentIntentAsync(string paymentIntentId)
     {
         return await _context.Bookings
             .AsNoTracking()
-            .Include(b => b.Event)
-            .Include(b => b.Tickets)
-            .FirstOrDefaultAsync(b => b.PaymentRef == paymentIntentId);
+            .Where(b => b.PaymentRef == paymentIntentId)
+            .Select(b => new BookingResponse
+            {
+                Id = b.Id,
+                UserId = b.UserId,
+                EventId = b.EventId,
+                EventTitle = b.Event!.Title,
+                UniqueCode = b.UniqueCode,
+                Quantity = b.Quantity,
+                PricePerTicket = b.PricePerTicket,
+                TotalAmount = b.TotalAmount,
+                PaymentStatus = b.PaymentStatus.ToString(),
+                PaymentRef = b.PaymentRef,
+                Tickets = b.Tickets.Select(t => new TicketDto
+                {
+                    Id = t.Id,
+                    TicketCode = t.TicketCode,
+                    QrCodeUrl = t.QrCodePath != null ? $"{t.QrCodePath}" : null,
+                    PdfUrl = t.PdfPath != null ? $"{t.PdfPath}" : null,
+                    IsUsed = t.IsUsed,
+                    UsedAt = t.UsedAt,
+                }).ToList(),
+                TicketCodes = b.Tickets.Select(t => t.TicketCode).ToList(),
+                RemainingSeats = b.Event!.TotalSeats,
+                CreatedAt = b.CreatedAt,
+            })
+            .FirstOrDefaultAsync();
     }
 
     public async Task<Booking?> GetBookingByTicketIdAsync(int ticketId)
@@ -130,33 +154,53 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
         return await _context.Bookings
             .AsNoTracking()
             .Where(b => b.Tickets.Any(t => t.Id == ticketId))
-            .Include(b => b.Tickets)
+            .Select(b => new Booking
+            {
+                Id = b.Id,
+                UserId = b.UserId,
+                EventId = b.EventId,
+                Tickets = b.Tickets.Select(t => new Ticket
+                {
+                    Id = t.Id,
+                    TicketCode = t.TicketCode,
+                    QrCodePath = t.QrCodePath,
+                    PdfPath = t.PdfPath,
+                }).ToList()
+            })
             .FirstOrDefaultAsync();
     }
 
-    public async Task<Ticket?> GetTicketByCodeAsync(string ticketCode)
+    public async Task<TicketCheckInProjection?> GetTicketByCodeAsync(string ticketCode)
     {
         return await _context.Tickets
-            .Include(t => t.Booking)
-                .ThenInclude(b => b.Event)
-            .Include(t => t.Booking)
-                .ThenInclude(b => b.User)
-            .FirstOrDefaultAsync(t => t.TicketCode == ticketCode);
+            .AsNoTracking()
+            .Where(t => t.TicketCode == ticketCode)
+            .Select(t => new TicketCheckInProjection
+            {
+                TicketId = t.Id,
+                TicketCode = t.TicketCode,
+                IsUsed = t.IsUsed,
+                UsedAt = t.UsedAt,
+                BookingId = t.Booking!.Id,
+                EventId = t.Booking.Event!.Id,
+                EventTitle = t.Booking.Event.Title,
+                EventOrganizerId = t.Booking.Event.OrganizerId,
+                AttendeeName = t.Booking.User != null
+                    ? (t.Booking.User.Name ?? t.Booking.User.Email)
+                    : null,
+            })
+            .FirstOrDefaultAsync();
     }
 
-    public async Task MarkTicketAsUsedAsync(Ticket ticket)
+    public async Task MarkTicketAsUsedAsync(int ticketId)
     {
-        Ticket? tracked = _context.ChangeTracker.Entries<Ticket>()
-            .Select(e => e.Entity)
-            .FirstOrDefault(e => e.Id == ticket.Id);
-
-        if (tracked != null)
+        Ticket? ticket = await _context.Tickets.FindAsync(ticketId);
+        if (ticket != null)
         {
-            tracked.IsUsed = ticket.IsUsed;
-            tracked.UsedAt = ticket.UsedAt;
+            ticket.IsUsed = true;
+            ticket.UsedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
         }
-
-        await _context.SaveChangesAsync();
     }
 
     public async Task<Booking?> GetBookingWithDetailsAsync(int bookingId)
@@ -186,14 +230,33 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<Booking>> GetUserBookingsAsync(int userId, int bookingId)
+    public async Task<List<MyTicketResponse>> GetUserBookingsAsync(int userId, int bookingId)
     {
         return await _context.Bookings
             .AsNoTracking()
             .Where(b => b.UserId == userId && b.PaymentStatus == PaymentStatus.Paid && b.Id == bookingId)
-            .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
-            .Include(b => b.Tickets)
             .OrderByDescending(b => b.CreatedAt)
+            .Select(b => new MyTicketResponse
+            {
+                BookingId = b.Id,
+                BookingCode = b.UniqueCode,
+                EventTitle = b.Event!.Title,
+                EventDate = b.Event.EventDate,
+                VenueName = b.Event.Venue != null ? b.Event.Venue.Name : null,
+                VenueCity = b.Event != null && b.Event.Venue != null && b.Event.Venue.City != null ? b.Event.Venue.City.Name : null,
+                Quantity = b.Quantity,
+                TotalAmount = b.TotalAmount,
+                CreatedAt = b.CreatedAt,
+                Tickets = b.Tickets.Select(t => new TicketDto
+                {
+                    Id = t.Id,
+                    TicketCode = t.TicketCode,
+                    QrCodeUrl = t.QrCodePath != null ? $"{t.QrCodePath}" : null,
+                    PdfUrl = t.PdfPath != null ? $"{t.PdfPath}" : null,
+                    IsUsed = t.IsUsed,
+                    UsedAt = t.UsedAt,
+                }).ToList()
+            })
             .ToListAsync();
     }
 
@@ -217,12 +280,12 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
             .ToListAsync();
     }
 
-    public async Task<PagedResult<PagedBookingProjection>> GetPagedBookingsAsync(PageRequest pageRequest)
+    public async Task<PagedResult<AdminBookingResponse>> GetPagedBookingsAsync(PageRequest pageRequest)
     {
-        IQueryable<PagedBookingProjection> query = _context.Bookings
+        IQueryable<AdminBookingResponse> query = _context.Bookings
             .AsNoTracking()
             .Where(b => b.PaymentStatus == PaymentStatus.Paid)
-            .Select(b => new PagedBookingProjection
+            .Select(b => new AdminBookingResponse
             {
                 Id = b.Id,
                 UserId = b.UserId,
@@ -233,54 +296,62 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
                 VenueName = b.Event.Venue != null ? b.Event.Venue.Name : null,
                 Quantity = b.Quantity,
                 TotalAmount = b.TotalAmount,
-                PaymentStatus = b.PaymentStatus,
+                PaymentStatus = b.PaymentStatus.ToString(),
                 UniqueCode = b.UniqueCode,
                 CreatedAt = b.CreatedAt,
             });
 
         int totalCount = await query.CountAsync();
 
-        List<PagedBookingProjection> items = await query
+        List<AdminBookingResponse> items = await query
             .OrderByDescending(b => b.CreatedAt)
             .Skip((pageRequest.PageNumber - 1) * pageRequest.PageSize)
             .Take(pageRequest.PageSize)
             .ToListAsync();
 
-        return new PagedResult<PagedBookingProjection>
+        return new PagedResult<AdminBookingResponse>
         {
             Items = items,
             TotalCount = totalCount
         };
     }
 
-    public async Task<List<Booking>> GetUserAllBookingsAsync(int userId)
+    public async Task<PagedResult<MyTicketResponse>> GetPagedUserBookingsAsync(int userId, PageRequest pageRequest)
     {
-        return await _context.Bookings
+        IQueryable<MyTicketResponse> query = _context.Bookings
             .AsNoTracking()
             .Where(b => b.UserId == userId && b.PaymentStatus == PaymentStatus.Paid)
-            .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
-            .Include(b => b.Tickets)
-            .OrderBy(b => b.Event!.EventDate)
-            .ToListAsync();
-    }
-
-    public async Task<PagedResult<Booking>> GetPagedUserBookingsAsync(int userId, PageRequest pageRequest)
-    {
-        IQueryable<Booking> query = _context.Bookings
-            .AsNoTracking()
-            .Where(b => b.UserId == userId && b.PaymentStatus == PaymentStatus.Paid)
-            .Include(b => b.Event)!.ThenInclude(e => e!.Venue)
-            .Include(b => b.Tickets);
+            .Select(b => new MyTicketResponse
+            {
+                BookingId = b.Id,
+                BookingCode = b.UniqueCode,
+                EventTitle = b.Event!.Title,
+                EventDate = b.Event.EventDate,
+                VenueName = b.Event.Venue != null ? b.Event.Venue.Name : null,
+                VenueCity = b.Event != null && b.Event.Venue != null && b.Event.Venue.City != null ? b.Event.Venue.City.Name : null,
+                Quantity = b.Quantity,
+                TotalAmount = b.TotalAmount,
+                CreatedAt = b.CreatedAt,
+                Tickets = b.Tickets.Select(t => new TicketDto
+                {
+                    Id = t.Id,
+                    TicketCode = t.TicketCode,
+                    QrCodeUrl = t.QrCodePath != null ? $"{t.QrCodePath}" : null,
+                    PdfUrl = t.PdfPath != null ? $"{t.PdfPath}" : null,
+                    IsUsed = t.IsUsed,
+                    UsedAt = t.UsedAt,
+                }).ToList()
+            });
 
         int totalCount = await query.CountAsync();
 
-        List<Booking> items = await query
-            .OrderBy(b => b.Event!.EventDate)
+        List<MyTicketResponse> items = await query
+            .OrderBy(b => b.EventDate)
             .Skip((pageRequest.PageNumber - 1) * pageRequest.PageSize)
             .Take(pageRequest.PageSize)
             .ToListAsync();
 
-        return new PagedResult<Booking>
+        return new PagedResult<MyTicketResponse>
         {
             Items = items,
             TotalCount = totalCount

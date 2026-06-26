@@ -92,7 +92,7 @@ namespace EventPulse.DAL.Context
             {
                 entity.ToTable("categories");
                 entity.HasKey(c => c.Id);
-                entity.HasIndex(c => c.Name).IsUnique();
+                entity.HasIndex(c => c.Name).IsUnique().HasFilter("\"is_deleted\" = false");
                 entity.Property(c => c.CreatedAt).HasDefaultValueSql("now()");
                 entity.Property(c => c.UpdatedAt).HasDefaultValueSql("now()");
                 entity.Property(c => c.IsDeleted).HasDefaultValue(false);
@@ -308,12 +308,6 @@ namespace EventPulse.DAL.Context
                 new Category { Id = 21, Name = "Webinars", CreatedAt = now },
                 new Category { Id = 22, Name = "Career & Jobs", CreatedAt = now }
             );
-        }
-
-        public override int SaveChanges()
-        {
-            StampUpdatedAt();
-            return base.SaveChanges();
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

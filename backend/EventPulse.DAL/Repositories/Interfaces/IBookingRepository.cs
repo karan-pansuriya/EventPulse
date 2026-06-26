@@ -17,27 +17,25 @@ public interface IBookingRepository
 
     Task MarkPaymentFailedAsync(string paymentIntentId);
 
-    Task<Booking?> GetByPaymentIntentAsync(string paymentIntentId);
+    Task<BookingResponse?> GetByPaymentIntentAsync(string paymentIntentId);
 
     Task<Booking?> GetBookingWithDetailsAsync(int bookingId);
 
     Task<Booking?> GetBookingByTicketIdAsync(int ticketId);
 
-    Task<Ticket?> GetTicketByCodeAsync(string ticketCode);
+    Task<TicketCheckInProjection?> GetTicketByCodeAsync(string ticketCode);
 
-    Task MarkTicketAsUsedAsync(Ticket ticket);
+    Task MarkTicketAsUsedAsync(int ticketId);
 
     Task UpdateTicketPathsAsync(ICollection<DAL.Entities.Ticket> tickets);
 
-    Task<List<Booking>> GetUserBookingsAsync(int userId, int bookingId);
+    Task<List<MyTicketResponse>> GetUserBookingsAsync(int userId, int bookingId);
 
-    Task<List<Booking>> GetUserAllBookingsAsync(int userId);
-
-    Task<PagedResult<Booking>> GetPagedUserBookingsAsync(int userId, PageRequest pageRequest);
+    Task<PagedResult<MyTicketResponse>> GetPagedUserBookingsAsync(int userId, PageRequest pageRequest);
 
     Task<List<BookingProjection>> GetAllBookingsAsync();
 
-    Task<PagedResult<PagedBookingProjection>> GetPagedBookingsAsync(PageRequest pageRequest);
+    Task<PagedResult<AdminBookingResponse>> GetPagedBookingsAsync(PageRequest pageRequest);
 
     Task<bool> HasBookingsAsync(int eventId);
 }

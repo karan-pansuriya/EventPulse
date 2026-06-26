@@ -17,28 +17,7 @@ public class BookingService : IBookingService
 
     public async Task<PagedResult<AdminBookingResponse>> GetPagedBookingsAsync(PageRequest pageRequest)
     {
-        PagedResult<PagedBookingProjection> paged = await _bookingRepository.GetPagedBookingsAsync(pageRequest);
-
-        var result = new PagedResult<AdminBookingResponse>
-        {
-            Items = paged.Items.Select(b => new AdminBookingResponse
-            {
-                Id = b.Id,
-                UserId = b.UserId,
-                CustomerName = b.CustomerName,
-                CustomerEmail = b.CustomerEmail,
-                EventId = b.EventId,
-                EventTitle = b.EventTitle,
-                VenueName = b.VenueName ?? "",
-                Quantity = b.Quantity,
-                TotalAmount = b.TotalAmount,
-                PaymentStatus = b.PaymentStatus.ToString(),
-                UniqueCode = b.UniqueCode,
-                CreatedAt = b.CreatedAt,
-            }),
-            TotalCount = paged.TotalCount,
-        };
-
-        return result;
+        return await _bookingRepository.GetPagedBookingsAsync(pageRequest);
+        
     }
 }

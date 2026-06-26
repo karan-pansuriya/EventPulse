@@ -23,9 +23,30 @@ public class AuthRepository(EventPulseDbContext context) : IAuthRepository
     {
         return await _context.Users
             .IgnoreQueryFilters()
-            .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+            .Where(u => u.Email == normalizedEmail)
+            .Select(u => new User
+            {
+                Id = u.Id,
+                Name = u.Name,
+                Email = u.Email,
+                Phone = u.Phone,
+                PasswordHash = u.PasswordHash,
+                PasswordSalt = u.PasswordSalt,
+                IsDeleted = u.IsDeleted,
+                CreatedAt = u.CreatedAt,
+                UpdatedAt = u.UpdatedAt,
+                UserRoles = u.UserRoles.Select(ur => new UserRole
+                {
+                    UserId = ur.UserId,
+                    RoleId = ur.RoleId,
+                    Role = new Role
+                    {
+                        Id = ur.Role.Id,
+                        Name = ur.Role.Name
+                    }
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
     }
 
     public async Task<RefreshToken?> GetRefreshTokenWithUserAsync(string token)

@@ -1,3 +1,4 @@
+using EventPulse.BLL.DTOs.Category;
 using EventPulse.DAL.Context;
 using EventPulse.DAL.Entities;
 using EventPulse.DAL.Repositories.Interfaces;
@@ -9,11 +10,16 @@ public class CategoryRepository(EventPulseDbContext context) : ICategoryReposito
 {
     private readonly EventPulseDbContext _context = context;
 
-    public async Task<IEnumerable<Category>> GetAllCategorysAsync()
+    public async Task<IEnumerable<CategoryResponse>> GetAllCategorysAsync()
     {
         return await _context.Categories
             .AsNoTracking()
             .OrderBy(c => c.Name)
+            .Select(c => new CategoryResponse
+            {
+                Id = c.Id,
+                Name = c.Name,
+            })
             .ToListAsync();
     }
 
@@ -28,13 +34,6 @@ public class CategoryRepository(EventPulseDbContext context) : ICategoryReposito
     {
         return await _context.Categories
             .AnyAsync(c => EF.Functions.ILike(c.Name, name));
-    }
-
-    public async Task<Category?> GetDeletedCategoryByNameAsync(string name)
-    {
-        return await _context.Categories
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(c => EF.Functions.ILike(c.Name, name));
     }
 
     public async Task AddCategoryAsync(Category category)

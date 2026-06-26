@@ -1,3 +1,4 @@
+using EventPulse.BLL.Common;
 using EventPulse.BLL.DTOs.User;
 using EventPulse.Common.Models;
 using EventPulse.Common.Models.Response;
@@ -53,11 +54,17 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
         };
     }
 
-    public async Task<List<User>> GetOrganizersAsync()
+    public async Task<List<OrganizerResponse>> GetOrganizersAsync()
     {
         return await _context.Users
             .AsNoTracking()
-            .Where(u => u.UserRoles.Any(ur => ur.Role.Id == 2))
+            .Where(u => u.UserRoles.Any(ur => ur.Role.Id == RoleId.Organizer))
+            .Select(u => new OrganizerResponse
+            {
+                Id = u.Id,
+                Name = u.Name,
+                Email = u.Email,
+            })
             .ToListAsync();
     }
 
@@ -68,7 +75,6 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
 
         user.IsDeleted = true;
         user.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
     }
 
     public async Task RemoveUserRolesAsync(int userId, List<int> roleIds)
@@ -89,7 +95,5 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
             user.IsDeleted = true;
             user.UpdatedAt = DateTime.UtcNow;
         }
-
-        await _context.SaveChangesAsync();
     }
 }

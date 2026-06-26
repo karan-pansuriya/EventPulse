@@ -4,7 +4,7 @@ namespace EventPulse.BLL.DTOs.Auth
 {
 public class LoginRequest
 {
-    [Required]
+    [Required(ErrorMessage = "Email is required.")]
     [MaxLength(255)]
     [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Invalid email format.")]
     public string Email { get; set; } = string.Empty;

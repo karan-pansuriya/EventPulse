@@ -19,38 +19,11 @@ public class CategoryService : ICategoryService
 
     public async Task<IEnumerable<CategoryResponse>> GetAllCategorysAsync()
     {
-        IEnumerable<Category> categories = await _categoryRepository.GetAllCategorysAsync();
-
-        return categories.Select(c => new CategoryResponse
-        {
-            Id = c.Id,
-            Name = c.Name,
-        });
+        return await _categoryRepository.GetAllCategorysAsync();
     }
 
     public async Task<CategoryResponse> CreateCategoryAsync(CreateCategoryDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Name))
-            throw new BadRequestException("Category name is required.");
-
-        if (dto.Name.Length > 100)
-            throw new BadRequestException("Category name must be at most 100 characters.");
-
-        Category? deleted = await _categoryRepository.GetDeletedCategoryByNameAsync(dto.Name);
-        if (deleted is not null)
-        {
-            deleted.IsDeleted = false;
-            deleted.UpdatedAt = DateTime.UtcNow;
-            _categoryRepository.UpdateCategory(deleted);
-            await _unitOfWork.SaveAsync();
-
-            return new CategoryResponse
-            {
-                Id = deleted.Id,
-                Name = deleted.Name,
-            };
-        }
-
         if (await _categoryRepository.CategoryNameExistsAsync(dto.Name))
             throw new BadRequestException("A category with this name already exists.");
 
@@ -71,17 +44,10 @@ public class CategoryService : ICategoryService
 
     public async Task<CategoryResponse> UpdateCategoryAsync(int id, UpdateCategoryDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Name))
-            throw new BadRequestException("Category name is required.");
-
-        if (dto.Name.Length > 100)
-            throw new BadRequestException("Category name must be at most 100 characters.");
-
         Category? category = await _categoryRepository.GetCategoryByIdAsync(id)
             ?? throw new NotFoundException("Category not found.");
 
-        if (!string.Equals(category.Name, dto.Name, StringComparison.OrdinalIgnoreCase)
-            && await _categoryRepository.CategoryNameExistsAsync(dto.Name))
+        if (await _categoryRepository.CategoryNameExistsAsync(dto.Name))
             throw new BadRequestException("A category with this name already exists.");
 
         category.Name = dto.Name;

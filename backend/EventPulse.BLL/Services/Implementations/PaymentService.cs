@@ -148,13 +148,15 @@ public class PaymentService : BaseService, IPaymentService
 
     public async Task<BookingResponse?> GetByPaymentIntentAsync(string paymentIntentId)
     {
-        Booking? booking = await _bookingRepository.GetByPaymentIntentAsync(paymentIntentId);
-        return booking == null ? null : _mapper.Map<BookingResponse>(booking);
+        BookingResponse? booking = await _bookingRepository.GetByPaymentIntentAsync(paymentIntentId);
+        if (booking == null)
+            throw new NotFoundException("Booking not found.");
+        return booking;
     }
 
     public async Task<object> GetPaymentStatusAsync(string paymentIntentId)
     {
-        Booking? booking = await _bookingRepository.GetByPaymentIntentAsync(paymentIntentId);
+        BookingResponse? booking = await _bookingRepository.GetByPaymentIntentAsync(paymentIntentId);
         if (booking == null)
             return new { status = "not_found" };
 

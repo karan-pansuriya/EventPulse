@@ -6,7 +6,6 @@ using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
 using EventPulse.DAL.Entities;
 using EventPulse.DAL.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventPulse.BLL.Services
 {
@@ -109,7 +108,7 @@ namespace EventPulse.BLL.Services
                 .FirstOrDefault(r => r.Id == request.RoleId);
 
             if (matchedRole is null)
-                throw new UnauthorizedAccessException("Invalid email or password.");
+                throw new ForbiddenException("You do not have access with the selected role.");
 
             List<int> roleIds = new List<int> { request.RoleId };
             string accessToken = jwtService.GenerateAccessToken(user, roleIds);
