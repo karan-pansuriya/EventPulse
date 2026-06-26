@@ -124,7 +124,7 @@ public class EventService : BaseService, IEventService
         _cache.Set(cacheKey, full, CacheDuration);
         return full;
     }
-    public async Task<PagedResult<EventListResponse>>   GetCustomerPagedEventsAsync(EventFilterRequest filter)
+    public async Task<PagedResult<EventListResponse>> GetCustomerPagedEventsAsync(EventFilterRequest filter)
     {
         string cacheKey = $"events_customer_{JsonSerializer.Serialize(filter)}";
 
@@ -225,19 +225,6 @@ public class EventService : BaseService, IEventService
         InvalidateListCaches(eventEntity.OrganizerId);
     }
 
-    public async Task<PagedResult<EventAttendeeDto>> GetAttendeesAsync(int pageNumber = 1, int pageSize = 10)
-    {
-        int organizerId = GetUserId();
-
-        (List<EventAttendeeDto> bookings, int totalCount) = await _eventRepository.GetPagedBookingsByOrganizerIdAsync(organizerId, pageNumber, pageSize);
-
-        return new PagedResult<EventAttendeeDto>
-        {
-            Items = bookings,
-            TotalCount = totalCount,
-        };
-    }
-
     public async Task<EventResponse> CreateEventAsync(CreateEventDto dto, List<(byte[] ImageBytes, string FileName)>? posterImages)
     {
         int userRoleId = GetActiveRoleId() ?? throw new UnauthorizedAccessException("Active role not found.");
@@ -257,7 +244,7 @@ public class EventService : BaseService, IEventService
         if (dto.EventDate.Date == DateTime.Today && dto.StartTime <= DateTime.Now.TimeOfDay)
             throw new BadRequestException("Event start time must be in the future.");
 
-        Event? duplicate = await _eventRepository.GetEventByDateVenueAsync( dto.EventDate, dto.VenueName);
+        Event? duplicate = await _eventRepository.GetEventByDateVenueAsync(dto.EventDate, dto.VenueName);
         if (duplicate != null)
             throw new BadRequestException("An event with the same date, and venue already exists.");
 
@@ -338,7 +325,7 @@ public class EventService : BaseService, IEventService
             await _unitOfWork.SaveAsync();
         }
 
-        Event? duplicate = await _eventRepository.GetEventByDateVenueAsync( dto.EventDate, dto.VenueName ?? string.Empty);
+        Event? duplicate = await _eventRepository.GetEventByDateVenueAsync(dto.EventDate, dto.VenueName ?? string.Empty);
         if (duplicate != null && duplicate.Id != id)
             throw new BadRequestException("An event with the same title, date, and venue already exists.");
 
@@ -453,7 +440,7 @@ public class EventService : BaseService, IEventService
         DateTime lastWeekStart = currentWeekStart.AddDays(-7);
 
         List<Event> allEvents = await _eventRepository.GetEventsByOrganizerIdAsync(organizerId);
-        List<Booking> allBookings = await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId);
+        List<Booking> allBookings = await _bookingRepository.GetBookingsByOrganizerIdAsync(organizerId);
         List<Booking> allPaidBookings = allBookings.Where(b => b.PaymentStatus == PaymentStatus.Paid).ToList();
 
         int totalEvents = allEvents.Count;
@@ -561,51 +548,6 @@ public class EventService : BaseService, IEventService
         };
     }
 
-    public async Task<PagedResult<TopBookedEventDto>> GetTopBookedEventsForOrganizerAsync(PageRequest pageRequest)
-    {
-        int organizerId = GetUserId();
-
-        List<Event> allEvents = await _eventRepository.GetEventsByOrganizerIdAsync(organizerId);
-        List<Booking> allBookings = await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId);
-        List<Booking> allPaidBookings = allBookings.Where(b => b.PaymentStatus == PaymentStatus.Paid).ToList();
-
-        var bookingStats = allPaidBookings
-            .GroupBy(b => b.EventId)
-            .Select(g => new
-            {
-                EventId = g.Key,
-                TotalBookings = g.Sum(b => b.Quantity),
-                RevenueGenerated = g.Sum(b => b.TotalAmount),
-            })
-            .OrderByDescending(x => x.TotalBookings)
-            .ToList();
-
-        List<TopBookedEventDto> topBookedEvents = bookingStats
-            .Select(bs =>
-            {
-                Event? ev = allEvents.FirstOrDefault(e => e.Id == bs.EventId);
-                if (ev == null) return null;
-                TopBookedEventDto dto = _mapper.Map<TopBookedEventDto>(ev);
-                dto.TotalBookings = bs.TotalBookings;
-                dto.RevenueGenerated = bs.RevenueGenerated;
-                return dto;
-            })
-            .OfType<TopBookedEventDto>()
-            .ToList();
-
-        int totalCount = topBookedEvents.Count;
-        List<TopBookedEventDto> paged = topBookedEvents
-            .Skip((pageRequest.PageNumber - 1) * pageRequest.PageSize)
-            .Take(pageRequest.PageSize)
-            .ToList();
-
-        return new PagedResult<TopBookedEventDto>
-        {
-            Items = paged,
-            TotalCount = totalCount,
-        };
-    }
-
     public async Task<OrganizerDashboardDto> GetAdminDashboardDataAsync(int? organizerId = null)
     {
         var (currentWeekStart, currentWeekEnd) = GetCurrentWeekBounds();
@@ -618,7 +560,7 @@ public class EventService : BaseService, IEventService
         List<BookingProjection> allPaidBookings;
         if (organizerId.HasValue)
         {
-            allPaidBookings = (await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId.Value))
+            allPaidBookings = (await _bookingRepository.GetBookingsByOrganizerIdAsync(organizerId.Value))
                 .Where(b => b.PaymentStatus == PaymentStatus.Paid)
                 .Select(b => new BookingProjection
                 {
@@ -723,7 +665,7 @@ public class EventService : BaseService, IEventService
     public async Task<List<MonthlyRevenueDto>> GetOrganizerRevenueTrendAsync(string? period = "year")
     {
         int organizerId = GetUserId();
-        List<Booking> bookings = await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId);
+        List<Booking> bookings = await _bookingRepository.GetBookingsByOrganizerIdAsync(organizerId);
         List<BookingProjection> paidBookings = bookings
             .Where(b => b.PaymentStatus == PaymentStatus.Paid)
             .Select(b => new BookingProjection
@@ -745,7 +687,7 @@ public class EventService : BaseService, IEventService
         List<BookingProjection> paidBookings;
         if (organizerId.HasValue)
         {
-            paidBookings = (await _eventRepository.GetBookingsByOrganizerIdAsync(organizerId.Value))
+            paidBookings = (await _bookingRepository.GetBookingsByOrganizerIdAsync(organizerId.Value))
                 .Where(b => b.PaymentStatus == PaymentStatus.Paid)
                 .Select(b => new BookingProjection
                 {
