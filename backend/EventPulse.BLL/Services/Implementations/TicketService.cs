@@ -5,6 +5,7 @@ using EventPulse.Common.Models;
 using EventPulse.Common.Models.Response;
 using EventPulse.DAL.Entities;
 using EventPulse.DAL.Repositories.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
 namespace EventPulse.BLL.Services;
@@ -12,23 +13,25 @@ namespace EventPulse.BLL.Services;
 public class TicketService : BaseService, ITicketService
 {
     private readonly IBookingRepository _bookingRepository;
-    private readonly string _webRootPath;
-
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IWebHostEnvironment _environment;
     public TicketService(
         IBookingRepository bookingRepository,
+        IUnitOfWork unitOfWork,
         IHttpContextAccessor httpContextAccessor,
-        string webRootPath)
+        IWebHostEnvironment environment)
         : base(httpContextAccessor)
     {
         _bookingRepository = bookingRepository;
-        _webRootPath = webRootPath;
+        _unitOfWork = unitOfWork;
+        _environment = environment;
     }
 
     public async Task<List<MyTicketResponse>> GetMyTicketsAsync(int bookingId)
     {
         int userId = GetUserId();
         return await _bookingRepository.GetUserBookingsAsync(userId, bookingId);
-        
+
     }
 
     public async Task<PagedResult<MyTicketResponse>> GetAllMyTicketsAsync(PageRequest pageRequest)
@@ -49,7 +52,7 @@ public class TicketService : BaseService, ITicketService
         if (ticket?.PdfPath == null)
             throw new NotFoundException("PDF not available for this ticket.");
 
-        string fullPath = Path.Combine(_webRootPath, ticket.PdfPath);
+        string fullPath = Path.Combine(_environment.WebRootPath, ticket.PdfPath);
         if (!File.Exists(fullPath))
             throw new NotFoundException("PDF file not found on server.");
 
@@ -70,6 +73,7 @@ public class TicketService : BaseService, ITicketService
             throw new BadRequestException("This ticket has already been checked in.");
 
         await _bookingRepository.MarkTicketAsUsedAsync(ticketInfo.TicketId);
+        await _unitOfWork.SaveAsync();
 
         return new CheckInResponse
         {

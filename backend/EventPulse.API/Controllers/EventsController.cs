@@ -1,5 +1,4 @@
 using EventPulse.API.Helpers;
-using EventPulse.BLL.Common;
 using EventPulse.BLL.DTOs.Dashboard;
 using EventPulse.BLL.DTOs.Event;
 using EventPulse.BLL.Interfaces;
@@ -16,12 +15,9 @@ public class EventsController : BaseHelper
 {
     private readonly IEventService _eventService;
 
-    private readonly IBookingService _bookingService;
-
-    public EventsController(IEventService eventService, IBookingService bookingService)
+    public EventsController(IEventService eventService)
     {
         _eventService = eventService;
-        _bookingService = bookingService;
     }
 
     [Authorize(Policy = "AdminOnly")]

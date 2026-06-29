@@ -38,7 +38,6 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
         };
 
         _context.Bookings.Add(booking);
-        await _context.SaveChangesAsync();
 
         return booking;
     }
@@ -66,37 +65,33 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
 
         try
         {
-            Event? tracked = _context.ChangeTracker.Entries<Event>()
-                .Select(e => e.Entity)
-                .FirstOrDefault(e => e.Id == existing.EventId);
-            if (tracked != null)
-                _context.Entry(tracked).State = EntityState.Detached;
+        Event? tracked = _context.ChangeTracker.Entries<Event>()
+            .Select(e => e.Entity)
+            .FirstOrDefault(e => e.Id == existing.EventId);
+        if (tracked != null)
+            _context.Entry(tracked).State = EntityState.Detached;
 
-            await _context.Database.ExecuteSqlRawAsync(
-                "SELECT 1 FROM events WHERE id = {0} AND NOT is_deleted FOR UPDATE", existing.EventId);
+        await _context.Database.ExecuteSqlRawAsync(
+            "SELECT 1 FROM events WHERE id = {0} AND NOT is_deleted FOR UPDATE", existing.EventId);
 
-            Event eventEntity = await _context.Events.FindAsync(existing.EventId)
-                ?? throw new InvalidOperationException("Event not found.");
+        Event eventEntity = await _context.Events.FindAsync(existing.EventId)
+            ?? throw new InvalidOperationException("Event not found.");
 
-            if (existing.Quantity > eventEntity.TotalSeats)
-                throw new InvalidOperationException($"Only {eventEntity.TotalSeats} seats available.");
+        if (existing.Quantity > eventEntity.TotalSeats)
+            throw new InvalidOperationException($"Only {eventEntity.TotalSeats} seats available.");
 
-            eventEntity.TotalSeats -= existing.Quantity;
-            existing.PaymentStatus = PaymentStatus.Paid;
+        eventEntity.TotalSeats -= existing.Quantity;
+        existing.PaymentStatus = PaymentStatus.Paid;
 
-            // Generate one unique GUID ticket code per seat
-            for (int i = 0; i < existing.Quantity; i++)
+        for (int i = 0; i < existing.Quantity; i++)
+        {
+            existing.Tickets.Add(new Ticket
             {
-                existing.Tickets.Add(new Ticket
-                {
-                    TicketCode = Guid.NewGuid().ToString("N").ToUpper(),
-                });
-            }
+                TicketCode = Guid.NewGuid().ToString("N").ToUpper(),
+            });
+        }
 
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return (existing, eventEntity.TotalSeats);
+        return (existing, eventEntity.TotalSeats);
         }
         catch
         {
@@ -114,7 +109,6 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
             return;
 
         booking.PaymentStatus = PaymentStatus.Failed;
-        await _context.SaveChangesAsync();
     }
 
     public async Task<BookingResponse?> GetByPaymentIntentAsync(string paymentIntentId)
@@ -200,7 +194,6 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
         {
             ticket.IsUsed = true;
             ticket.UsedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
         }
     }
 
@@ -228,7 +221,6 @@ public class BookingRepository(EventPulseDbContext context) : IBookingRepository
                 tracked.PdfPath = ticket.PdfPath;
             }
         }
-        await _context.SaveChangesAsync();
     }
 
     public async Task<List<MyTicketResponse>> GetUserBookingsAsync(int userId, int bookingId)

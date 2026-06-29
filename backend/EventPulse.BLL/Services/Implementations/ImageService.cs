@@ -1,5 +1,6 @@
 using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 
 namespace EventPulse.BLL.Services;
 
@@ -12,11 +13,10 @@ public class ImageService : IImageService
 
     private const long MaxFileSize = 5 * 1024 * 1024;
 
-    private readonly string _webRootPath;
-
-    public ImageService(string webRootPath)
+    private readonly IWebHostEnvironment _environment;
+    public ImageService(IWebHostEnvironment environment)
     {
-        _webRootPath = webRootPath;
+        _environment = environment;
     }
 
     public async Task<string> SaveImageAsync(byte[] imageBytes, string fileName, string subfolder)
@@ -29,7 +29,7 @@ public class ImageService : IImageService
             throw new BadRequestException("File size exceeds the maximum allowed size of 5MB.");
 
         string relativeFolder = Path.Combine("uploads", subfolder);
-        string folderPath = Path.Combine(_webRootPath, relativeFolder);
+        string folderPath = Path.Combine(_environment.WebRootPath, relativeFolder);
         Directory.CreateDirectory(folderPath);
 
         string uniqueFileName = $"{Guid.NewGuid()}{extension}";
@@ -45,7 +45,7 @@ public class ImageService : IImageService
         if (string.IsNullOrWhiteSpace(relativePath))
             return;
 
-        string fullPath = Path.Combine(_webRootPath, relativePath);
+        string fullPath = Path.Combine(_environment.WebRootPath, relativePath);
         if (File.Exists(fullPath))
             File.Delete(fullPath);
     }

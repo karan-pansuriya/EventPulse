@@ -23,11 +23,6 @@ public class UserService : IUserService
         return await _userRepository.GetPagedUsersAsync(pageRequest, roleId);
     }
 
-    public async Task<List<OrganizerResponse>> GetOrganizersAsync()
-    {
-        return await _userRepository.GetOrganizersAsync();
-    }
-
     public async Task DeleteUserAsync(int id)
     {
         await _userRepository.DeleteUserAsync(id);

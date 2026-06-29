@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { BaseHttpService } from '../../../../../../shared/services/base-http.service';
 import { ApiResponse } from '../../../../../../shared/models/api-response.model';
 import { PagedResult } from '../../../../../../shared/models/paged-result.model';
-import { OrganizerResponse, UserListResponse, RoleResponse } from '../models/adminuser.model';
+import { UserListResponse, RoleResponse } from '../models/adminuser.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminUserService {
@@ -22,10 +22,6 @@ export class AdminUserService {
     }
 
     return this.http.get<PagedResult<UserListResponse>>('users', { params });
-  }
-
-  getOrganizers(): Observable<ApiResponse<OrganizerResponse[]>> {
-    return this.http.get<OrganizerResponse[]>('users/organizers');
   }
 
   deleteUser(id: number): Observable<ApiResponse<null>> {

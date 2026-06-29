@@ -54,20 +54,6 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
         };
     }
 
-    public async Task<List<OrganizerResponse>> GetOrganizersAsync()
-    {
-        return await _context.Users
-            .AsNoTracking()
-            .Where(u => u.UserRoles.Any(ur => ur.Role.Id == RoleId.Organizer))
-            .Select(u => new OrganizerResponse
-            {
-                Id = u.Id,
-                Name = u.Name,
-                Email = u.Email,
-            })
-            .ToListAsync();
-    }
-
     public async Task DeleteUserAsync(int id)
     {
         User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);

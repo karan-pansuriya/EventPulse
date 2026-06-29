@@ -16,6 +16,7 @@ namespace EventPulse.BLL.Services;
 public class PaymentService : BaseService, IPaymentService
 {
     private readonly IBookingRepository _bookingRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly StripeSettings _stripeSettings;
     private readonly ISeatUpdateNotifier _seatNotifier;
@@ -23,6 +24,7 @@ public class PaymentService : BaseService, IPaymentService
 
     public PaymentService(
         IBookingRepository bookingRepository,
+        IUnitOfWork unitOfWork,
         IMapper mapper,
         IOptions<StripeSettings> stripeSettings,
         ISeatUpdateNotifier seatNotifier,
@@ -31,6 +33,7 @@ public class PaymentService : BaseService, IPaymentService
         : base(httpContextAccessor)
     {
         _bookingRepository = bookingRepository;
+        _unitOfWork = unitOfWork;
         _mapper = mapper;
         _stripeSettings = stripeSettings.Value;
         _seatNotifier = seatNotifier;
@@ -74,6 +77,8 @@ public class PaymentService : BaseService, IPaymentService
             userId, request.EventId, uniqueCode, request.Quantity,
             eventEntity.Price, totalAmount, paymentIntent.Id);
 
+        await _unitOfWork.SaveAsync();
+
         return new PaymentIntentResponse
         {
             ClientSecret = paymentIntent.ClientSecret,
@@ -100,6 +105,7 @@ public class PaymentService : BaseService, IPaymentService
         {
             await _ticketGenerationService.GenerateTicketDocumentsAsync(bookingWithDetails);
             await _bookingRepository.UpdateTicketPathsAsync(bookingWithDetails.Tickets);
+            await _unitOfWork.SaveAsync();
         }
 
         BookingResponse response = _mapper.Map<BookingResponse>(bookingWithDetails);
@@ -127,6 +133,7 @@ public class PaymentService : BaseService, IPaymentService
                         {
                             await _ticketGenerationService.GenerateTicketDocumentsAsync(wd);
                             await _bookingRepository.UpdateTicketPathsAsync(wd.Tickets);
+                            await _unitOfWork.SaveAsync();
                         }
                     }
                     break;
@@ -136,6 +143,7 @@ public class PaymentService : BaseService, IPaymentService
                     if (failedIntent != null)
                     {
                         await _bookingRepository.MarkPaymentFailedAsync(failedIntent.Id);
+                        await _unitOfWork.SaveAsync();
                     }
                     break;
             }

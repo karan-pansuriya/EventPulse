@@ -101,9 +101,9 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   }
 
   private loadOrganizers(): void {
-    this.adminUserService.getOrganizers().subscribe({
+    this.adminUserService.getAllUsers(1, 100, 2).subscribe({
       next: (res) => {
-        this.organizers = (res.data ?? []).map((o) => ({ id: o.id, name: o.name }));
+        this.organizers = (res.data?.items ?? []).map((o) => ({ id: o.id, name: o.name }));
       },
     });
   }

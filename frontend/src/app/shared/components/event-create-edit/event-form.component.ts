@@ -182,9 +182,9 @@ export class EventFormComponent implements OnInit, OnDestroy {
 
     if (!this.isEditMode && this.isAdmin) {
       this.isLoadingOrganizers = true;
-      this.adminUserService.getOrganizers().subscribe({
+      this.adminUserService.getAllUsers(1, 100, 2).subscribe({
         next: (res) => {
-          if (res.success && res.data) this.organizers = res.data;
+          if (res.success && res.data?.items) this.organizers = res.data.items;
           this.isLoadingOrganizers = false;
           this.cdr.detectChanges();
         },

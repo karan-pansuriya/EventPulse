@@ -26,13 +26,6 @@ public class UsersController : BaseHelper
         return SuccessResponse(result);
     }
 
-    [HttpGet("organizers")]
-    public async Task<IActionResult> GetOrganizers()
-    {
-        List<OrganizerResponse> result = await _userService.GetOrganizersAsync();
-        return SuccessResponse(result);
-    }
-
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(int id)
     {

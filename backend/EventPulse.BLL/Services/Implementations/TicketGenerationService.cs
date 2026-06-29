@@ -1,5 +1,6 @@
 using EventPulse.BLL.Interfaces;
 using EventPulse.DAL.Entities;
+using Microsoft.AspNetCore.Hosting;
 using QRCoder;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -9,11 +10,12 @@ namespace EventPulse.BLL.Services;
 
 public class TicketGenerationService : ITicketGenerationService
 {
-    private readonly string _webRootPath;
+    
+    private readonly IWebHostEnvironment _environment;
 
-    public TicketGenerationService(string webRootPath)
+    public TicketGenerationService(IWebHostEnvironment environment)
     {
-        _webRootPath = webRootPath;
+        _environment = environment;
         QuestPDF.Settings.License = LicenseType.Community;
     }
 
@@ -29,7 +31,7 @@ public class TicketGenerationService : ITicketGenerationService
 
             string qrRelative = Path.Combine("uploads", "tickets", "qr", $"{Guid.NewGuid()}.png")
                 .Replace("\\", "/");
-            string qrFull = Path.Combine(_webRootPath, qrRelative);
+            string qrFull = Path.Combine(_environment.WebRootPath, qrRelative);
             Directory.CreateDirectory(Path.GetDirectoryName(qrFull)!);
             await File.WriteAllBytesAsync(qrFull, qrBytes);
 
@@ -38,7 +40,7 @@ public class TicketGenerationService : ITicketGenerationService
 
             string pdfRelative = Path.Combine("uploads", "tickets", "pdf", $"{Guid.NewGuid()}.pdf")
                 .Replace("\\", "/");
-            string pdfFull = Path.Combine(_webRootPath, pdfRelative);
+            string pdfFull = Path.Combine(_environment.WebRootPath, pdfRelative);
             Directory.CreateDirectory(Path.GetDirectoryName(pdfFull)!);
             await File.WriteAllBytesAsync(pdfFull, pdfBytes);
 
