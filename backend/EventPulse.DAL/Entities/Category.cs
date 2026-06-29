@@ -5,13 +5,12 @@ using EventPulse.Common.Entities;
 namespace EventPulse.DAL.Entities
 {
     [Table("categories")]
-    public class Category : ActivatableEntity
+    public class Category : BaseEntity
     {
         [Required]
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        public string? ImagePath { get; set; }
         public virtual ICollection<Event> Events { get; set; } = new List<Event>();
     }
 }

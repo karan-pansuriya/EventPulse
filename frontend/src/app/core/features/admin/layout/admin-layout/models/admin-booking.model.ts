@@ -9,7 +9,6 @@ export interface AdminBookingResponse {
     quantity: number;
     totalAmount: number;
     paymentStatus: string;
-    bookingStatus: string;
     uniqueCode: string;
     createdAt: string;
   }

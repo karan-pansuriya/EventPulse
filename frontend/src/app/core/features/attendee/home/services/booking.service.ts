@@ -18,7 +18,6 @@ export interface BookingResponse {
   pricePerTicket: number;
   totalAmount: number;
   paymentStatus: string;
-  bookingStatus: string;
   paymentRef: string | null;
   ticketCodes: string[];
   createdAt: string;

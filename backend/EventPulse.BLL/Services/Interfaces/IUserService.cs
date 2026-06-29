@@ -6,7 +6,7 @@ namespace EventPulse.BLL.Interfaces;
 
 public interface IUserService
 {
-    Task<PagedResult<UserListResponse>> GetPagedUsersAsync(PageRequest pageRequest, string? roleName = null);
-    Task<List<OrganizerResponse>> GetOrganizersAsync();
+    Task<PagedResult<UserListResponse>> GetPagedUsersAsync(PageRequest pageRequest, int? roleId = null);
     Task DeleteUserAsync(int id);
+    Task RemoveUserRolesAsync(int userId, List<int> roleIds);
 }

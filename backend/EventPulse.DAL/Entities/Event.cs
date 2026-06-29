@@ -5,7 +5,7 @@ using EventPulse.Common.Entities;
 namespace EventPulse.DAL.Entities
 {
     [Table("events")]
-    public class Event : ActivatableEntity
+    public class Event : BaseEntity
     {
         [Required]
         public int OrganizerId { get; set; }

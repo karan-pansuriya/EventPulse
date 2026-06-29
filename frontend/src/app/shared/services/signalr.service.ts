@@ -54,7 +54,8 @@ export class SignalRService implements OnDestroy {
       this.connectionPromise = null;
     });
 
-    this.connectionPromise = this.hubConnection.start()
+    this.connectionPromise = this.hubConnection
+      .start()
       .then(() => {
         this.connectionStateSubject.next(true);
       })

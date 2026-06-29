@@ -1,5 +1,4 @@
 using EventPulse.API.Helpers;
-using EventPulse.BLL.Common;
 using EventPulse.BLL.DTOs.Dashboard;
 using EventPulse.BLL.DTOs.Event;
 using EventPulse.BLL.Interfaces;
@@ -25,7 +24,7 @@ public class EventsController : BaseHelper
     [HttpGet("admin/all")]
     public async Task<IActionResult> GetAllEventsForAdmin([FromQuery] PageRequest pageRequest)
     {
-        PagedResult<EventListResponse> result = await _eventService.GetAllEventsAsync(pageRequest);
+        PagedResult<EventListResponse> result = await _eventService.GetAllEventsForAdminAsync(pageRequest);
         return SuccessResponse(result);
     }
 
@@ -49,14 +48,14 @@ public class EventsController : BaseHelper
     [HttpGet]
     public async Task<IActionResult> GetAllEvents([FromQuery] EventFilterRequest filter)
     {
-        PagedResult<EventListResponse> result = await _eventService.GetPagedEventsAsync(filter);
+        PagedResult<EventListResponse> result = await _eventService.GetCustomerPagedEventsAsync(filter);
         return SuccessResponse(result);
     }
 
     [HttpGet("my-events")]
     public async Task<IActionResult> GetMyEvents([FromQuery] PageRequest pageRequest)
     {
-        PagedResult<EventListResponse> result = await _eventService.GetMyEventsAsync(pageRequest);
+        PagedResult<EventListResponse> result = await _eventService.GetMyEventsForOrganizerAsync(pageRequest);
         return SuccessResponse(result);
     }
 
@@ -103,13 +102,6 @@ public class EventsController : BaseHelper
     public async Task<IActionResult> GetAdminRevenueTrend([FromQuery] string? period = "year", [FromQuery] int? organizerId = null)
     {
         List<MonthlyRevenueDto> result = await _eventService.GetAdminRevenueTrendAsync(period, organizerId);
-        return SuccessResponse(result);
-    }
-
-    [HttpGet("attendees")]
-    public async Task<IActionResult> GetAttendees([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-    {
-        PagedResult<EventAttendeeDto> result = await _eventService.GetAttendeesAsync(pageNumber, pageSize);
         return SuccessResponse(result);
     }
 

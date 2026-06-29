@@ -1,33 +1,23 @@
 @if (isOpen) {
-  <div
-    class="modal-backdrop"
-    role="dialog"
-    aria-modal="true"
-    [attr.aria-label]="title"
-    (click)="onBackdropClick($event)"
-  >
-    <div class="modal-box">
-      <h5 class="modal-title">{{ title }}</h5>
-      <p class="modal-message">{{ message }}</p>
+<div class="modal-backdrop" role="dialog" aria-modal="true" [attr.aria-label]="title" (click)="onBackdropClick($event)">
+  <div class="modal-box">
+    <h5 class="modal-title">{{ title }}</h5>
+    <p class="modal-message">{{ message }}</p>
 
-      <div class="modal-actions">
-        <div class="row">
-          <div class="col-6">
-            <app-secondary-button [fullWidth]="true" (click)="onCancel()">
-              {{ cancelLabel }}
-            </app-secondary-button>
-          </div>
-          <div class="col-6">
-            <app-primary-button
-           [fullWidth]="true"
-              [ngClass]="confirmButtonClass"
-              (click)="onConfirm()"
-            >
-              {{ confirmLabel }}
-            </app-primary-button>
-          </div>
+    <div class="modal-actions">
+      <div class="row">
+        <div class="col-6">
+          <app-secondary-button [fullWidth]="true" (click)="onCancel()">
+            {{ cancelLabel }}
+          </app-secondary-button>
+        </div>
+        <div class="col-6">
+          <app-primary-button [fullWidth]="true" [ngClass]="confirmButtonClass" (click)="onConfirm()">
+            {{ confirmLabel }}
+          </app-primary-button>
         </div>
       </div>
     </div>
   </div>
+</div>
 }

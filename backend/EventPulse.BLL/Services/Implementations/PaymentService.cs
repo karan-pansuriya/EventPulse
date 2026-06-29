@@ -16,6 +16,7 @@ namespace EventPulse.BLL.Services;
 public class PaymentService : BaseService, IPaymentService
 {
     private readonly IBookingRepository _bookingRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly StripeSettings _stripeSettings;
     private readonly ISeatUpdateNotifier _seatNotifier;
@@ -23,6 +24,7 @@ public class PaymentService : BaseService, IPaymentService
 
     public PaymentService(
         IBookingRepository bookingRepository,
+        IUnitOfWork unitOfWork,
         IMapper mapper,
         IOptions<StripeSettings> stripeSettings,
         ISeatUpdateNotifier seatNotifier,
@@ -31,6 +33,7 @@ public class PaymentService : BaseService, IPaymentService
         : base(httpContextAccessor)
     {
         _bookingRepository = bookingRepository;
+        _unitOfWork = unitOfWork;
         _mapper = mapper;
         _stripeSettings = stripeSettings.Value;
         _seatNotifier = seatNotifier;
@@ -56,7 +59,7 @@ public class PaymentService : BaseService, IPaymentService
         var options = new PaymentIntentCreateOptions
         {
             Amount = amountInCents,
-            Currency = "usd",
+            Currency = "inr",
             Metadata = new Dictionary<string, string>
             {
                 { "event_id", request.EventId.ToString() },
@@ -73,6 +76,8 @@ public class PaymentService : BaseService, IPaymentService
         Booking booking = await _bookingRepository.CreatePendingBookingAsync(
             userId, request.EventId, uniqueCode, request.Quantity,
             eventEntity.Price, totalAmount, paymentIntent.Id);
+
+        await _unitOfWork.SaveAsync();
 
         return new PaymentIntentResponse
         {
@@ -100,6 +105,7 @@ public class PaymentService : BaseService, IPaymentService
         {
             await _ticketGenerationService.GenerateTicketDocumentsAsync(bookingWithDetails);
             await _bookingRepository.UpdateTicketPathsAsync(bookingWithDetails.Tickets);
+            await _unitOfWork.SaveAsync();
         }
 
         BookingResponse response = _mapper.Map<BookingResponse>(bookingWithDetails);
@@ -127,6 +133,7 @@ public class PaymentService : BaseService, IPaymentService
                         {
                             await _ticketGenerationService.GenerateTicketDocumentsAsync(wd);
                             await _bookingRepository.UpdateTicketPathsAsync(wd.Tickets);
+                            await _unitOfWork.SaveAsync();
                         }
                     }
                     break;
@@ -136,6 +143,7 @@ public class PaymentService : BaseService, IPaymentService
                     if (failedIntent != null)
                     {
                         await _bookingRepository.MarkPaymentFailedAsync(failedIntent.Id);
+                        await _unitOfWork.SaveAsync();
                     }
                     break;
             }
@@ -148,13 +156,15 @@ public class PaymentService : BaseService, IPaymentService
 
     public async Task<BookingResponse?> GetByPaymentIntentAsync(string paymentIntentId)
     {
-        Booking? booking = await _bookingRepository.GetByPaymentIntentAsync(paymentIntentId);
-        return booking == null ? null : _mapper.Map<BookingResponse>(booking);
+        BookingResponse? booking = await _bookingRepository.GetByPaymentIntentAsync(paymentIntentId);
+        if (booking == null)
+            throw new NotFoundException("Booking not found.");
+        return booking;
     }
 
     public async Task<object> GetPaymentStatusAsync(string paymentIntentId)
     {
-        Booking? booking = await _bookingRepository.GetByPaymentIntentAsync(paymentIntentId);
+        BookingResponse? booking = await _bookingRepository.GetByPaymentIntentAsync(paymentIntentId);
         if (booking == null)
             return new { status = "not_found" };
 

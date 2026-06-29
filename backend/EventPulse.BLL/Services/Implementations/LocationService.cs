@@ -17,7 +17,6 @@ public class LocationService : ILocationService
     public async Task<List<CountryDto>> GetAllCountriesAsync()
     {
         return await _context.Countries
-            .Where(c => !c.IsDeleted)
             .OrderBy(c => c.Name)
             .Select(c => new CountryDto { Id = c.Id, Name = c.Name })
             .ToListAsync();
@@ -26,7 +25,7 @@ public class LocationService : ILocationService
     public async Task<List<StateDto>> GetStatesByCountryIdAsync(int countryId)
     {
         return await _context.States
-            .Where(s => s.CountryId == countryId && !s.IsDeleted)
+            .Where(s => s.CountryId == countryId)
             .OrderBy(s => s.Name)
             .Select(s => new StateDto { Id = s.Id, Name = s.Name, CountryId = s.CountryId })
             .ToListAsync();
@@ -35,7 +34,7 @@ public class LocationService : ILocationService
     public async Task<List<CityDto>> GetCitiesByStateIdAsync(int stateId)
     {
         return await _context.Cities
-            .Where(c => c.StateId == stateId && !c.IsDeleted)
+            .Where(c => c.StateId == stateId)
             .OrderBy(c => c.Name)
             .Select(c => new CityDto { Id = c.Id, Name = c.Name, StateId = c.StateId, CountryId = c.State.CountryId })
             .ToListAsync();
@@ -44,7 +43,7 @@ public class LocationService : ILocationService
     public async Task<CityDto?> GetCityByIdAsync(int cityId)
     {
         return await _context.Cities
-            .Where(c => c.Id == cityId && !c.IsDeleted)
+            .Where(c => c.Id == cityId)
             .Select(c => new CityDto { Id = c.Id, Name = c.Name, StateId = c.StateId, CountryId = c.State.CountryId })
             .FirstOrDefaultAsync();
     }

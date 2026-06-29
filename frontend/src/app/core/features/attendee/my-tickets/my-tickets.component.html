@@ -8,129 +8,172 @@
 
     <!-- ── Page Header ──────────────────────── -->
     <div class="d-flex align-items-center gap-3 mb-3 mb-md-4">
-      <i class="bi bi-ticket-perforated fs-2 text-primary"></i>
+      <i class="bi bi-ticket-perforated fs-2 text-danger"></i>
       <h2 class="fw-bold mb-0">My Tickets</h2>
     </div>
 
+    <!-- ── Upcoming / Completed Toggle ──────── -->
+    @if (!isLoading) {
+    <div class="d-flex gap-2 mb-3 mb-md-4">
+      <button class="btn toggle-btn" [class.active]="activeTab === 'upcoming'" (click)="setActiveTab('upcoming')">
+        <i class="bi bi-calendar-check me-1"></i>Upcoming
+      </button>
+      <button class="btn toggle-btn" [class.active]="activeTab === 'completed'" (click)="setActiveTab('completed')">
+        <i class="bi bi-clock-history me-1"></i>Completed
+      </button>
+    </div>
+    }
+
     <!-- ── Loading ──────────────────────────── -->
     @if (isLoading) {
-      <div class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <p class="text-muted mt-2">Loading your tickets…</p>
+    <div class="text-center py-5">
+      <div class="spinner-border text-bg-danger" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
+      <p class="text-muted mt-2">Loading your tickets…</p>
+    </div>
     }
 
     <!-- ── Error ────────────────────────────── -->
     @if (!isLoading && hasError) {
-      <div class="alert alert-warning text-center" role="alert">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        Could not load your tickets. Please try again later.
-      </div>
+    <div class="alert alert-warning text-center" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      Could not load your tickets. Please try again later.
+    </div>
     }
 
     <!-- ── Empty state ──────────────────────── -->
-    @if (!isLoading && !hasError && bookings.length === 0) {
-      <div class="text-center py-5">
-        <i class="bi bi-ticket fs-1 text-muted"></i>
-        <p class="text-muted mt-3 mb-3">You haven't purchased any tickets yet.</p>
-        <a class="btn btn-primary" routerLink="/attendee/home">
-          <i class="bi bi-search me-1"></i>Browse Events
-        </a>
-      </div>
+    @if (!isLoading && !hasError && filteredBookings.length === 0) {
+    <div class="text-center py-5">
+      <i class="bi bi-ticket fs-1 text-muted"></i>
+      @if (bookings.length === 0) {
+      <p class="text-muted mt-3 mb-3">You haven't purchased any tickets yet.</p>
+      <a class="btn btn-primary" routerLink="/attendee/home">
+        <i class="bi bi-search me-1"></i>Browse Events
+      </a>
+      } @else {
+      <p class="text-muted mt-3 mb-3">
+        @if (activeTab === 'upcoming') {
+        No upcoming tickets.
+        } @else {
+        No completed tickets.
+        }
+      </p>
+      }
+    </div>
     }
 
     <!-- ── Booking List ─────────────────────── -->
     @if (!isLoading && !hasError) {
-      @for (booking of bookings; track booking.bookingId) {
-        <div class="booking-card mb-3 mb-md-4">
+    @for (booking of filteredBookings; track booking.bookingId) {
+    <div class="booking-card mb-3 mb-md-4">
 
-          <!-- Booking header -->
-          <div class="booking-header">
-            <div class="row align-items-start align-items-sm-center g-2">
-              <div class="col-12 col-sm">
-                <h5 class="fw-bold mb-1 text-break">{{ booking.eventTitle }}</h5>
-                <div class="booking-meta d-flex flex-wrap gap-2 gap-sm-0">
-                  @if (booking.eventDate) {
-                    <span>
-                      <i class="bi bi-calendar3 me-1"></i>{{ formatDate(booking.eventDate) }}
-                    </span>
-                  }
-                  @if (booking.venueName) {
-                    <span class="ms-sm-3">
-                      <i class="bi bi-geo-alt me-1"></i>{{ booking.venueName }}{{ booking.venueCity ? ', ' + booking.venueCity : '' }}
-                    </span>
-                  }
-                </div>
-              </div>
-              <div class="col-12 col-sm-auto text-start text-sm-end">
-                <span class="booking-code-badge">{{ booking.bookingCode }}</span>
-                <div class="ticket-count mt-1">{{ booking.quantity }} Ticket{{ booking.quantity > 1 ? 's' : '' }}</div>
-              </div>
+      <!-- Booking header -->
+      <div class="booking-header">
+        <div class="row align-items-start align-items-sm-center g-2">
+          <div class="col-12 col-sm">
+            <h5 class="fw-bold mb-1 text-break">{{ booking.eventTitle }}</h5>
+            <div class="booking-meta d-flex flex-wrap gap-2 gap-sm-0">
+              @if (booking.eventDate) {
+              <span>
+                <i class="bi bi-calendar3 me-1"></i>{{ formatDate(booking.eventDate) }}
+              </span>
+              }
+              @if (booking.venueName) {
+              <span class="ms-sm-3">
+                <i class="bi bi-geo-alt me-1"></i>{{ booking.venueName }}{{ booking.venueCity ? ', ' + booking.venueCity
+                : '' }}
+              </span>
+              }
             </div>
-            <div class="booking-footer mt-2 d-flex flex-wrap gap-2">
-              <small class="text-muted">Booked on {{ formatDateTime(booking.createdAt) }}</small>
-              <span class="total-amount ms-sm-auto fw-bold">₹{{ booking.totalAmount | number: '1.2-2' }}</span>
+          </div>
+          <div class="col-12 col-sm-auto text-start text-sm-end">
+            <span class="booking-code-badge">{{ booking.bookingCode }}</span>
+            <div class="ticket-count mt-1">{{ booking.quantity }} Ticket{{ booking.quantity > 1 ? 's' : '' }}</div>
+          </div>
+        </div>
+        <div class="booking-footer mt-2 d-flex flex-wrap gap-2">
+          <small class="text-muted">Booked on {{ formatDateTime(booking.createdAt) }}</small>
+          <span class="total-amount ms-sm-auto fw-bold">₹{{ booking.totalAmount | number: '1.2-2' }}</span>
+        </div>
+      </div>
+
+      <!-- Individual ticket cards -->
+      @for (ticket of booking.tickets; track ticket.id) {
+      <div class="ticket-row">
+        <div class="ticket-row-inner d-flex flex-column flex-sm-row align-items-sm-center">
+
+          <!-- QR + info (side by side) -->
+          <div class="d-flex align-items-center flex-grow-1 w-100">
+            <!-- QR Code -->
+            <div class="qr-section">
+              @if (ticket.qrCodeUrl) {
+              <img [src]="ticket.qrCodeUrl" alt="QR for {{ ticket.ticketCode }}" class="qr-img" width="72"
+                height="72" />
+              } @else {
+              <div class="qr-placeholder">
+                <i class="bi bi-qr-code fs-3 text-muted"></i>
+              </div>
+              }
+            </div>
+
+            <!-- Ticket info -->
+            <div class="flex-grow-1 px-2 px-sm-3 min-width-0">
+              <p class="ticket-code mb-0 text-break">{{ ticket.ticketCode }}</p>
+              @if (ticket.isUsed) {
+              <span class="ticket-status used">
+                <i class="bi bi-check-circle-fill me-1"></i>Used
+              </span>
+              @if (ticket.usedAt) {
+              <small class="text-muted ms-2">{{ formatDateTime(ticket.usedAt) }}</small>
+              }
+              } @else {
+              <span class="ticket-status unused">
+                <i class="bi bi-clock me-1"></i>Not Used
+              </span>
+              }
             </div>
           </div>
 
-          <!-- Individual ticket cards -->
-          @for (ticket of booking.tickets; track ticket.id) {
-            <div class="ticket-row">
-              <div class="ticket-row-inner d-flex flex-column flex-sm-row align-items-sm-center">
-
-                <!-- QR + info (side by side) -->
-                <div class="d-flex align-items-center flex-grow-1 w-100">
-                  <!-- QR Code -->
-                  <div class="qr-section">
-                    @if (ticket.qrCodeUrl) {
-                      <img [src]="ticket.qrCodeUrl" alt="QR for {{ ticket.ticketCode }}"
-                           class="qr-img" width="72" height="72" />
-                    } @else {
-                      <div class="qr-placeholder">
-                        <i class="bi bi-qr-code fs-3 text-muted"></i>
-                      </div>
-                    }
-                  </div>
-
-                  <!-- Ticket info -->
-                  <div class="flex-grow-1 px-2 px-sm-3 min-width-0">
-                    <p class="ticket-code mb-0 text-break">{{ ticket.ticketCode }}</p>
-                    @if (ticket.isUsed) {
-                      <span class="ticket-status used">
-                        <i class="bi bi-check-circle-fill me-1"></i>Used
-                      </span>
-                      @if (ticket.usedAt) {
-                        <small class="text-muted ms-2">{{ formatDateTime(ticket.usedAt) }}</small>
-                      }
-                    } @else {
-                      <span class="ticket-status unused">
-                        <i class="bi bi-clock me-1"></i>Not Used
-                      </span>
-                    }
-                  </div>
-                </div>
-
-                <!-- Download -->
-                <div class="px-3 pb-3 pb-sm-0 pe-sm-3 flex-shrink-0">
-                  @if (ticket.pdfUrl) {
-                    <a [href]="getDownloadUrl(ticket.id)"
-                       target="_blank"
-                       class="btn btn-download d-block d-sm-inline-block text-center">
-                      <i class="bi bi-download me-1"></i>PDF
-                    </a>
-                  } @else {
-                    <span class="text-muted small d-block text-center text-sm-start">Pending</span>
-                  }
-                </div>
-
-              </div>
-            </div>
-          }
+          <!-- Download -->
+          <div class="px-3 pb-3 pb-sm-0 pe-sm-3 flex-shrink-0">
+            @if (ticket.pdfUrl) {
+            <a [href]="getDownloadUrl(ticket.id)" target="_blank"
+              class="btn btn-download d-block d-sm-inline-block text-center">
+              <i class="bi bi-download me-1"></i>PDF
+            </a>
+            } @else {
+            <span class="text-muted small d-block text-center text-sm-start">Pending</span>
+            }
+          </div>
 
         </div>
+      </div>
       }
+
+    </div>
+    }
+
+    <!-- ── Pagination ───────────────────────── -->
+    @if (totalPages > 1) {
+    <div class="pagination-nav">
+      <button class="page-btn" [disabled]="pageNumber === 1" (click)="goToPage(pageNumber - 1)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
+      @for (p of pages; track p) {
+      <button class="page-btn" [class.active]="p === pageNumber" (click)="goToPage(p)">
+        {{ p }}
+      </button>
+      }
+      <button class="page-btn" [disabled]="pageNumber === totalPages" (click)="goToPage(pageNumber + 1)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </button>
+    </div>
+    }
     }
 
   </div>

@@ -17,62 +17,45 @@ public class CategoryService : ICategoryService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<CategoryResponse>> GetAllAsync()
+    public async Task<IEnumerable<CategoryResponse>> GetAllCategorysAsync()
     {
-        IEnumerable<Category> categories = await _categoryRepository.GetAllAsync();
-
-        return categories.Select(c => new CategoryResponse
-        {
-            Id = c.Id,
-            Name = c.Name,
-            ImagePath = c.ImagePath,
-        });
+        return await _categoryRepository.GetAllCategorysAsync();
     }
 
-    public async Task<CategoryResponse> CreateAsync(CreateCategoryDto dto)
+    public async Task CreateCategoryAsync(CreateCategoryDto dto)
     {
+        if (await _categoryRepository.CategoryNameExistsAsync(dto.Name))
+            throw new BadRequestException("A category with this name already exists.");
+
         Category category = new Category
         {
             Name = dto.Name,
-            ImagePath = dto.ImagePath,
         };
 
-        await _categoryRepository.AddAsync(category);
+        await _categoryRepository.AddCategoryAsync(category);
         await _unitOfWork.SaveAsync();
-
-        return new CategoryResponse
-        {
-            Id = category.Id,
-            Name = category.Name,
-            ImagePath = category.ImagePath,
-        };
     }
 
-    public async Task<CategoryResponse> UpdateAsync(int id, UpdateCategoryDto dto)
+    public async Task UpdateCategoryAsync(int id, UpdateCategoryDto dto)
     {
-        Category? category = await _categoryRepository.GetByIdAsync(id)
+        Category? category = await _categoryRepository.GetCategoryByIdAsync(id)
             ?? throw new NotFoundException("Category not found.");
+
+        if (await _categoryRepository.CategoryNameExistsAsync(dto.Name))
+            throw new BadRequestException("A category with this name already exists.");
 
         category.Name = dto.Name;
-        category.ImagePath = dto.ImagePath;
 
-        _categoryRepository.Update(category);
+        _categoryRepository.UpdateCategory(category);
         await _unitOfWork.SaveAsync();
-
-        return new CategoryResponse
-        {
-            Id = category.Id,
-            Name = category.Name,
-            ImagePath = category.ImagePath,
-        };
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteCategoryAsync(int id)
     {
-        Category? category = await _categoryRepository.GetByIdAsync(id)
+        Category? category = await _categoryRepository.GetCategoryByIdAsync(id)
             ?? throw new NotFoundException("Category not found.");
 
-        _categoryRepository.Delete(category);
+        _categoryRepository.DeleteCategory(category);
         await _unitOfWork.SaveAsync();
     }
 }

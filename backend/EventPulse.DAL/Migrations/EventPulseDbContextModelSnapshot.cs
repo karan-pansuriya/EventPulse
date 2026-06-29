@@ -31,13 +31,6 @@ namespace EventPulse.DAL.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("BookingStatus")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("Confirmed")
-                        .HasColumnName("booking_status");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -126,16 +119,6 @@ namespace EventPulse.DAL.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
 
-                    b.Property<string>("ImagePath")
-                        .HasColumnType("text")
-                        .HasColumnName("image_path");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
-
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -159,7 +142,8 @@ namespace EventPulse.DAL.Migrations
 
                     b.HasIndex("Name")
                         .IsUnique()
-                        .HasDatabaseName("ix_categories_name");
+                        .HasDatabaseName("ix_categories_name")
+                        .HasFilter("\"is_deleted\" = false");
 
                     b.ToTable("categories", (string)null);
 
@@ -168,8 +152,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 1,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Concerts & Music"
                         },
@@ -177,8 +159,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 2,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Sports"
                         },
@@ -186,8 +166,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 3,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Tech"
                         },
@@ -195,8 +173,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 4,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Comedy"
                         },
@@ -204,8 +180,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 5,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Movies & Screenings"
                         },
@@ -213,8 +187,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 6,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Theatre & Drama"
                         },
@@ -222,8 +194,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 7,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Workshops"
                         },
@@ -231,8 +201,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 8,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Conferences"
                         },
@@ -240,8 +208,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 9,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Festivals"
                         },
@@ -249,8 +215,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 10,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Food & Drink"
                         },
@@ -258,8 +222,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 11,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Arts & Exhibitions"
                         },
@@ -267,8 +229,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 12,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Gaming & Esports"
                         },
@@ -276,8 +236,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 13,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Education"
                         },
@@ -285,8 +243,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 14,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Health & Wellness"
                         },
@@ -294,8 +250,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 15,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Networking"
                         },
@@ -303,8 +257,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 16,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Travel & Adventure"
                         },
@@ -312,8 +264,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 17,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Business"
                         },
@@ -321,8 +271,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 18,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Fashion"
                         },
@@ -330,8 +278,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 19,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Cultural Events"
                         },
@@ -339,8 +285,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 20,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Expos & Trade Shows"
                         },
@@ -348,8 +292,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 21,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Webinars"
                         },
@@ -357,8 +299,6 @@ namespace EventPulse.DAL.Migrations
                         {
                             Id = 22,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ImagePath = "/categories/category_image.png",
-                            IsActive = true,
                             IsDeleted = false,
                             Name = "Career & Jobs"
                         });
@@ -489,12 +429,6 @@ namespace EventPulse.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("genre");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -779,14 +713,6 @@ namespace EventPulse.DAL.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_active");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_deleted");
-
                     b.Property<bool>("IsUsed")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -846,12 +772,6 @@ namespace EventPulse.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("email");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -936,12 +856,6 @@ namespace EventPulse.DAL.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()

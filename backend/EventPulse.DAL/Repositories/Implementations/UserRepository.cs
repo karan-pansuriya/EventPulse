@@ -1,3 +1,5 @@
+using EventPulse.BLL.Common;
+using EventPulse.BLL.DTOs.User;
 using EventPulse.Common.Models;
 using EventPulse.Common.Models.Response;
 using EventPulse.DAL.Context;
@@ -11,47 +13,73 @@ public class UserRepository(EventPulseDbContext context) : IUserRepository
 {
     private readonly EventPulseDbContext _context = context;
 
-    public async Task<PagedResult<User>> GetPagedUsersAsync(PageRequest pageRequest, string? roleName = null)
+    public async Task<PagedResult<UserListResponse>> GetPagedUsersAsync(PageRequest pageRequest, int? roleId = null)
     {
         IQueryable<User> query = _context.Users
-            .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-            .Where(u => !u.IsDeleted);
+            .AsNoTracking();
 
-        if (!string.IsNullOrWhiteSpace(roleName))
+        if (roleId.HasValue)
         {
-            query = query.Where(u => u.UserRoles.Any(ur => ur.Role.Name == roleName));
+            query = query.Where(u =>
+                u.UserRoles.Any(ur => ur.RoleId == roleId.Value));
         }
 
-        int totalCount = await query.CountAsync();
+        var totalCount = await query.CountAsync();
 
-        List<User> items = await query
+        var users = await query
             .OrderByDescending(u => u.CreatedAt)
             .Skip((pageRequest.PageNumber - 1) * pageRequest.PageSize)
             .Take(pageRequest.PageSize)
+            .Select(u => new UserListResponse
+            {
+                Id = u.Id,
+                Name = u.Name,
+                Email = u.Email,
+                Phone = u.Phone,
+                CreatedAt = u.CreatedAt,
+                Roles = u.UserRoles
+                    .Select(ur => ur.Role.Name)
+                    .ToList(),
+
+                RoleIds = u.UserRoles
+                    .Select(ur => ur.RoleId)
+                    .ToList()
+            })
             .ToListAsync();
 
-        return new PagedResult<User>
+        return new PagedResult<UserListResponse>
         {
-            Items = items,
-            TotalCount = totalCount
+            Items = users,
+            TotalCount = totalCount,
         };
-    }
-
-    public async Task<List<User>> GetOrganizersAsync()
-    {
-        return await _context.Users
-            .Where(u => u.UserRoles.Any(ur => ur.Role.Id == 2) && !u.IsDeleted)
-            .ToListAsync();
     }
 
     public async Task DeleteUserAsync(int id)
     {
-        User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
+        User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
         if (user is null) return;
 
         user.IsDeleted = true;
         user.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
+    }
+
+    public async Task RemoveUserRolesAsync(int userId, List<int> roleIds)
+    {
+        User? user = await _context.Users
+            .Include(u => u.UserRoles)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user is null) return;
+
+        List<UserRole> toRemove = user.UserRoles.Where(ur => roleIds.Contains(ur.RoleId)).ToList();
+        if (toRemove.Count == 0) return;
+
+        _context.UserRoles.RemoveRange(toRemove);
+
+        if (user.UserRoles.Count == toRemove.Count)
+        {
+            user.IsDeleted = true;
+            user.UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

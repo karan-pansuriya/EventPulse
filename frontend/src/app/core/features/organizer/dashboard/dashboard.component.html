@@ -177,13 +177,20 @@
                 <div class="chart-header">
                     <h5 class="chart-title mb-0">Revenue Trend</h5>
                     <div class="period-pills">
-                        <button class="pill" [class.active]="selectedPeriod === 'week'" (click)="setPeriod('week')">This Week</button>
-                        <button class="pill" [class.active]="selectedPeriod === 'month'" (click)="setPeriod('month')">This Month</button>
-                        <button class="pill" [class.active]="selectedPeriod === 'year'" (click)="setPeriod('year')">This Year</button>
+                        <button class="pill" [class.active]="selectedPeriod === 'week'" (click)="setPeriod('week')">This
+                            Week</button>
+                        <button class="pill" [class.active]="selectedPeriod === 'month'"
+                            (click)="setPeriod('month')">This Month</button>
+                        <button class="pill" [class.active]="selectedPeriod === 'year'" (click)="setPeriod('year')">This
+                            Year</button>
                     </div>
                 </div>
                 <div class="chart-container">
+                    @if (data.monthlyRevenue.length > 0) {
                     <canvas id="revenueChart"></canvas>
+                    } @else {
+                    <div class="empty-chart text-center py-4 text-muted">No revenue data available</div>
+                    }
                 </div>
             </div>
         </div>
@@ -191,7 +198,11 @@
             <div class="chart-card">
                 <h5 class="chart-title">Interest Categories By Event</h5>
                 <div class="chart-container">
+                    @if (data.eventsByCategory.length > 0) {
                     <canvas id="categoryChart"></canvas>
+                    } @else {
+                    <div class="empty-chart text-center py-4 text-muted">No category data available</div>
+                    }
                 </div>
             </div>
         </div>
@@ -200,7 +211,12 @@
     <div class="row g-3 mb-4">
         <div class="col-12 col-lg-6">
             <div class="section-card">
-                <h5 class="section-title">Recent Attendees</h5>
+                <div class="section-header">
+                    <h5 class="section-title mb-0">Recent Attendees</h5>
+                    @if (data.topBookedEvents.length > 0) {
+                    <a routerLink="/organizer/attendees" class="view-all-btn">View All</a>
+                    }
+                </div>
                 @if (data.recentAttendees.length > 0) {
                 <div class="sales-table-scroll">
                     <table class="sales-table">
@@ -230,17 +246,22 @@
                     </table>
                 </div>
                 } @else {
-                <div class="text-center py-4 text-muted">No attendees yet.</div>
+                <div class="empty-chart text-center py-4 text-muted">No attendees yet.</div>
                 }
             </div>
         </div>
         <div class="col-12 col-lg-6">
             <div class="section-card">
-                <h5 class="section-title">Top Events</h5>
+                <div class="section-header">
+                    <h5 class="section-title mb-0">Top Events</h5>
+                    @if (data.topBookedEvents.length > 0) {
+                    <a routerLink="/organizer/top-booked" class="view-all-btn">View All</a>
+                    }
+                </div>
                 @if (data.topBookedEvents.length > 0) {
                 <div class="top-event-scroll">
                     @for (ev of data.topBookedEvents; track ev.id; let i = $index) {
-                    <div  class="top-event-item">
+                    <div class="top-event-item">
                         <span class="top-event-rank">{{ i + 1 }}</span>
                         <div class="top-event-info">
                             <span class="top-event-name">{{ ev.title }}</span>
@@ -258,7 +279,7 @@
                     }
                 </div>
                 } @else {
-                <div class="text-center py-4 text-muted">No events yet.</div>
+                <div class="empty-chart text-center py-4 text-muted">No events yet.</div>
                 }
             </div>
         </div>

@@ -26,7 +26,6 @@ export class BookingsComponent implements OnInit, OnDestroy {
   error: string | null = null;
 
   columns: GridColumn[] = [
-    { header: 'ID', field: 'id', width: '60px' },
     { header: 'Customer', field: 'customerName' },
     { header: 'Email', field: 'customerEmail' },
     { header: 'Event', field: 'eventTitle', type: 'truncate', width: '200px' },

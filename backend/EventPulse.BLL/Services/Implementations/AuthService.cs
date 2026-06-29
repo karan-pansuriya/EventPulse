@@ -6,7 +6,6 @@ using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
 using EventPulse.DAL.Entities;
 using EventPulse.DAL.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventPulse.BLL.Services
 {
@@ -29,11 +28,21 @@ namespace EventPulse.BLL.Services
 
             if (existingUser != null)
             {
+                if (existingUser.IsDeleted)
+                {
+                    existingUser.IsDeleted = false;
+                    existingUser.UpdatedAt = DateTime.UtcNow;
+
+                    await authRepository.UpdateUserAsync(existingUser);
+                }
                 user = existingUser;
                 roleIds = user.UserRoles.Select(ur => ur.Role.Id).ToList();
 
                 if (roleIds.Contains(role.Id))
                     throw new BadRequestException($"You already have the '{role.Name}' role.");
+
+                if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
+                    throw new BadRequestException("Password does not match the existing account for this email.");
 
                 await authRepository.AddUserRoleAsync(new UserRole { UserId = user.Id, RoleId = role.Id });
                 roleIds.Add(role.Id);
@@ -56,18 +65,14 @@ namespace EventPulse.BLL.Services
                 roleIds = new List<int> { role.Id };
             }
 
-            try
-            {
-                await unitOfWork.SaveAsync();
-            }
-            catch (DbUpdateException)
-            {
-                throw new BadRequestException("Email is already in use.");
-            }
+            await unitOfWork.SaveAsync();
+
 
             string accessToken = jwtService.GenerateAccessToken(user, roleIds);
             string refreshToken = jwtService.GenerateRefreshToken();
             int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roleIds);
+
+            await authRepository.DeleteUserRefreshTokensAsync(user.Id);
 
             await authRepository.AddRefreshTokenAsync(new RefreshToken
             {
@@ -103,12 +108,14 @@ namespace EventPulse.BLL.Services
                 .FirstOrDefault(r => r.Id == request.RoleId);
 
             if (matchedRole is null)
-                throw new UnauthorizedAccessException("Invalid email or password.");
+                throw new ForbiddenException("You do not have access with the selected role.");
 
             List<int> roleIds = new List<int> { request.RoleId };
             string accessToken = jwtService.GenerateAccessToken(user, roleIds);
             string refreshToken = jwtService.GenerateRefreshToken();
             int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roleIds);
+
+            await authRepository.DeleteUserRefreshTokensAsync(user.Id);
 
             await authRepository.AddRefreshTokenAsync(new RefreshToken
             {
@@ -172,6 +179,8 @@ namespace EventPulse.BLL.Services
             string newAccessToken = jwtService.GenerateAccessToken(user, roleIds);
             string newRefreshToken = jwtService.GenerateRefreshToken();
             int refreshMinutes = jwtService.GetRefreshTokenExpirationMinutes(roleIds);
+
+            await authRepository.DeleteUserRefreshTokensAsync(user.Id);
 
             await authRepository.AddRefreshTokenAsync(new RefreshToken
             {

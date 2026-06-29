@@ -1,6 +1,8 @@
 .payment-success-page {
   max-width: 640px;
   margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 /* ── Success icon ─────────────────────────────────── */
@@ -10,23 +12,15 @@
 }
 
 @keyframes pop-in {
-  from { transform: scale(0.5); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
-}
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
 
-/* ── Booking code badge ───────────────────────────── */
-.booking-code-badge {
-  display: inline-block;
-  background: rgba(190, 24, 93, 0.08);
-  color: #9d174d;
-  border-radius: 8px;
-  padding: 6px 16px;
-  font-size: 0.9rem;
-}
-
-.booking-code-badge span {
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ── Booking summary card ─────────────────────────── */
@@ -116,11 +110,9 @@
 /* ── Perforation line ─────────────────────────────── */
 .ticket-perforation {
   height: 4px;
-  background: repeating-linear-gradient(
-    90deg,
-    #9d174d 0px, #9d174d 12px,
-    transparent 12px, transparent 20px
-  );
+  background: repeating-linear-gradient(90deg,
+      #9d174d 0px, #9d174d 12px,
+      transparent 12px, transparent 20px);
   opacity: 0.25;
 }
 
@@ -160,4 +152,46 @@
 .btn-outline-secondary {
   border-radius: 10px;
   padding: 12px 28px;
+}
+
+@media (max-width: 576px) {
+  .ticket-card-inner {
+    flex-direction: column;
+    align-items: center !important;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .qr-section {
+    border-right: none;
+    border-bottom: 2px dashed #e5e7eb;
+    padding-bottom: 12px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .ticket-card-inner>.col {
+    padding: 0 16px;
+  }
+
+  .ticket-card-inner>.col-auto.pe-3 {
+    padding-right: 0 !important;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .booking-summary-card .row {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .booking-summary-card .col-auto {
+    margin-top: 8px;
+  }
+
+  .btn-lg {
+    width: 100%;
+  }
 }

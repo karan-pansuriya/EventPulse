@@ -1,21 +1,23 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ViewChild,
+  TemplateRef,
+} from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { OrganizerEventService } from '../layout/services/organizer-event.service';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
-import {
-  GridComponent,
-  GridColumn,
-  GridActionItem,
-} from '../../../../shared/components/grid/grid.component';
+import { GridComponent, GridColumn } from '../../../../shared/components/grid/grid.component';
 import { EventListResponse } from '../../attendee/home/models/event.models';
-import { environment } from '../../../../../environments/environment';
 import { ToastService } from '../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-organizer-events',
   standalone: true,
-  imports: [RouterLink, CommonModule, GridComponent, ConfirmationModalComponent],
+  imports: [CommonModule, GridComponent, ConfirmationModalComponent],
   templateUrl: './events.component.html',
   styleUrl: './events.component.css',
 })
@@ -25,14 +27,14 @@ export class EventsComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private toastService = inject(ToastService);
 
-  private imageBaseUrl = environment.apiUrl.replace('/api', '');
-
   events: EventListResponse[] = [];
   totalCount = 0;
   pageNumber = 1;
   pageSize = 10;
   isLoading = true;
   hasError = false;
+  @ViewChild('actionTemplate', { static: true }) actionTemplate!: TemplateRef<any>;
+
   showDeleteModal = false;
   deletingEvent: EventListResponse | null = null;
 
@@ -57,21 +59,8 @@ export class EventsComponent implements OnInit {
           ? '<span class="badge bg-success">Verified</span>'
           : '<span class="badge bg-danger">Not Verified</span>',
     },
-    { header: '', field: 'actions', type: 'action', width: '60px' },
+    { header: 'Actions', field: 'actions', type: 'action', width: '60px' },
   ];
-
-  getRowActionItems = (row: Record<string, unknown>): GridActionItem[] => {
-    const r = row as unknown as EventListResponse;
-    const isPast = this.isPastEvent(r.eventDate);
-    const items: GridActionItem[] = [];
-    if (!r.isVerified && !isPast) {
-      items.push({ label: 'Edit', icon: 'assets/icons/Edit.svg', emit: 'edit' });
-    }
-    if (!r.isVerified && !isPast) {
-      items.push({ label: 'Delete', icon: 'assets/icons/Delete.svg', emit: 'delete' });
-    }
-    return items;
-  };
 
   ngOnInit(): void {
     this.loadEvents();
@@ -107,6 +96,10 @@ export class EventsComponent implements OnInit {
     this.pageSize = size;
     this.pageNumber = 1;
     this.loadEvents();
+  }
+
+  createEvent(): void {
+    this.router.navigate(['/organizer/events/create']);
   }
 
   onEdit(event: Record<string, unknown>): void {
@@ -151,7 +144,7 @@ export class EventsComponent implements OnInit {
     return `Are you sure you want to delete "${title}"? This action cannot be undone.`;
   }
 
-  private isPastEvent(eventDate: string): boolean {
+  isPastEvent(eventDate: string): boolean {
     const today = new Date().toISOString().slice(0, 10);
     return eventDate < today;
   }

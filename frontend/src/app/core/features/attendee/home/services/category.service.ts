@@ -9,7 +9,7 @@ export class CategoryService {
   private http = inject(BaseHttpService);
   private cache$: Observable<ApiResponse<Category[]>> | null = null;
 
-  getAll(): Observable<ApiResponse<Category[]>> {
+  getAllCatagorys(): Observable<ApiResponse<Category[]>> {
     if (!this.cache$) {
       this.cache$ = this.http.get<Category[]>('categories').pipe(shareReplay(1));
     }

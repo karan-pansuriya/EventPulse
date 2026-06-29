@@ -3,7 +3,6 @@ using System.Security.Claims;
 using EventPulse.BLL.Exceptions;
 using EventPulse.BLL.Interfaces;
 using EventPulse.Common.Entities;
-using EventPulse.DAL.Entities;
 using EventPulse.Common.Models;
 using EventPulse.Common.Models.Response;
 using EventPulse.DAL.Repositories.Interfaces;

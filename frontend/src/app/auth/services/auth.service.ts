@@ -1,6 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { map, tap, Observable, throwError, BehaviorSubject, filter, take, catchError } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import { LoginRequest, RegisterRequest, TokenResponse, UserInfo, RoleResponse } from '../models/auth.models';
 import { BaseHttpService } from '../../shared/services/base-http.service';
 import {
@@ -114,7 +113,7 @@ export class AuthService {
   }
 
   private handleTokens(tokens: TokenResponse): void {
-    saveTokens(tokens.accessToken, tokens.refreshToken);
+    saveTokens(tokens.accessToken, tokens.refreshToken, tokens.expiresIn, tokens.refreshExpiresIn);
     const user = decodeToken(tokens.accessToken);
     if (user) {
       this.user.set(user);

@@ -9,32 +9,50 @@ public class AuthRepository(EventPulseDbContext context) : IAuthRepository
 {
     private readonly EventPulseDbContext _context = context;
 
-    public async Task<bool> UserEmailExistsAsync(string normalizedEmail)
-    {
-        return await _context.Users.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
-    }
-
     public async Task<Role?> GetRoleByIdAsync(int roleId)
     {
-        return await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId);
+        return await _context.Roles.AsNoTracking().FirstOrDefaultAsync(r => r.Id == roleId);
     }
 
     public async Task<List<Role>> GetRolesAsync()
     {
-        return await _context.Roles.ToListAsync();
+        return await _context.Roles.AsNoTracking().ToListAsync();
     }
 
     public async Task<User?> GetUserWithRolesByEmailAsync(string normalizedEmail)
     {
         return await _context.Users
-            .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+            .IgnoreQueryFilters()
+            .Where(u => u.Email == normalizedEmail)
+            .Select(u => new User
+            {
+                Id = u.Id,
+                Name = u.Name,
+                Email = u.Email,
+                Phone = u.Phone,
+                PasswordHash = u.PasswordHash,
+                PasswordSalt = u.PasswordSalt,
+                IsDeleted = u.IsDeleted,
+                CreatedAt = u.CreatedAt,
+                UpdatedAt = u.UpdatedAt,
+                UserRoles = u.UserRoles.Select(ur => new UserRole
+                {
+                    UserId = ur.UserId,
+                    RoleId = ur.RoleId,
+                    Role = new Role
+                    {
+                        Id = ur.Role.Id,
+                        Name = ur.Role.Name
+                    }
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
     }
 
     public async Task<RefreshToken?> GetRefreshTokenWithUserAsync(string token)
     {
         return await _context.RefreshTokens
+            .AsNoTracking()
             .Include(rt => rt.User)
                 .ThenInclude(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
@@ -54,5 +72,23 @@ public class AuthRepository(EventPulseDbContext context) : IAuthRepository
     public async Task AddRefreshTokenAsync(RefreshToken token)
     {
         await _context.RefreshTokens.AddAsync(token);
+    }
+
+    public async Task DeleteUserRefreshTokensAsync(int userId)
+    {
+        List<RefreshToken> tokens = await _context.RefreshTokens
+            .Where(rt => rt.UserId == userId && !rt.IsRevoked && rt.ExpiresAt > DateTime.UtcNow)
+            .ToListAsync();
+
+        if (tokens.Count > 0)
+        {
+            _context.RefreshTokens.RemoveRange(tokens);
+        }
+    }
+
+    public async Task UpdateUserAsync(User user)
+    {
+        _context.Users.Update(user);
+        await Task.CompletedTask;
     }
 }

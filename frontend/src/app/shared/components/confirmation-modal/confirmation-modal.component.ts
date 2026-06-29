@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SecondaryButton } from "../buttons/secondary-button/secondary-button.component";
-import { PrimaryButton } from "../buttons/primary-button/primary-button.component";
+import { SecondaryButton } from '../buttons/secondary-button/secondary-button.component';
+import { PrimaryButton } from '../buttons/primary-button/primary-button.component';
 
 @Component({
   selector: 'app-confirmation-modal',

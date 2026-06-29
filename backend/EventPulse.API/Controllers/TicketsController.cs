@@ -1,6 +1,8 @@
 using EventPulse.API.Helpers;
 using EventPulse.BLL.DTOs.Booking;
 using EventPulse.BLL.Interfaces;
+using EventPulse.Common.Models;
+using EventPulse.Common.Models.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,9 +28,9 @@ public class TicketsController : BaseHelper
 
     [Authorize(Policy = "CustomerOnly")]
     [HttpGet("my-tickets")]
-    public async Task<IActionResult> GetAllMyTickets()
+    public async Task<IActionResult> GetAllMyTickets([FromQuery] PageRequest pageRequest)
     {
-        List<MyTicketResponse> result = await _ticketService.GetAllMyTicketsAsync();
+        PagedResult<MyTicketResponse> result = await _ticketService.GetAllMyTicketsAsync(pageRequest);
         return SuccessResponse(result);
     }
 

@@ -17,33 +17,33 @@ public class CategoriesController : BaseHelper
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAllCategorys()
     {
-        IEnumerable<CategoryResponse> result = await _categoryService.GetAllAsync();
+        IEnumerable<CategoryResponse> result = await _categoryService.GetAllCategorysAsync();
         return SuccessResponse(result);
     }
 
     [Authorize(Policy = "AdminOnly")]
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateCategoryDto dto)
+    public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto dto)
     {
-        CategoryResponse result = await _categoryService.CreateAsync(dto);
-        return CreatedResponse(result);
+        await _categoryService.CreateCategoryAsync(dto);
+        return SuccessResponse("Category created successfully.");
     }
 
     [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryDto dto)
+    public async Task<IActionResult> UpdateCategory(int id, [FromBody] UpdateCategoryDto dto)
     {
-        CategoryResponse result = await _categoryService.UpdateAsync(id, dto);
-        return SuccessResponse(result);
+        await _categoryService.UpdateCategoryAsync(id, dto);
+        return SuccessResponse("Category Updated successfully.");
     }
 
     [Authorize(Policy = "AdminOnly")]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> DeleteCategory(int id)
     {
-        await _categoryService.DeleteAsync(id);
+        await _categoryService.DeleteCategoryAsync(id);
         return SuccessResponse("Category deleted successfully.");
     }
 }

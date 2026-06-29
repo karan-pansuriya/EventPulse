@@ -1,12 +1,6 @@
 <div class="dashboard-page">
 
     <div class="d-flex align-items-center gap-3 mb-4">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="1.5">
-            <rect x="3" y="3" width="7" height="7" />
-            <rect x="14" y="3" width="7" height="7" />
-            <rect x="3" y="14" width="7" height="7" />
-            <rect x="14" y="14" width="7" height="7" />
-        </svg>
         <h2 class="fw-bold mb-0">Admin Dashboard</h2>
         @if (!isLoading && data) {
         <div class="ms-auto d-flex align-items-center gap-2">
@@ -162,7 +156,7 @@
 
     <div class="row g-3 mb-4">
         <div class="col-12 col-lg-6">
-            <div class="chart-card glow-card">
+            <div class="chart-card">
                 <div class="chart-header">
                     <h5 class="chart-title mb-0">Revenue Trend</h5>
                     <div class="period-pills">
@@ -175,7 +169,11 @@
                     </div>
                 </div>
                 <div class="chart-container">
+                    @if (data.monthlyRevenue.length > 0) {
                     <canvas id="revenueChart"></canvas>
+                    } @else {
+                    <div class="empty-chart text-center py-4 text-muted">No revenue data available</div>
+                    }
                 </div>
             </div>
         </div>
@@ -183,7 +181,11 @@
             <div class="chart-card">
                 <h5 class="chart-title">Interest Categories By Event</h5>
                 <div class="chart-container">
+                    @if (data.eventsByCategory.length > 0) {
                     <canvas id="categoryChart"></canvas>
+                    } @else {
+                    <div class="empty-chart text-center py-4 text-muted">No category data available</div>
+                    }
                 </div>
             </div>
         </div>
@@ -196,7 +198,7 @@
                 @if (data.topBookedEvents.length > 0) {
                 <div class="top-event-scroll">
                     @for (ev of data.topBookedEvents; track ev.id; let i = $index) {
-                    <a [routerLink]="['/admin/events']" class="top-event-item">
+                    <a class="top-event-item">
                         <span class="top-event-rank">{{ i + 1 }}</span>
                         <div class="top-event-info">
                             <span class="top-event-name">{{ ev.title }}</span>

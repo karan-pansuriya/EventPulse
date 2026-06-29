@@ -167,33 +167,16 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ISeatUpdateNotifier, SignalRSeatUpdateNotifier>();
-
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
-builder.Services.AddScoped<IImageService>(sp =>
-{
-    IWebHostEnvironment env = sp.GetRequiredService<IWebHostEnvironment>();
-    return new ImageService(env.WebRootPath);
-});
-
-builder.Services.AddScoped<ITicketGenerationService>(sp =>
-{
-    IWebHostEnvironment env = sp.GetRequiredService<IWebHostEnvironment>();
-    return new TicketGenerationService(env.WebRootPath);
-});
-
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<ITicketGenerationService, TicketGenerationService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
-builder.Services.AddScoped<ITicketService>(sp =>
-{
-    IBookingRepository bookingRepository = sp.GetRequiredService<IBookingRepository>();
-    IHttpContextAccessor httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
-    IWebHostEnvironment env = sp.GetRequiredService<IWebHostEnvironment>();
-    return new TicketService(bookingRepository, httpContextAccessor, env.WebRootPath);
-});
-
+builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 
 // ─── CORS ────────────────────────────────────────────────────────────────────

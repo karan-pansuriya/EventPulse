@@ -2,113 +2,109 @@
   <div class="container py-4">
 
     @if (loading) {
-      <div class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
+    </div>
     } @else if (error) {
-      <div class="text-center py-5">
-        <p class="text-danger">{{ error }}</p>
-        <a class="btn btn-outline-primary" routerLink="/attendee/home">Back to Events</a>
-      </div>
+    <div class="text-center py-5">
+      <p class="text-danger">{{ error }}</p>
+      <a class="btn btn-outline-primary" routerLink="/attendee/home">Back to Events</a>
+    </div>
     } @else if (event) {
-      <div class="row g-4">
-        <!-- Left: Payment Summary -->
-        <div class="col-lg-7">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-              <h4 class="fw-bold mb-4">Payment Summary</h4>
+    <div class="row g-4">
+      <!-- Left: Payment Summary -->
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h4 class="fw-bold mb-4">Payment Summary</h4>
 
-              <div class="d-flex align-items-center gap-3 mb-4">
-                <div class="event-thumb"
-                     [style.background-image]="getPosterStyle(event.posterUrl)">
-                </div>
-                <div>
-                  <h5 class="mb-1">{{ event.title }}</h5>
-                  <small class="text-muted">{{ event.eventDate | date:'MMM d, yyyy' }} at {{ formatTime(event.startTime) }}</small>
-                </div>
+            <div class="d-flex align-items-center gap-3 mb-4 flex-sm-wrap">
+              <div class="event-thumb" [style.background-image]="getPosterStyle(event.posterUrls[0])">
               </div>
-
-              <table class="table table-borderless">
-                <tbody>
-                  <tr>
-                    <td class="ps-0 text-muted">Price per ticket</td>
-                    <td class="text-end">{{ event.price | currency:'INR':'symbol':'1.2-2' }}</td>
-                  </tr>
-                  <tr>
-                    <td class="ps-0 text-muted">Quantity</td>
-                    <td class="text-end">{{ quantity }}</td>
-                  </tr>
-                  <tr class="border-top">
-                    <td class="ps-0 fw-bold">Total</td>
-                    <td class="text-end fw-bold fs-5 text-primary">{{ totalPrice | currency:'INR':'symbol':'1.2-2' }}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="text-content">
+                <h5 class="mb-1">{{ event.title }}</h5>
+                <small class="text-muted">{{ event.eventDate | date:'MMM d, yyyy' }} at {{ formatTime(event.startTime)
+                  }}</small>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Right: Stripe Card Payment -->
-        <div class="col-lg-5">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-              <h4 class="fw-bold mb-4">Card Payment</h4>
-
-              <!-- Card Number -->
-              <div class="mb-3">
-                <label class="form-label small fw-semibold">Card Number</label>
-                <div id="stripe-card-number"
-                     class="form-control form-control-lg stripe-field"
-                     [class.field-error]="cardNumberError">
-                </div>
-                @if (cardNumberError) {
-                  <small class="validation-error">{{ cardNumberError }}</small>
-                }
-              </div>
-
-              <!-- Expiry + CVC row -->
-              <div class="row g-3 mb-3">
-                <div class="col-6">
-                  <label class="form-label small fw-semibold">Expiry Date</label>
-                  <div id="stripe-card-expiry"
-                       class="form-control form-control-lg stripe-field"
-                       [class.field-error]="cardExpiryError">
-                  </div>
-                  @if (cardExpiryError) {
-                    <small class="validation-error">{{ cardExpiryError }}</small>
-                  }
-                </div>
-                <div class="col-6">
-                  <label class="form-label small fw-semibold">CVC</label>
-                  <div id="stripe-card-cvc"
-                       class="form-control form-control-lg stripe-field"
-                       [class.field-error]="cardCvcError">
-                  </div>
-                  @if (cardCvcError) {
-                    <small class="validation-error">{{ cardCvcError }}</small>
-                  }
-                </div>
-              </div>
-
-              <button class="btn btn-primary w-100 btn-lg fw-semibold mt-3"
-                      (click)="pay()"
-                      [disabled]="processing || !stripeReady">
-                @if (processing) {
-                  Processing...
-                } @else {
-                  Pay {{ totalPrice | currency:'INR':'symbol':'1.2-2' }}
-                }
-              </button>
-
-              <p class="text-muted small mt-3 mb-0 text-center">
-                Your card details are securely handled by Stripe.
-              </p>
-            </div>
+            <table class="table table-borderless">
+              <tbody>
+                <tr>
+                  <td class="ps-0 text-muted">Price per ticket</td>
+                  <td class="text-end">{{ event.price | currency:'INR':'symbol':'1.2-2' }}</td>
+                </tr>
+                <tr>
+                  <td class="ps-0 text-muted">Quantity</td>
+                  <td class="text-end">{{ quantity }}</td>
+                </tr>
+                <tr class="border-top">
+                  <td class="ps-0 fw-bold">Total</td>
+                  <td class="text-end fw-bold fs-5 text-primary">{{ totalPrice | currency:'INR':'symbol':'1.2-2' }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
+
+      <!-- Right: Stripe Card Payment -->
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h4 class="fw-bold mb-4">Card Payment</h4>
+
+            <!-- Card Number -->
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Card Number</label>
+              <div id="stripe-card-number" class="form-control form-control-lg stripe-field"
+                [class.field-error]="cardNumberError">
+              </div>
+              @if (cardNumberError) {
+              <small class="validation-error">{{ cardNumberError }}</small>
+              }
+            </div>
+
+            <!-- Expiry + CVC row -->
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-semibold">Expiry Date</label>
+                <div id="stripe-card-expiry" class="form-control form-control-lg stripe-field"
+                  [class.field-error]="cardExpiryError">
+                </div>
+                @if (cardExpiryError) {
+                <small class="validation-error">{{ cardExpiryError }}</small>
+                }
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-semibold">CVC</label>
+                <div id="stripe-card-cvc" class="form-control form-control-lg stripe-field"
+                  [class.field-error]="cardCvcError">
+                </div>
+                @if (cardCvcError) {
+                <small class="validation-error">{{ cardCvcError }}</small>
+                }
+              </div>
+            </div>
+
+            <button class="btn btn-primary w-100 btn-lg fw-semibold mt-3" (click)="pay()"
+              [disabled]="processing || !stripeReady">
+              @if (processing) {
+              Processing...
+              } @else {
+              Pay {{ totalPrice | currency:'INR':'symbol':'1.2-2' }}
+              }
+            </button>
+
+            <p class="text-muted small mt-3 mb-0 text-center">
+              Your card details are securely handled by Stripe.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
     }
 
   </div>

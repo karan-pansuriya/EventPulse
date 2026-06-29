@@ -1,12 +1,17 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using EventPulse.Common.Entities;
 
 namespace EventPulse.DAL.Entities
 {
     [Table("tickets")]
-    public class Ticket : ActivatableEntity
+    public class Ticket
     {
+        public int Id { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime? UpdatedAt { get; set; }
+
         [Required]
         public int BookingId { get; set; }
 

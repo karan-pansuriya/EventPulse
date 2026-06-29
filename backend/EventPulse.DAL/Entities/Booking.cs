@@ -30,8 +30,6 @@ namespace EventPulse.DAL.Entities
 
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
 
-        public BookingStatus BookingStatus { get; set; } = BookingStatus.Confirmed;
-
         [MaxLength(200)]
         public string? PaymentRef { get; set; }
 

@@ -8,10 +8,9 @@ namespace EventPulse.BLL.Interfaces;
 public interface IEventService
 {
     Task<EventResponse> GetEventByIdAsync(int id);
-    Task<PagedResult<EventListResponse>> GetPagedEventsAsync(EventFilterRequest filter);
-    Task<PagedResult<EventListResponse>> GetMyEventsAsync(PageRequest pageRequest);
-    Task<PagedResult<EventListResponse>> GetAllEventsAsync(PageRequest pageRequest);
-    Task<PagedResult<EventAttendeeDto>> GetAttendeesAsync(int pageNumber = 1, int pageSize = 10);
+    Task<PagedResult<EventListResponse>> GetCustomerPagedEventsAsync(EventFilterRequest filter);
+    Task<PagedResult<EventListResponse>> GetMyEventsForOrganizerAsync(PageRequest pageRequest);
+    Task<PagedResult<EventListResponse>> GetAllEventsForAdminAsync(PageRequest pageRequest);
     Task<OrganizerDashboardDto> GetOrganizerDashboardDataAsync();
     Task<OrganizerDashboardDto> GetAdminDashboardDataAsync(int? organizerId = null);
     Task<List<MonthlyRevenueDto>> GetOrganizerRevenueTrendAsync(string? period = "year");

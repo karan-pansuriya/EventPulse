@@ -20,7 +20,7 @@ export class OrganizerEventService {
       .set('PageNumber', pageNumber)
       .set('PageSize', pageSize)
       .set('SortBy', 'eventDate')
-      .set('SortDirection', 'desc');
+      .set('SortDirection', 'asc');
 
     return this.http.get<PagedResult<EventListResponse>>('events/my-events', { params });
   }

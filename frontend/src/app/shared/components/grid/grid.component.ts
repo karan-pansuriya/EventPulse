@@ -1,4 +1,13 @@
-import { Component, Input, Output, EventEmitter, HostListener, TemplateRef, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  HostListener,
+  TemplateRef,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import { DatePipe } from '@angular/common';
 
@@ -6,7 +15,16 @@ export interface GridColumn {
   header: string;
   field: string;
   sortable?: boolean;
-  type?: 'text' | 'truncate' | 'action' | 'toggle' | 'currency' | 'percent' | 'date';
+  type?:
+    | 'text'
+    | 'truncate'
+    | 'action'
+    | 'toggle'
+    | 'currency'
+    | 'percent'
+    | 'date'
+    | 'edit'
+    | 'delete';
   width?: string;
   formatter?: (value: unknown) => string;
 }
@@ -58,7 +76,9 @@ export class GridComponent<T> implements OnInit, OnDestroy {
 
   @HostListener('document:click')
   onDocumentClick(): void {
-    this.activeDropdownRow = null;
+    if (this.activeDropdownRow !== null) {
+      this.activeDropdownRow = null;
+    }
   }
 
   private scrollHandler = () => {
@@ -148,5 +168,10 @@ export class GridComponent<T> implements OnInit, OnDestroy {
 
   getFieldValue(row: T, field: string): unknown {
     return (row as any)[field];
+  }
+
+  displayValue(value: unknown): string {
+    if (value === null || value === undefined || value === '') return '-';
+    return String(value);
   }
 }

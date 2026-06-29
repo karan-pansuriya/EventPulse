@@ -21,10 +21,10 @@ export class ProfileService {
   private apiUrl = 'profile';
 
   getProfile(): Observable<UserDto> {
-    return this.http.get<UserDto>(this.apiUrl).pipe(map(res => res.data!));
+    return this.http.get<UserDto>(this.apiUrl).pipe(map((res) => res.data!));
   }
 
   updateProfile(request: UpdateUserRequest): Observable<UserDto> {
-    return this.http.put<UserDto>(this.apiUrl, request).pipe(map(res => res.data!));
+    return this.http.put<UserDto>(this.apiUrl, request).pipe(map((res) => res.data!));
   }
 }

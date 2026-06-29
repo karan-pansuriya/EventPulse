@@ -149,6 +149,31 @@
   transform: translateY(-1px);
 }
 
+/* ── Toggle buttons ───────────────────────────── */
+.toggle-btn {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #6b7280;
+  transition: all 0.15s ease;
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #be185d 0%, #9d174d 100%);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(157, 23, 77, 0.25);
+}
+
+.toggle-btn:not(.active):hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
 /* ── Primary CTA ──────────────────────────────── */
 .btn-primary {
   background: linear-gradient(135deg, #be185d 0%, #9d174d 100%);
@@ -160,4 +185,47 @@
 .btn-primary:hover {
   opacity: 0.92;
   transform: translateY(-1px);
+}
+
+/* ── Pagination ────────────────────────────────── */
+.pagination-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px 0 10px;
+}
+
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #374151;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0 10px;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.page-btn.active {
+  background: linear-gradient(135deg, #be185d 0%, #9d174d 100%);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(157, 23, 77, 0.25);
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

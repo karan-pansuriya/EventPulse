@@ -1,36 +1,38 @@
 <div class="admin-page">
-    <div class="page-header">
-      <h1>All Events</h1>
-    </div>
+  <div class="page-header">
+    <h1>All Events</h1>
+    <a (click)="createEvent()" class="btn btn-primary create-btn">
+      <i class="bi bi-plus-lg"></i> Create Event
+    </a>
+  </div>
 
-    <app-grid
-      [columns]="columns"
-      [data]="events"
-      [totalRecords]="totalRecords"
-      [currentPage]="currentPage"
-      [pageSize]="pageSize"
-      [trackByField]="'id'"
-      [isLoading]="loading"
-      [errorMessage]="error"
-      [actionTemplate]="actionTemplate"
-      (pageChange)="onPageChange($event)"
-      (pageSizeChange)="onPageSizeChange($event)"
-      (toggle)="onToggleVerify($event)"
-    />
+  <app-grid [columns]="columns" [data]="events" [totalRecords]="totalRecords" [currentPage]="currentPage"
+    [pageSize]="pageSize" [trackByField]="'id'" [isLoading]="loading" [errorMessage]="error"
+    [actionTemplate]="actionTemplate" (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+    (toggle)="promptToggleVerify($event)" (edit)="onEdit($event)" (delete)="promptDelete($event)" />
 
-    <ng-template #actionTemplate let-row>
-      <button class="btn btn-sm btn-outline-danger border-0 p-1" (click)="promptDelete(row)" title="Delete">
+  <ng-template #actionTemplate let-row>
+    <div class="d-flex gap-1">
+      <button class="btn btn-sm btn-outline-primary border-0 p-1"
+        [disabled]="row.isVerified"
+        [class.text-muted]="row.isVerified"
+        (click)="$event.stopPropagation(); row.isVerified || onEdit(row)"
+        title="Edit">
+        <i class="bi bi-pencil"></i>
+      </button>
+      <button class="btn btn-sm btn-outline-danger border-0 p-1" (click)="$event.stopPropagation(); promptDelete(row)"
+        title="Delete">
         <i class="bi bi-trash"></i>
       </button>
-    </ng-template>
+    </div>
+  </ng-template>
 
-    <app-confirmation-modal
-      [isOpen]="!!confirmEvent"
-      title="Delete Event"
-      [message]="'Delete ' + (confirmEvent?.title || 'event') + '? This action cannot be undone.'"
-      confirmLabel="Delete"
-      confirmButtonClass="btn-danger"
-      (confirmed)="onDeleteConfirmed()"
-      (cancelled)="onDeleteCancelled()"
-    />
+  <app-confirmation-modal [isOpen]="!!confirmEvent" title="Delete Event"
+    [message]="'Delete ' + (confirmEvent?.title || 'event') + '? This action cannot be undone.'" confirmLabel="Delete"
+    confirmButtonClass="btn-danger" (confirmed)="onDeleteConfirmed()" (cancelled)="onDeleteCancelled()" />
+
+  <app-confirmation-modal [isOpen]="!!confirmToggleEvent" title="Toggle Verification"
+    [message]="(confirmToggleEvent?.isVerified ? 'Revoke verification for' : 'Verify') + ' ' + (confirmToggleEvent?.title || 'this event') + '?'"
+    confirmLabel="Yes" confirmButtonClass="btn-primary" (confirmed)="onToggleConfirmed()"
+    (cancelled)="onToggleCancelled()" />
 </div>

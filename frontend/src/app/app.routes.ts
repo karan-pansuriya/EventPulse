@@ -33,11 +33,25 @@ export const routes: Routes = [
             (m) => m.AdminDashboard,
           ),
       },
-      // {
-      //   path: APP_ROUTES.ADMIN.USERS,
-      //   loadComponent: () =>
-      //     import('./core/features/admin/users/users.component').then((m) => m.UsersComponent),
-      // },
+      {
+        path: APP_ROUTES.ADMIN.USERS,
+        loadComponent: () =>
+          import('./core/features/admin/users/users.component').then((m) => m.UsersComponent),
+      },
+      {
+        path: APP_ROUTES.ADMIN.CREATE_EVENT,
+        loadComponent: () =>
+          import('./shared/components/event-create-edit/event-form.component').then(
+            (m) => m.EventFormComponent,
+          ),
+      },
+      {
+        path: APP_ROUTES.ADMIN.EDIT_EVENT,
+        loadComponent: () =>
+          import('./shared/components/event-create-edit/event-form.component').then(
+            (m) => m.EventFormComponent,
+          ),
+      },
       {
         path: APP_ROUTES.ADMIN.EVENTS,
         loadComponent: () =>
@@ -88,14 +102,14 @@ export const routes: Routes = [
       {
         path: APP_ROUTES.ORGANIZER.CREATE_EVENT,
         loadComponent: () =>
-          import('./core/features/organizer/event-form/event-form.component').then(
+          import('./shared/components/event-create-edit/event-form.component').then(
             (m) => m.EventFormComponent,
           ),
       },
       {
         path: APP_ROUTES.ORGANIZER.EDIT_EVENT,
         loadComponent: () =>
-          import('./core/features/organizer/event-form/event-form.component').then(
+          import('./shared/components/event-create-edit/event-form.component').then(
             (m) => m.EventFormComponent,
           ),
       },
@@ -119,6 +133,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./core/features/organizer/check-in/check-in.component').then(
             (m) => m.CheckInComponent,
+          ),
+      },
+      {
+        path: APP_ROUTES.ORGANIZER.TOP_BOOKED,
+        loadComponent: () =>
+          import('./core/features/organizer/top-booked-events/top-booked-events.component').then(
+            (m) => m.TopBookedEventsComponent,
           ),
       },
       {
@@ -151,7 +172,7 @@ export const routes: Routes = [
         path: APP_ROUTES.ATTENDEE.EVENT_DETAILS,
         loadComponent: () =>
           import('./core/features/attendee/home/event_details/event_details.component').then(
-            (m) => m.EventDetailsComponent
+            (m) => m.EventDetailsComponent,
           ),
       },
       {

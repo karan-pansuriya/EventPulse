@@ -1,13 +1,10 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { NgZone } from '@angular/core';
-import {
-  GridComponent,
-  GridColumn,
-} from '../../../../shared/components/grid/grid.component';
+import { GridComponent, GridColumn } from '../../../../shared/components/grid/grid.component';
 import { AdminEventService } from '../layout/admin-layout/services/admin-event.service';
 import { EventListResponse } from '../layout/admin-layout/models/event.models';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
@@ -23,6 +20,7 @@ export class AdminEventsComponent implements OnInit {
   private adminEventService = inject(AdminEventService);
   private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
+  private router = inject(Router);
   private destroy$ = new Subject<void>();
 
   events: EventListResponse[] = [];
@@ -33,16 +31,16 @@ export class AdminEventsComponent implements OnInit {
   error: string | null = null;
 
   confirmEvent: EventListResponse | null = null;
+  confirmToggleEvent: EventListResponse | null = null;
 
   columns: GridColumn[] = [
-    { header: 'ID', field: 'id', width: '60px' },
     { header: 'Title', field: 'title', type: 'truncate', width: '200px' },
     { header: 'Category', field: 'categoryName' },
     { header: 'Venue', field: 'venueName', type: 'truncate' },
     { header: 'Date', field: 'eventDate', type: 'date' },
     { header: 'Price', field: 'price', type: 'currency' },
     { header: 'Verified', field: 'isVerified', type: 'toggle' },
-    { header: 'Actions', field: 'id', type: 'action' },
+    { header: 'Actions', field: 'id', type: 'action', width: '80px' },
   ];
 
   ngOnInit(): void {
@@ -54,7 +52,7 @@ export class AdminEventsComponent implements OnInit {
     this.error = null;
 
     this.adminEventService
-      .getAllEvents(this.currentPage, this.pageSize)
+      .getAllEvents(this.currentPage, this.pageSize, 'EventDate', 'asc')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
@@ -88,7 +86,23 @@ export class AdminEventsComponent implements OnInit {
     this.loadEvents();
   }
 
-  onToggleVerify(event: EventListResponse): void {
+  createEvent(): void {
+    this.router.navigate(['/admin/events/create']);
+  }
+
+  onEdit(event: EventListResponse): void {
+    this.router.navigate(['/admin/events/edit', event.id]);
+  }
+
+  promptToggleVerify(event: EventListResponse): void {
+    this.confirmToggleEvent = event;
+  }
+
+  onToggleConfirmed(): void {
+    if (!this.confirmToggleEvent) return;
+    const event = this.confirmToggleEvent;
+    this.confirmToggleEvent = null;
+
     this.adminEventService
       .toggleVerification(event.id)
       .pipe(takeUntil(this.destroy$))
@@ -98,6 +112,10 @@ export class AdminEventsComponent implements OnInit {
           this.cdr.detectChanges();
         });
       });
+  }
+
+  onToggleCancelled(): void {
+    this.confirmToggleEvent = null;
   }
 
   promptDelete(event: EventListResponse): void {

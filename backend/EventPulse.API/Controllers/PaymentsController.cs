@@ -36,8 +36,6 @@ public class PaymentsController : BaseHelper
     public async Task<IActionResult> GetBookingByPayment(string paymentIntentId)
     {
         BookingResponse? result = await _paymentService.GetByPaymentIntentAsync(paymentIntentId);
-        if (result == null)
-            return NotFoundResponse("Booking not found.");
         return SuccessResponse(result);
     }
 

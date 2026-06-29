@@ -2,73 +2,73 @@
   <div class="container-fluid py-3 py-md-4">
 
     <!-- Page Header -->
-    <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mb-3 mb-md-4">
+    <div
+      class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mb-3 mb-md-4">
       <div class="d-flex align-items-center gap-3">
-        <i class="bi bi-calendar-event fs-4 fs-md-2 text-primary"></i>
+        <i class="bi bi-calendar-event fs-4 fs-md-2text-primary"></i>
         <h2 class="fw-bold mb-0 fs-5 fs-md-2">My Events</h2>
       </div>
-      <a class="btn btn-primary" routerLink="/organizer/events/create">
+      <a class="btn btn-primary" (click)="createEvent()">
         <i class="bi bi-plus-lg me-1"></i>Create Event
       </a>
     </div>
 
     <!-- Error -->
     @if (!isLoading && hasError) {
-      <div class="alert alert-warning text-center" role="alert">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        Could not load your events. Please try again later.
-      </div>
+    <div class="alert alert-warning text-center" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      Could not load your events. Please try again later.
+    </div>
     }
 
     <!-- Empty State -->
     @if (!isLoading && !hasError && events.length === 0) {
-      <div class="text-center py-5">
-        <i class="bi bi-calendar-plus fs-1 text-muted"></i>
-        <p class="text-muted mt-3 mb-3">You haven't created any events yet.</p>
-        <a class="btn btn-primary" routerLink="/organizer/events/create">
-          <i class="bi bi-plus-lg me-1"></i>Create Your First Event
-        </a>
-      </div>
+    <div class="text-center py-5">
+      <i class="bi bi-calendar-plus fs-1 text-muted"></i>
+      <p class="text-muted mt-3 mb-3">You haven't created any events yet.</p>
+      <a class="btn btn-primary" (click)="createEvent()">
+        <i class="bi bi-plus-lg me-1"></i>Create Your First Event
+      </a>
+    </div>
     }
 
     <!-- Grid -->
     @if (!isLoading && !hasError && events.length > 0) {
-      <app-grid
-        [columns]="columns"
-        [data]="gridData"
-        [totalRecords]="totalCount"
-        [currentPage]="pageNumber"
-        [pageSize]="pageSize"
-        [isLoading]="false"
-        [actionItems]="getRowActionItems"
-        trackByField="id"
-        (pageChange)="onPageChange($event)"
-        (pageSizeChange)="onPageSizeChange($event)"
-        (edit)="onEdit($event)"
-        (delete)="onDelete($event)"
-      />
+    <app-grid [columns]="columns" [data]="gridData" [totalRecords]="totalCount" [currentPage]="pageNumber"
+      [pageSize]="pageSize" [isLoading]="false" [actionTemplate]="actionTemplate" trackByField="id"
+      (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)" (edit)="onEdit($event)"
+      (delete)="onDelete($event)" />
     }
+
+    <ng-template #actionTemplate let-row>
+      @if (!row['isVerified'] && !isPastEvent(row['eventDate'])) {
+      <div class="d-flex gap-1">
+        <button class="btn btn-sm btn-outline-primary border-0 p-1" (click)="$event.stopPropagation(); onEdit(row)"
+          title="Edit">
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger border-0 p-1" (click)="$event.stopPropagation(); onDelete(row)"
+          title="Delete">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+      }
+    </ng-template>
 
     <!-- Loading overlay for initial load -->
     @if (isLoading) {
-      <div class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <p class="text-muted mt-2">Loading your events...</p>
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
+      <p class="text-muted mt-2">Loading your events...</p>
+    </div>
     }
 
   </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
-<app-confirmation-modal
-  [isOpen]="showDeleteModal"
-  title="Delete Event"
-  [message]="deleteMessage"
-  confirmLabel="Delete"
-  cancelLabel="Cancel"
-  (confirmed)="confirmDelete()"
-  (cancelled)="cancelDelete()">
+<app-confirmation-modal [isOpen]="showDeleteModal" title="Delete Event" [message]="deleteMessage" confirmLabel="Delete"
+  cancelLabel="Cancel" (confirmed)="confirmDelete()" (cancelled)="cancelDelete()">
 </app-confirmation-modal>

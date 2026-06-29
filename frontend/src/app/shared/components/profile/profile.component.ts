@@ -62,19 +62,24 @@ export class ProfileComponent implements OnInit {
   }
 
   saveProfile(): void {
-    if (!this.editForm.name.trim()) return;
     this.isSaving = true;
-    this.profileService.updateProfile(this.editForm).subscribe({
-      next: (data) => {
-        this.profile = data;
-        this.isEditing = false;
-        this.isSaving = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.isSaving = false;
-        this.cdr.detectChanges();
-      },
-    });
+
+    this.profileService
+      .updateProfile({
+        name: this.editForm.name.trim(),
+        phone: this.editForm.phone?.trim() || null,
+      })
+      .subscribe({
+        next: (data) => {
+          this.profile = data;
+          this.isEditing = false;
+          this.isSaving = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.isSaving = false;
+          this.cdr.detectChanges();
+        },
+      });
   }
 }

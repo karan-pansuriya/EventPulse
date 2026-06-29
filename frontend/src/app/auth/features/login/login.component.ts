@@ -11,7 +11,7 @@ import { RoleResponse, RoleId } from '../../models/auth.models';
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
-  styleUrls: ['../../shared/auth-styles.css', './login.component.css'],
+  styleUrls: [ './login.component.css'],
 })
 export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);

@@ -4,7 +4,7 @@ using EventPulse.Common.Entities;
 namespace EventPulse.DAL.Entities
 {
     [Table("users")]
-    public class User : ActivatableEntity
+    public class User : BaseEntity
     {
         public required string Name { get; set; }
 

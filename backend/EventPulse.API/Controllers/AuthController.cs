@@ -8,13 +8,19 @@ namespace EventPulse.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController(
-        IAuthService authService) : ControllerBase
+    public class AuthController : ControllerBase
     {
+        private readonly IAuthService _authService;
+
+        public AuthController(IAuthService authService)
+        {
+            _authService = authService;
+        }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            TokenResponse result = await authService.RegisterAsync(request);
+            TokenResponse result = await _authService.RegisterAsync(request);
             SetTokenCookies(result);
             ApiResponse<TokenResponse> response = new ApiResponse<TokenResponse>(true, 200, "Registration successful.", result);
             return Ok(response);
@@ -23,7 +29,7 @@ namespace EventPulse.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            TokenResponse result = await authService.LoginAsync(request);
+            TokenResponse result = await _authService.LoginAsync(request);
             SetTokenCookies(result);
             ApiResponse<TokenResponse> response = new ApiResponse<TokenResponse>(true, 200, "Login successful.", result);
             return Ok(response);
@@ -32,7 +38,7 @@ namespace EventPulse.API.Controllers
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
         {
-            TokenResponse result = await authService.RefreshTokenAsync(request);
+            TokenResponse result = await _authService.RefreshTokenAsync(request);
             SetTokenCookies(result);
             ApiResponse<TokenResponse> response = new ApiResponse<TokenResponse>(true, 200, "Token refreshed.", result);
             return Ok(response);
@@ -42,7 +48,7 @@ namespace EventPulse.API.Controllers
         [HttpGet("roles")]
         public async Task<IActionResult> GetRoles()
         {
-            List<RoleResponse> roles = await authService.GetRolesAsync();
+            List<RoleResponse> roles = await _authService.GetRolesAsync();
             ApiResponse<List<RoleResponse>> response = new ApiResponse<List<RoleResponse>>(true, 200, "Roles retrieved successfully.", roles);
             return Ok(response);
         }
@@ -87,7 +93,6 @@ namespace EventPulse.API.Controllers
 
             Response.Cookies.Delete("access_token", cookieOptions);
             Response.Cookies.Delete("refresh_token", cookieOptions);
-            Response.Headers.Append("Clear-Site-Data", "\"cookies\"");
         }
     }
 }
