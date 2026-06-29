@@ -24,6 +24,7 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { RoleId } from '../../../auth/models/auth.models';
 import { AdminUserService } from '../../../core/features/admin/layout/admin-layout/services/admin-user.service';
 import { OrganizerResponse } from '../../../core/features/admin/layout/admin-layout/models/adminuser.model';
+import { UserRole } from '../../Enum/user-role.enum';
 import { environment } from '../../../../environments/environment';
 
 function pastDateValidator(minDate: string): ValidatorFn {
@@ -182,7 +183,7 @@ export class EventFormComponent implements OnInit, OnDestroy {
 
     if (!this.isEditMode && this.isAdmin) {
       this.isLoadingOrganizers = true;
-      this.adminUserService.getAllUsers(1, 100, 2).subscribe({
+      this.adminUserService.getAllUsers(1, 1000, UserRole.Organizer).subscribe({
         next: (res) => {
           if (res.success && res.data?.items) this.organizers = res.data.items;
           this.isLoadingOrganizers = false;

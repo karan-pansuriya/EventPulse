@@ -22,7 +22,7 @@ public class CategoryService : ICategoryService
         return await _categoryRepository.GetAllCategorysAsync();
     }
 
-    public async Task<CategoryResponse> CreateCategoryAsync(CreateCategoryDto dto)
+    public async Task CreateCategoryAsync(CreateCategoryDto dto)
     {
         if (await _categoryRepository.CategoryNameExistsAsync(dto.Name))
             throw new BadRequestException("A category with this name already exists.");
@@ -34,15 +34,9 @@ public class CategoryService : ICategoryService
 
         await _categoryRepository.AddCategoryAsync(category);
         await _unitOfWork.SaveAsync();
-
-        return new CategoryResponse
-        {
-            Id = category.Id,
-            Name = category.Name,
-        };
     }
 
-    public async Task<CategoryResponse> UpdateCategoryAsync(int id, UpdateCategoryDto dto)
+    public async Task UpdateCategoryAsync(int id, UpdateCategoryDto dto)
     {
         Category? category = await _categoryRepository.GetCategoryByIdAsync(id)
             ?? throw new NotFoundException("Category not found.");
@@ -54,12 +48,6 @@ public class CategoryService : ICategoryService
 
         _categoryRepository.UpdateCategory(category);
         await _unitOfWork.SaveAsync();
-
-        return new CategoryResponse
-        {
-            Id = category.Id,
-            Name = category.Name,
-        };
     }
 
     public async Task DeleteCategoryAsync(int id)

@@ -13,6 +13,7 @@ import { Chart, registerables } from 'chart.js';
 import { AdminDashboardService } from '../layout/admin-layout/services/admin-dashboard.service';
 import { AdminUserService } from '../layout/admin-layout/services/admin-user.service';
 import { OrganizerDashboardData } from '../../organizer/layout/models/dashboard.models';
+import { UserRole } from '../../../../shared/Enum/user-role.enum';
 
 Chart.register(...registerables);
 
@@ -101,7 +102,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   }
 
   private loadOrganizers(): void {
-    this.adminUserService.getAllUsers(1, 100, 2).subscribe({
+    this.adminUserService.getAllUsers(1, 1000, UserRole.Organizer).subscribe({
       next: (res) => {
         this.organizers = (res.data?.items ?? []).map((o) => ({ id: o.id, name: o.name }));
       },

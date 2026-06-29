@@ -27,16 +27,16 @@ public class CategoriesController : BaseHelper
     [HttpPost]
     public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto dto)
     {
-        CategoryResponse result = await _categoryService.CreateCategoryAsync(dto);
-        return CreatedResponse(result);
+        await _categoryService.CreateCategoryAsync(dto);
+        return SuccessResponse("Category created successfully.");
     }
 
     [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCategory(int id, [FromBody] UpdateCategoryDto dto)
     {
-        CategoryResponse result = await _categoryService.UpdateCategoryAsync(id, dto);
-        return SuccessResponse(result);
+        await _categoryService.UpdateCategoryAsync(id, dto);
+        return SuccessResponse("Category Updated successfully.");
     }
 
     [Authorize(Policy = "AdminOnly")]
